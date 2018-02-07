@@ -142,7 +142,7 @@ vita_create_self(${PROJECT_NAME}.self ${PROJECT_NAME} ${UNSAFE_FLAG})
 add_custom_target(${PROJECT_NAME}.vpk
         DEPENDS ${PROJECT_NAME}.self
         COMMAND rm -rf vpk && mkdir -p vpk/sce_sys
-        COMMAND ${VITASDK}/bin/vita-mksfoex TITLE_ID=${TITLEID} "${PROJECT_NAME}" vpk/sce_sys/param.sfo
+        COMMAND ${VITASDK}/bin/vita-mksfoex -s TITLE_ID=${TITLEID} "${PROJECT_NAME}" vpk/sce_sys/param.sfo
         COMMAND cp ${PROJECT_NAME}.self vpk/eboot.bin
         COMMAND cp -r ${CMAKE_SOURCE_DIR}/psp2data/* vpk
         COMMAND cd vpk && zip -r ../uae4all-${BUILD_DATE}.vpk . && cd ..

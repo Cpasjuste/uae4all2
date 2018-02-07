@@ -435,9 +435,9 @@ static int menuLoadLoop(char *curr_path)
 							if (p <= start) strcpy(newdir, "/");
 							else { strncpy(newdir, start, p-start); newdir[p-start] = 0; }
 						} 
-						else if (strcmp(namelist[sel+1]->d_name, "ur0:") == 0)
+						else if (strcmp(namelist[sel+1]->d_name, "uma0:") == 0)
 						{
-							strcpy(newdir, "ur0:/");
+							strcpy(newdir, "uma0:/");
 						}
 						else if (strcmp(namelist[sel+1]->d_name, "ux0:") == 0)
 						{

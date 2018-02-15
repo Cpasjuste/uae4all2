@@ -470,16 +470,16 @@ static const int fetchstarts[] = { 3,2,1,0, 4,3,2,0, 5,4,3,0 };
 static const int fm_maxplanes[] = { 3,2,1,0, 3,3,2,0, 3,3,3,0 };
 
 static int cycle_diagram_table[3][3][9][32];
-// blitter_slowdown doesn't work at the moment (causes gfx glitches in Shadow of the Beast)
-//static int cycle_diagram_free_cycles[3][3][9];
-//static int cycle_diagram_total_cycles[3][3][9];
+// blitter_slowdown used to cause gfx glitches in Shadow of the Beast but works now
+static int cycle_diagram_free_cycles[3][3][9];
+static int cycle_diagram_total_cycles[3][3][9];
 static int *curr_diagram;
 static int cycle_sequences[3 * 8] = { 2,1,2,1,2,1,2,1, 4,2,3,1,4,2,3,1, 8,4,6,2,7,3,5,1 };
 
 static _INLINE_ void create_cycle_diagram_table(void)
 {
    int fm, res, cycle, planes, v;
-   int fetch_start, max_planes/*, freecycles*/;
+   int fetch_start, max_planes, freecycles;
    int *cycle_sequence;
    
    for (fm = 0; fm <= 2; fm++) {
@@ -489,7 +489,7 @@ static _INLINE_ void create_cycle_diagram_table(void)
          cycle_sequence = &cycle_sequences[(max_planes - 1) * 8];
          max_planes = 1 << max_planes;
          for (planes = 0; planes <= 8; planes++) {
-//            freecycles = 0;
+            freecycles = 0;
             for (cycle = 0; cycle < 32; cycle++)
                cycle_diagram_table[fm][res][planes][cycle] = -1;
             if (planes <= max_planes) {
@@ -498,13 +498,13 @@ static _INLINE_ void create_cycle_diagram_table(void)
                      v = cycle_sequence[cycle & 7];
                   } else {
                      v = 0;
-//                     freecycles++;
+                     freecycles++;
                   }
                   cycle_diagram_table[fm][res][planes][cycle] = v;
                }
             }
-//				    cycle_diagram_free_cycles[fm][res][planes] = freecycles;
-//				    cycle_diagram_total_cycles[fm][res][planes] = fetch_start;
+				    cycle_diagram_free_cycles[fm][res][planes] = freecycles;
+				    cycle_diagram_total_cycles[fm][res][planes] = fetch_start;
          }
       }
    }
@@ -3848,13 +3848,12 @@ static void hsync_handler (void)
       fetch_audio();
    }
  
-/* blitter_slowdown doesn't work at the moment (causes gfx glitches in Shadow of the Beast)
-	 if (bltstate != BLT_done && dmaen (DMA_BITPLANE) && diwstate == DIW_waiting_stop) {
+	 //blitter_slowdown used to cause gfx glitches in Shadow of the Beast but works now
+	 if (!blitter_in_partial_mode && !currprefs.immediate_blits && bltstate != BLT_done && dmaen (DMA_BITPLANE) && diwstate == DIW_waiting_stop) {
 		 blitter_slowdown (thisline_decision.plfleft, thisline_decision.plfright - (16 << fetchmode),
 			 cycle_diagram_total_cycles[fetchmode][res_bplcon0][planes_bplcon0],
 			 cycle_diagram_free_cycles[fetchmode][res_bplcon0][planes_bplcon0]);
 	 }
-*/   
 
   /* In theory only an equality test is needed here - but if a program
        goes haywire with the VPOSW register, it can cause us to miss this,

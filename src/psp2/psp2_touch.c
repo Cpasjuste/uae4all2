@@ -39,7 +39,13 @@ typedef struct {
 
 Touch _finger[SCE_TOUCH_PORT_MAX_NUM][MAX_NUM_FINGERS]; // keep track of finger status
 
-bool _multiFingerDragging[SCE_TOUCH_PORT_MAX_NUM]; // keep track whether we are currently drag-and-dropping
+typedef enum DraggingType {
+	DRAG_NONE = 0,
+	DRAG_TWO_FINGER,
+	DRAG_THREE_FINGER,
+} DraggingType;
+
+DraggingType _multiFingerDragging[SCE_TOUCH_PORT_MAX_NUM]; // keep track whether we are currently drag-and-dropping
 
 int _simulatedClickStartTime[SCE_TOUCH_PORT_MAX_NUM][2]; // initiation time of last simulated left or right click (zero if no click)
 
@@ -63,7 +69,7 @@ void psp2InitTouch(void) {
 		for (int i = 0; i < MAX_NUM_FINGERS; i++) {
 			_finger[port][i].id = -1;
 		}
-		_multiFingerDragging[port] = false;
+		_multiFingerDragging[port] = DRAG_NONE;
 	}
 	
 	for (int port = 0; port < SCE_TOUCH_PORT_MAX_NUM; port++) {
@@ -229,6 +235,13 @@ void psp2ProcessFingerDown(TouchEvent *event) {
 	int x = lastmx;
 	int y = lastmy;
 
+	// make sure each finger is not reported down multiple times
+	for (int i = 0; i < MAX_NUM_FINGERS; i++) {
+		if (_finger[port][i].id == id) {
+			_finger[port][i].id = -1;
+		}
+	}
+
 	// we need the timestamps to decide later if the user performed a short tap (click)
 	// or a long tap (drag)
 	// we also need the last coordinates for each finger to keep track of dragging
@@ -286,12 +299,18 @@ void psp2ProcessFingerUp(TouchEvent *event) {
 				}
 			} else if (numFingersDown == 1) {
 				// when dragging, and the last finger is lifted, the drag is over
+				Uint8 simulatedButton = 0;
+				if (_multiFingerDragging[port] == DRAG_THREE_FINGER)
+					simulatedButton = SDL_BUTTON_RIGHT;
+				else {
+					simulatedButton = SDL_BUTTON_LEFT;					
+				}
 				SDL_Event ev0;
 				ev0.type = SDL_MOUSEBUTTONUP;
-				ev0.button.button = SDL_BUTTON_LEFT;
+				ev0.button.button = simulatedButton;
 				ev0.button.x = x;
 				ev0.button.y = y;
-				_multiFingerDragging[port] = false;
+				_multiFingerDragging[port] = DRAG_NONE;
 				SDL_PushEvent(&ev0);
 			}
 		}
@@ -334,15 +353,22 @@ void psp2ProcessFingerMotion(TouchEvent *event) {
 					}
 				}
 				if (numFingersDownLong >= 2) {
-					int mouseDownX = x;
-					int mouseDownY = y;
+					Uint8 simulatedButton = 0;
+					if (numFingersDownLong == 2) {
+						simulatedButton = SDL_BUTTON_LEFT;
+						_multiFingerDragging[port] = DRAG_TWO_FINGER;
+					} else {
+						simulatedButton = SDL_BUTTON_RIGHT;
+						_multiFingerDragging[port] = DRAG_THREE_FINGER;						
+					}
+					int mouseDownX = lastmx;
+					int mouseDownY = lastmy;
 					SDL_Event ev;
 					ev.type = SDL_MOUSEBUTTONDOWN;
-					ev.button.button = SDL_BUTTON_LEFT;
+					ev.button.button = simulatedButton;
 					ev.button.x = mouseDownX;
 					ev.button.y = mouseDownY;
 					SDL_PushEvent(&ev);
-					_multiFingerDragging[port] = true;
 				}
 			}
 		}

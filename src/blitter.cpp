@@ -59,8 +59,8 @@ uae_u32 blit_masktable[BLITTER_MAX_WORDS];
 enum blitter_states bltstate;
 
 static long int blit_cyclecounter;
-// blitter_slowdown doesn't work at the moment
-//static int blit_slowdown;
+// blitter_slowdown used to cause gfx glitches in Shadow of the Beast but works now
+static int blit_slowdown;
 
 static long blit_firstline_cycles;
 static long blit_first_cycle;
@@ -545,14 +545,14 @@ void blitter_handler(void)
     return;
   }
 
-// blitter_slowdown doesn't work at the moment
-//	if (blit_slowdown > 0 && !currprefs.immediate_blits) {
-//	eventtab[ev_blitter].active = 1;
-//	eventtab[ev_blitter].oldcycles = get_cycles ();
-//	eventtab[ev_blitter].evtime = blit_slowdown * CYCLE_UNIT + get_cycles (); /* wait a little */
-//		blit_slowdown = -1;
-//		return;
-//	}
+	// blitter_slowdown used to cause gfx glitches in Shadow of the Beast but works now
+	if (!currprefs.immediate_blits && blit_slowdown > 0) {
+	eventtab[ev_blitter].active = 1;
+	eventtab[ev_blitter].oldcycles = get_cycles ();
+	eventtab[ev_blitter].evtime = blit_slowdown * CYCLE_UNIT + get_cycles (); /* wait a little */
+		blit_slowdown = -1;
+		return;
+	}
 
   blitter_doit();
 }
@@ -670,10 +670,12 @@ void do_blitter(void)
   }
   
 	bltstate = BLT_init;
-// blitter_slowdown doesn't work at the moment
-//	blit_slowdown = 0;
+	// blitter_slowdown used to cause gfx glitches in Shadow of the Beast but works now
+	if (!blitter_in_partial_mode && !currprefs.immediate_blits) {
+		blit_slowdown = 0;
+	}
 
-    if (dmaen(DMA_BLITPRI))
+	if (dmaen(DMA_BLITPRI))
         setnasty();
     else
     	unset_special (SPCFLAG_BLTNASTY);
@@ -848,9 +850,9 @@ int blitnasty (void)
 	return ccnt;
 }
 
-// blitter_slowdown doesn't work at the moment (causes gfx glitches in Shadow of the Beast)
+// blitter_slowdown used to cause gfx glitches in Shadow of the Beast but works now
 /* very approximate emulation of blitter slowdown caused by bitplane DMA */
-/*
+
 void blitter_slowdown (int ddfstrt, int ddfstop, int totalcycles, int freecycles)
 {
 	static int oddfstrt, oddfstop, ototal, ofree;
@@ -874,4 +876,3 @@ void blitter_slowdown (int ddfstrt, int ddfstop, int totalcycles, int freecycles
 		return;
 	blit_slowdown += slow;
 }
-*/

@@ -339,8 +339,8 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	{
 		for (int i=0; i<nr_joysticks; i++)
 		{
-			// The main Joystick mapping directions
-			if ((mainMenu_joyPort == 0) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1))
+			// The main (joyport)) joystick mapping directions
+			if (nr == 1)
 			{
 				if((mainMenu_custom_A[i]==-5 && buttonA[i]) || (mainMenu_custom_B[i]==-5 && buttonB[i]) || (mainMenu_custom_X[i]==-5 && buttonX[i]) || (mainMenu_custom_Y[i]==-5 && buttonY[i]) || (mainMenu_custom_L[i]==-5 && triggerL[i]) || (mainMenu_custom_R[i]==-5 && triggerR[i]))
 					top = 1;
@@ -374,8 +374,8 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 						right = 1;
 				}
 			}
-			// The "other" (second) Joystick mapping directions
-			else if ((nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1))
+			// The second (mouseport) joystick mapping directions
+			else if (nr == 0)
 			{
 				if((mainMenu_custom_A[i]==-9 && buttonA[i]) || (mainMenu_custom_B[i]==-9 && buttonB[i]) || (mainMenu_custom_X[i]==-9 && buttonX[i]) || (mainMenu_custom_Y[i]==-9 && buttonY[i]) || (mainMenu_custom_L[i]==-9 && triggerL[i]) || (mainMenu_custom_R[i]==-9 && triggerR[i]))
 					top = 1;
@@ -422,8 +422,8 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		{
 			for (int i=0; i<nr_joysticks; i++)
 			{
-				//The main joystick mapping buttons
-				if ((mainMenu_joyPort == 0) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1))
+				//The main (joyport) joystick mapping buttons
+				if (nr == 1)
 				{
 					if((mainMenu_custom_A[i]==-3 && buttonA[i]) || (mainMenu_custom_B[i]==-3 && buttonB[i]) || (mainMenu_custom_X[i]==-3 && buttonX[i]) || (mainMenu_custom_Y[i]==-3 && buttonY[i]) || (mainMenu_custom_L[i]==-3 && triggerL[i]) || (mainMenu_custom_R[i]==-3 && triggerR[i]))
 						*button = 1;
@@ -440,8 +440,8 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 							*button |= 1 << 1;
 					}
 				}
-				//The "other" (second) joystick buttons
-				else if ((nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1))
+				//The second (mouseport) joystick mapping buttons
+				else if (nr == 0)
 				{
 					if((mainMenu_custom_A[i]==-1 && buttonA[i]) || (mainMenu_custom_B[i]==-1 && buttonB[i]) || (mainMenu_custom_X[i]==-1 && buttonX[i]) || (mainMenu_custom_Y[i]==-1 && buttonY[i]) || (mainMenu_custom_L[i]==-1 && triggerL[i]) || (mainMenu_custom_R[i]==-1 && triggerR[i]))
 						*button = 1;

@@ -125,6 +125,28 @@ single finger drag = move the mouse pointer
 dual finger drag = drag'n'drop (left mouse button is held down)
 
 CHANGELOG:
+1.65
+
+- eliminate transparent keyboard slowdown
+- fix joystick port setting affecting custom controls unless set to 'port1'
+
+1.64
+
+- improved 'normal' blitter mode (fixes flicker in PP Hammer and Spindizzy Worlds)
+
+1.63
+
+- implemented three-finger drag as right-button drag (useful to hold-down the right mouse button). Fingers have to be somewhat apart from each other, otherwise they are recognized as single or dual touch by the Vita.
+
+1.62
+
+- re-compiled in safe-mode
+- fix empty directory listing of uma0:
+
+1.61
+
+- re-compiled in unsafe-mode
+
 1.60
 
 - support for uma0: added

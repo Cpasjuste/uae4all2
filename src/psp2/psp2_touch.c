@@ -29,12 +29,15 @@ extern int lastmy;
 enum {
 	MAX_NUM_FINGERS = 3, // number of fingers to track per panel
 	MAX_TAP_TIME = 250, // taps longer than this will not result in mouse click events
+	MAX_TAP_MOTION_DISTANCE = 10, // max distance finger motion in Vita screen pixels to be considered a tap
 	SIMULATED_CLICK_DURATION = 50, // time in ms how long simulated mouse clicks should be
 }; // track three fingers per panel
 
 typedef struct {
 	int id; // -1: no touch
 	int timeLastDown;
+	float lastDownX;
+	float lastDownY;
 } Touch;
 
 Touch _finger[SCE_TOUCH_PORT_MAX_NUM][MAX_NUM_FINGERS]; // keep track of finger status
@@ -249,6 +252,8 @@ void psp2ProcessFingerDown(TouchEvent *event) {
 		if (_finger[port][i].id == -1) {
 			_finger[port][i].id = id;
 			_finger[port][i].timeLastDown = event->tfinger.timestamp;
+			_finger[port][i].lastDownX = event->tfinger.x;
+			_finger[port][i].lastDownY = event->tfinger.y;
 			break;
 		}
 	}
@@ -277,24 +282,30 @@ void psp2ProcessFingerUp(TouchEvent *event) {
 			if (!_multiFingerDragging[port]) {
 				if ((event->tfinger.timestamp - _finger[port][i].timeLastDown) <= MAX_TAP_TIME) {
 					// short (<MAX_TAP_TIME ms) tap is interpreted as right/left mouse click depending on # fingers already down
-					if (numFingersDown == 2 || numFingersDown == 1) {
-						Uint8 simulatedButton = 0;
-						if (numFingersDown == 2) {
-							simulatedButton = SDL_BUTTON_RIGHT;
-							// need to raise the button later
-							_simulatedClickStartTime[port][1] = event->tfinger.timestamp;
-						} else if (numFingersDown == 1) {
-							simulatedButton = SDL_BUTTON_LEFT;
-							// need to raise the button later
-							_simulatedClickStartTime[port][0] = event->tfinger.timestamp;
-						}
+					// but only if the finger hasn't moved since it was pressed down by more than MAX_TAP_MOTION_DISTANCE pixels
+					float xrel = ((event->tfinger.x * 960.0) - (_finger[port][i].lastDownX * 960.0));
+					float yrel = ((event->tfinger.y * 544.0) - (_finger[port][i].lastDownY * 544.0));
+					float maxRSquared = (float) (MAX_TAP_MOTION_DISTANCE * MAX_TAP_MOTION_DISTANCE);
+					if ((xrel * xrel + yrel * yrel) < maxRSquared) {
+						if (numFingersDown == 2 || numFingersDown == 1) {
+							Uint8 simulatedButton = 0;
+							if (numFingersDown == 2) {
+								simulatedButton = SDL_BUTTON_RIGHT;
+								// need to raise the button later
+								_simulatedClickStartTime[port][1] = event->tfinger.timestamp;
+							} else if (numFingersDown == 1) {
+								simulatedButton = SDL_BUTTON_LEFT;
+								// need to raise the button later
+								_simulatedClickStartTime[port][0] = event->tfinger.timestamp;
+							}
 
-						SDL_Event ev0;
-						ev0.type = SDL_MOUSEBUTTONDOWN;
-						ev0.button.button = simulatedButton;
-						ev0.button.x = x;
-						ev0.button.y = y;
-						SDL_PushEvent(&ev0);
+							SDL_Event ev0;
+							ev0.type = SDL_MOUSEBUTTONDOWN;
+							ev0.button.button = simulatedButton;
+							ev0.button.x = x;
+							ev0.button.y = y;
+							SDL_PushEvent(&ev0);
+						}
 					}
 				}
 			} else if (numFingersDown == 1) {

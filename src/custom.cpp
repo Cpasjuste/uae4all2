@@ -90,8 +90,8 @@ static uae_u32 fetched_aga1[MAX_PLANES];
 /* Mouse and joystick emulation */
 int buttonstate[3];
 int mouse_x, mouse_y;
-int joy0button, joy1button;
-unsigned int joy0dir, joy1dir;
+int joy0button, joy1button, joy2button, joy3button;
+unsigned int joy0dir, joy1dir, joy2dir, joy3dir;
 extern int mouseMoving;
 extern int fcounter;
 
@@ -3772,6 +3772,9 @@ static void vsync_handler (void)
 		handle_events ();
 		getjoystate (0, &joy1dir, &joy1button);
 		getjoystate (1, &joy0dir, &joy0button);
+		// parallel port joysticks
+		getjoystate (2, &joy2dir, &joy2button);
+		getjoystate (3, &joy3dir, &joy3button);
 		if (joy0button!=back_joy0button)
 	  {
 			back_joy0button= joy0button;

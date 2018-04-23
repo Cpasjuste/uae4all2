@@ -58,7 +58,7 @@ extern int lAnalogY;
 extern int mainMenu_leftStickMouse;
 extern int mainMenu_touchControls;
 extern int mainMenu_deadZone;
-int delay2=0; // for 2nd player non-custom autofire 
+int delay2[] = {0, 0, 0}; // for 2nd, 3rd and 4th player non-custom autofire
 #endif
 
 extern char launchDir[300];
@@ -67,6 +67,10 @@ int delay=0;
 #endif
 
 int nr_joysticks;
+bool parport_joystick_enabled = true;
+//needed for parallel port joystick handling done in this file
+extern int joy2_dir, joy3_dir;
+extern int joy2_button, joy3_button;
 
 SDL_Joystick *uae4all_joy0, *uae4all_joy1, *uae4all_joy2, *uae4all_joy3;
 extern SDL_Surface *prSDLScreen;
@@ -78,15 +82,36 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		int left = 0, right = 0, top = 0, bot = 0, upRight=0, downRight=0, upLeft=0, downLeft=0, x=0, y=0, a=0, b=0;
 		int len, i, num;
 
-		SDL_Joystick *joy = nr == 0 ? uae4all_joy0 : uae4all_joy1;
+		SDL_Joystick *joy;
+		switch (nr)
+		{
+			case 0:
+				joy = uae4all_joy0;
+				break;
+			case 1:
+				joy = uae4all_joy1;
+				break;
+			case 2:
+				joy = uae4all_joy2;
+				break;
+			case 3:
+				joy = uae4all_joy3;
+				break;
+			default:
+				joy = uae4all_joy1;
+				break;
+		}
 
 		*dir = 0;
 		*button = 0;
 
-		nr = (~nr)&0x1;
+		if (nr == 1)
+			nr = 0;
+		else if (nr == 0)
+			nr = 1;
 
-	// are we trying to figure out the regular GP2X controls for the primary (or both) joysticks?
-	int usingRegularControls = (!mainMenu_customControls) && ((mainMenu_joyPort == 0) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1));
+	// are we trying to figure out the regular GP2X controls for the primary (or first two) joysticks?
+	int usingRegularControls = (!mainMenu_customControls) && ((mainMenu_joyPort == 0 && (nr == 0 || nr == 1)) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1));
 	
 	//PSP2 updates joysticks in handle_events function which is always called 
 	//just before read_joystick is called. No need to update them again here
@@ -119,20 +144,20 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		{
 			if( 
 				(
-					(mainMenu_custom_A[i]==-13 && buttonA[i]) ||
-					(mainMenu_custom_B[i]==-13 && buttonB[i]) ||
-					(mainMenu_custom_X[i]==-13 && buttonX[i]) ||
-					(mainMenu_custom_Y[i]==-13 && buttonY[i]) ||
-					(mainMenu_custom_L[i]==-13 && triggerL[i]) ||
-					(mainMenu_custom_R[i]==-13 && triggerR[i])
+					(mainMenu_custom_A[i]==-25 && buttonA[i]) ||
+					(mainMenu_custom_B[i]==-25 && buttonB[i]) ||
+					(mainMenu_custom_X[i]==-25 && buttonX[i]) ||
+					(mainMenu_custom_Y[i]==-25 && buttonY[i]) ||
+					(mainMenu_custom_L[i]==-25 && triggerL[i]) ||
+					(mainMenu_custom_R[i]==-25 && triggerR[i])
 				) ||
 				(
 					(mainMenu_custom_dpad == 0) && 
 					(
-						(mainMenu_custom_up[i]==-13 && dpadUp[i]) ||
-						(mainMenu_custom_down[i]==-13 && dpadDown[i]) ||
-						(mainMenu_custom_left[i]==-13 && dpadLeft[i]) ||
-						(mainMenu_custom_right[i]==-13 && dpadRight[i]))
+						(mainMenu_custom_up[i]==-25 && dpadUp[i]) ||
+						(mainMenu_custom_down[i]==-25 && dpadDown[i]) ||
+						(mainMenu_custom_left[i]==-25 && dpadLeft[i]) ||
+						(mainMenu_custom_right[i]==-25 && dpadRight[i]))
 					)
 				)
 			{
@@ -282,9 +307,9 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 //Analog Mouse on PSP2, only update once per frame (when nr==1)
 #ifdef __PSP2__
 #ifdef USE_UAE4ALL_VKBD
-	if (!vkbd_mode && nr)
+	if (!vkbd_mode && (nr == 1))
 #else
-	if (nr)
+	if (nr == 1)
 #endif
 	{
 		//VITA: always use an analog stick (default: right stick) for mouse pointer movements
@@ -339,75 +364,71 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 	{
 		for (int i=0; i<nr_joysticks; i++)
 		{
-			// The main (joyport)) joystick mapping directions
-			if (nr == 1)
+			// mapping directions
+			int u, d, l, r;
+			switch (nr)
 			{
-				if((mainMenu_custom_A[i]==-5 && buttonA[i]) || (mainMenu_custom_B[i]==-5 && buttonB[i]) || (mainMenu_custom_X[i]==-5 && buttonX[i]) || (mainMenu_custom_Y[i]==-5 && buttonY[i]) || (mainMenu_custom_L[i]==-5 && triggerL[i]) || (mainMenu_custom_R[i]==-5 && triggerR[i]))
-					top = 1;
-				else if(mainMenu_custom_dpad == 0)
-				{
-					if((mainMenu_custom_up[i]==-5 && dpadUp[i]) || (mainMenu_custom_down[i]==-5 && dpadDown[i]) || (mainMenu_custom_left[i]==-5 && dpadLeft[i]) || (mainMenu_custom_right[i]==-5 && dpadRight[i]))
-						top = 1;
-				}
-
-				if((mainMenu_custom_A[i]==-6 && buttonA[i]) || (mainMenu_custom_B[i]==-6 && buttonB[i]) || (mainMenu_custom_X[i]==-6 && buttonX[i]) || (mainMenu_custom_Y[i]==-6 && buttonY[i]) || (mainMenu_custom_L[i]==-6 && triggerL[i]) || (mainMenu_custom_R[i]==-6 && triggerR[i]))
-					bot = 1;
-				else if(mainMenu_custom_dpad == 0)
-				{
-					if((mainMenu_custom_up[i]==-6 && dpadUp[i]) || (mainMenu_custom_down[i]==-6 && dpadDown[i]) || (mainMenu_custom_left[i]==-6 && dpadLeft[i]) || (mainMenu_custom_right[i]==-6 && dpadRight[i]))
-						bot = 1;
-				}
-
-				if((mainMenu_custom_A[i]==-7 && buttonA[i]) || (mainMenu_custom_B[i]==-7 && buttonB[i]) || (mainMenu_custom_X[i]==-7 && buttonX[i]) || (mainMenu_custom_Y[i]==-7 && buttonY[i]) || (mainMenu_custom_L[i]==-7 && triggerL[i]) || (mainMenu_custom_R[i]==-7 && triggerR[i]))
-					left = 1;
-				else if(mainMenu_custom_dpad == 0)
-				{
-					if((mainMenu_custom_up[i]==-7 && dpadUp[i]) || (mainMenu_custom_down[i]==-7 && dpadDown[i]) || (mainMenu_custom_left[i]==-7 && dpadLeft[i]) || (mainMenu_custom_right[i]==-7 && dpadRight[i]))
-						left = 1;
-				}
-
-				if((mainMenu_custom_A[i]==-8 && buttonA[i]) || (mainMenu_custom_B[i]==-8 && buttonB[i]) || (mainMenu_custom_X[i]==-8 && buttonX[i]) || (mainMenu_custom_Y[i]==-8 && buttonY[i]) || (mainMenu_custom_L[i]==-8 && triggerL[i]) || (mainMenu_custom_R[i]==-8 && triggerR[i]))
-					right = 1;
-				else if(mainMenu_custom_dpad == 0)
-				{
-					if((mainMenu_custom_up[i]==-8 && dpadUp[i]) || (mainMenu_custom_down[i]==-8 && dpadDown[i]) || (mainMenu_custom_left[i]==-8 && dpadLeft[i]) || (mainMenu_custom_right[i]==-8 && dpadRight[i]))
-						right = 1;
-				}
+				case 0:
+				//second (mouseport) joystick
+					u = -9;
+					d = -10;
+					l = -11;
+					r = -12;
+					break;
+				case 1:
+				//first (joyport) joystick
+					u = -5;
+					d = -6;
+					l = -7;
+					r = -8;
+					break;
+				case 2:
+				//third (parallel port) joystick
+					u = -15;
+					d = -16;
+					l = -17;
+					r = -18;
+					break;
+				case 3:
+				//fourth (parallel port) joystick
+					u = -21;
+					d = -22;
+					l = -23;
+					r = -24;
+					break;
+				default:
+					break;
 			}
-			// The second (mouseport) joystick mapping directions
-			else if (nr == 0)
+			if((mainMenu_custom_A[i]==u && buttonA[i]) || (mainMenu_custom_B[i]==u && buttonB[i]) || (mainMenu_custom_X[i]==u && buttonX[i]) || (mainMenu_custom_Y[i]==u && buttonY[i]) || (mainMenu_custom_L[i]==u && triggerL[i]) || (mainMenu_custom_R[i]==u && triggerR[i]))
+				top = 1;
+			else if(mainMenu_custom_dpad == 0)
 			{
-				if((mainMenu_custom_A[i]==-9 && buttonA[i]) || (mainMenu_custom_B[i]==-9 && buttonB[i]) || (mainMenu_custom_X[i]==-9 && buttonX[i]) || (mainMenu_custom_Y[i]==-9 && buttonY[i]) || (mainMenu_custom_L[i]==-9 && triggerL[i]) || (mainMenu_custom_R[i]==-9 && triggerR[i]))
+				if((mainMenu_custom_up[i]==u && dpadUp[i]) || (mainMenu_custom_down[i]==u && dpadDown[i]) || (mainMenu_custom_left[i]==u && dpadLeft[i]) || (mainMenu_custom_right[i]==u && dpadRight[i]))
 					top = 1;
-				else if(mainMenu_custom_dpad == 0)
-				{
-					if((mainMenu_custom_up[i]==-9 && dpadUp[i]) || (mainMenu_custom_down[i]==-9 && dpadDown[i]) || (mainMenu_custom_left[i]==-9 && dpadLeft[i]) || (mainMenu_custom_right[i]==-9 && dpadRight[i]))
-						top = 1;
-				}
+			}
 
-				if((mainMenu_custom_A[i]==-10 && buttonA[i]) || (mainMenu_custom_B[i]==-10 && buttonB[i]) || (mainMenu_custom_X[i]==-10 && buttonX[i]) || (mainMenu_custom_Y[i]==-10 && buttonY[i]) || (mainMenu_custom_L[i]==-10 && triggerL[i]) || (mainMenu_custom_R[i]==-10 && triggerR[i]))
+			if((mainMenu_custom_A[i]==d && buttonA[i]) || (mainMenu_custom_B[i]==d && buttonB[i]) || (mainMenu_custom_X[i]==d && buttonX[i]) || (mainMenu_custom_Y[i]==d && buttonY[i]) || (mainMenu_custom_L[i]==d && triggerL[i]) || (mainMenu_custom_R[i]==d && triggerR[i]))
+				bot = 1;
+			else if(mainMenu_custom_dpad == 0)
+			{
+				if((mainMenu_custom_up[i]==d && dpadUp[i]) || (mainMenu_custom_down[i]==d && dpadDown[i]) || (mainMenu_custom_left[i]==d && dpadLeft[i]) || (mainMenu_custom_right[i]==d && dpadRight[i]))
 					bot = 1;
-				else if(mainMenu_custom_dpad == 0)
-				{
-					if((mainMenu_custom_up[i]==-10 && dpadUp[i]) || (mainMenu_custom_down[i]==-10 && dpadDown[i]) || (mainMenu_custom_left[i]==-10 && dpadLeft[i]) || (mainMenu_custom_right[i]==-10 && dpadRight[i]))
-						bot = 1;
-				}
+			}
 
-				if((mainMenu_custom_A[i]==-11 && buttonA[i]) || (mainMenu_custom_B[i]==-11 && buttonB[i]) || (mainMenu_custom_X[i]==-11 && buttonX[i]) || (mainMenu_custom_Y[i]==-11 && buttonY[i]) || (mainMenu_custom_L[i]==-11 && triggerL[i]) || (mainMenu_custom_R[i]==-11 && triggerR[i]))
+			if((mainMenu_custom_A[i]==l && buttonA[i]) || (mainMenu_custom_B[i]==l && buttonB[i]) || (mainMenu_custom_X[i]==l && buttonX[i]) || (mainMenu_custom_Y[i]==l && buttonY[i]) || (mainMenu_custom_L[i]==l && triggerL[i]) || (mainMenu_custom_R[i]==l && triggerR[i]))
+				left = 1;
+			else if(mainMenu_custom_dpad == 0)
+			{
+				if((mainMenu_custom_up[i]==l && dpadUp[i]) || (mainMenu_custom_down[i]==l && dpadDown[i]) || (mainMenu_custom_left[i]==l && dpadLeft[i]) || (mainMenu_custom_right[i]==l && dpadRight[i]))
 					left = 1;
-				else if(mainMenu_custom_dpad == 0)
-				{
-					if((mainMenu_custom_up[i]==-11 && dpadUp[i]) || (mainMenu_custom_down[i]==-11 && dpadDown[i]) || (mainMenu_custom_left[i]==-11 && dpadLeft[i]) || (mainMenu_custom_right[i]==-11 && dpadRight[i]))
-						left = 1;
-				}
+			}
 
-				if((mainMenu_custom_A[i]==-12 && buttonA[i]) || (mainMenu_custom_B[i]==-12 && buttonB[i]) || (mainMenu_custom_X[i]==-12 && buttonX[i]) || (mainMenu_custom_Y[i]==-12 && buttonY[i]) || (mainMenu_custom_L[i]==-12 && triggerL[i]) || (mainMenu_custom_R[i]==-12 && triggerR[i]))
+			if((mainMenu_custom_A[i]==r && buttonA[i]) || (mainMenu_custom_B[i]==r && buttonB[i]) || (mainMenu_custom_X[i]==r && buttonX[i]) || (mainMenu_custom_Y[i]==r && buttonY[i]) || (mainMenu_custom_L[i]==r && triggerL[i]) || (mainMenu_custom_R[i]==r && triggerR[i]))
+				right = 1;
+			else if(mainMenu_custom_dpad == 0)
+			{
+				if((mainMenu_custom_up[i]==r && dpadUp[i]) || (mainMenu_custom_down[i]==r && dpadDown[i]) || (mainMenu_custom_left[i]==r && dpadLeft[i]) || (mainMenu_custom_right[i]==r && dpadRight[i]))
 					right = 1;
-				else if(mainMenu_custom_dpad == 0)
-				{
-					if((mainMenu_custom_up[i]==-12 && dpadUp[i]) || (mainMenu_custom_down[i]==-12 && dpadDown[i]) || (mainMenu_custom_left[i]==-12 && dpadLeft[i]) || (mainMenu_custom_right[i]==-12 && dpadRight[i]))
-						right = 1;
-				}
 			}
 		}
 	}
@@ -422,49 +443,54 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 		{
 			for (int i=0; i<nr_joysticks; i++)
 			{
-				//The main (joyport) joystick mapping buttons
-				if (nr == 1)
+				// mapping buttons
+				int b1, b2;
+				switch (nr)
 				{
-					if((mainMenu_custom_A[i]==-3 && buttonA[i]) || (mainMenu_custom_B[i]==-3 && buttonB[i]) || (mainMenu_custom_X[i]==-3 && buttonX[i]) || (mainMenu_custom_Y[i]==-3 && buttonY[i]) || (mainMenu_custom_L[i]==-3 && triggerL[i]) || (mainMenu_custom_R[i]==-3 && triggerR[i]))
-						*button = 1;
-					else if(mainMenu_custom_dpad == 0)
-					{
-						if((mainMenu_custom_up[i]==-3 && dpadUp[i]) || (mainMenu_custom_down[i]==-3 && dpadDown[i]) || (mainMenu_custom_left[i]==-3 && dpadLeft[i]) || (mainMenu_custom_right[i]==-3 && dpadRight[i]))
-							*button = 1;
-					}
-					if((mainMenu_custom_A[i]==-4 && buttonA[i]) || (mainMenu_custom_B[i]==-4 && buttonB[i]) || (mainMenu_custom_X[i]==-4 && buttonX[i]) || (mainMenu_custom_Y[i]==-4 && buttonY[i]) || (mainMenu_custom_L[i]==-4 && triggerL[i]) || (mainMenu_custom_R[i]==-4 && triggerR[i]))
-						*button |= 1 << 1;
-					else if(mainMenu_custom_dpad == 0)
-					{
-						if((mainMenu_custom_up[i]==-4 && dpadUp[i]) || (mainMenu_custom_down[i]==-4 && dpadDown[i]) || (mainMenu_custom_left[i]==-4 && dpadLeft[i]) || (mainMenu_custom_right[i]==-4 && dpadRight[i]))
-							*button |= 1 << 1;
-					}
+					case 0:
+					//second (mouseport) joystick
+						b1 = -1;
+						b2 = -2;
+						break;
+					case 1:
+					//first (joyport) joystick
+						b1 = -3;
+						b2 = -4;
+						break;
+					case 2:
+					//third (parallel port) joystick
+						b1 = -13;
+						b2 = -14;
+						break;
+					case 3:
+					//fourth (parallel port) joystick
+						b1 = -19;
+						b2 = -20;
+						break;
+					default:
+						break;
 				}
-				//The second (mouseport) joystick mapping buttons
-				else if (nr == 0)
+				//mapping buttons
+				if((mainMenu_custom_A[i]==b1 && buttonA[i]) || (mainMenu_custom_B[i]==b1 && buttonB[i]) || (mainMenu_custom_X[i]==b1 && buttonX[i]) || (mainMenu_custom_Y[i]==b1 && buttonY[i]) || (mainMenu_custom_L[i]==b1 && triggerL[i]) || (mainMenu_custom_R[i]==b1 && triggerR[i]))
+					*button = 1;
+				else if(mainMenu_custom_dpad == 0)
 				{
-					if((mainMenu_custom_A[i]==-1 && buttonA[i]) || (mainMenu_custom_B[i]==-1 && buttonB[i]) || (mainMenu_custom_X[i]==-1 && buttonX[i]) || (mainMenu_custom_Y[i]==-1 && buttonY[i]) || (mainMenu_custom_L[i]==-1 && triggerL[i]) || (mainMenu_custom_R[i]==-1 && triggerR[i]))
+					if((mainMenu_custom_up[i]==b1 && dpadUp[i]) || (mainMenu_custom_down[i]==b1 && dpadDown[i]) || (mainMenu_custom_left[i]==b1 && dpadLeft[i]) || (mainMenu_custom_right[i]==b1 && dpadRight[i]))
 						*button = 1;
-					else if(mainMenu_custom_dpad == 0)
-					{
-						if((mainMenu_custom_up[i]==-1 && dpadUp[i]) || (mainMenu_custom_down[i]==-1 && dpadDown[i]) || (mainMenu_custom_left[i]==-1 && dpadLeft[i]) || (mainMenu_custom_right[i]==-1 && dpadRight[i]))
-							*button = 1;
-					}
-
-					if((mainMenu_custom_A[i]==-2 && buttonA[i]) || (mainMenu_custom_B[i]==-2 && buttonB[i]) || (mainMenu_custom_X[i]==-2 && buttonX[i]) || (mainMenu_custom_Y[i]==-2 && buttonY[i]) || (mainMenu_custom_L[i]==-2 && triggerL[i]) || (mainMenu_custom_R[i]==-2 && triggerR[i]))
+				}
+				if((mainMenu_custom_A[i]==b2 && buttonA[i]) || (mainMenu_custom_B[i]==b2 && buttonB[i]) || (mainMenu_custom_X[i]==b2 && buttonX[i]) || (mainMenu_custom_Y[i]==b2 && buttonY[i]) || (mainMenu_custom_L[i]==b2 && triggerL[i]) || (mainMenu_custom_R[i]==b2 && triggerR[i]))
+					*button |= 1 << 1;
+				else if(mainMenu_custom_dpad == 0)
+				{
+					if((mainMenu_custom_up[i]==b2 && dpadUp[i]) || (mainMenu_custom_down[i]==b2 && dpadDown[i]) || (mainMenu_custom_left[i]==b2 && dpadLeft[i]) || (mainMenu_custom_right[i]==b2 && dpadRight[i]))
 						*button |= 1 << 1;
-					else if(mainMenu_custom_dpad == 0)
-					{
-						if((mainMenu_custom_up[i]==-2 && dpadUp[i]) || (mainMenu_custom_down[i]==-2 && dpadDown[i]) || (mainMenu_custom_left[i]==-2 && dpadLeft[i]) || (mainMenu_custom_right[i]==-2 && dpadRight[i]))
-							*button |= 1 << 1;
-					}
 				}
 			}
 		}
 	}
 
 #ifdef USE_UAE4ALL_VKBD
-	if (vkbd_mode && nr)
+	if (vkbd_mode && nr == 1)
 	{
 		// move around the virtual keyboard instead
 
@@ -581,52 +607,58 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 #ifdef __PSP2__
 		// On Vita, map the second player to always using the GP2X mapping, in addition to everything else
 		// Unless there is a custom mapping
-		if (!mainMenu_customControls && (nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1))
+		if (!mainMenu_customControls && ((nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1) || nr == 2 || nr == 3))
 		{
-			if (dpadRight[1])
+			int joynum = 1;
+			if (nr == 2 || nr == 3)
+				joynum = nr;
+			if (dpadRight[joynum])
 				right = 1;
-			else if (dpadLeft[1])
+			else if (dpadLeft[joynum])
 				left = 1;
-			if (dpadUp[1])
+			if (dpadUp[joynum])
 				top = 1;
-			else if (dpadDown[1])
+			else if (dpadDown[joynum])
 				bot = 1;
 			if (
-				(mainMenu_autofire & switch_autofire & delay2>mainMenu_autofireRate)
+				(mainMenu_autofire & switch_autofire & delay2[joynum-1]>mainMenu_autofireRate)
 				||
 					(
 						(
-							(mainMenu_autofireButton1==GP2X_BUTTON_B && buttonA[1])
+							(mainMenu_autofireButton1==GP2X_BUTTON_B && buttonA[joynum])
 							||
-							(mainMenu_autofireButton1==GP2X_BUTTON_X && buttonX[1])
+							(mainMenu_autofireButton1==GP2X_BUTTON_X && buttonX[joynum])
 							||
-							(mainMenu_autofireButton1==GP2X_BUTTON_Y && buttonY[1])
+							(mainMenu_autofireButton1==GP2X_BUTTON_Y && buttonY[joynum])
 						)
-						& delay2>mainMenu_autofireRate
+						& delay2[joynum-1]>mainMenu_autofireRate
 					)
 				)
 			{
-				if(!buttonB[1])
+				if(!buttonB[joynum])
 					*button=1;
-				delay2=0;
-				*button |= (buttonB[1] & 1) << 1;
+				delay2[joynum-1]=0;
+				*button |= (buttonB[joynum] & 1) << 1;
 			}
 			else
 			{
-				if ((mainMenu_button1==GP2X_BUTTON_B && buttonA[1]) || (mainMenu_button1==GP2X_BUTTON_X && buttonX[1]) || (mainMenu_button1==GP2X_BUTTON_Y && buttonY[1]))
+				if ((mainMenu_button1==GP2X_BUTTON_B && buttonA[joynum]) || (mainMenu_button1==GP2X_BUTTON_X && buttonX[joynum]) || (mainMenu_button1==GP2X_BUTTON_Y && buttonY[joynum]))
 					*button |= 0x01;
-				if (buttonB[1])
+				if (buttonB[joynum])
 					*button |= (0x01 << 1);
-				delay2++;
+				delay2[joynum-1]++;
 			}
 		}
 #endif //__PSP2__
 		// normal joystick movement
 		// make sure it is impossible to press left + right etc
-		if (left)
-			top = !top;
-		if (right)
-			bot = !bot;
+		if (nr == 0 || nr == 1)
+		{
+			if (left)
+				top = !top;
+			if (right)
+				bot = !bot;
+		}
 		*dir = bot | (right << 1) | (top << 8) | (left << 9);
 	}
 

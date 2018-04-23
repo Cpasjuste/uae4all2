@@ -28,7 +28,7 @@
 #endif
 
 #define MAX_CUSTOM_ID 96
-#define MIN_CUSTOM_ID -13
+#define MIN_CUSTOM_ID -25
 
 const char *text_str_controls_separator="----------------------------------";
 const char *text_str_controls_title=    "         Custom Controls         -";
@@ -66,11 +66,24 @@ enum {
 	MENUCONTROLS_END
 };
 
+// remember to also edit MIN_CUSTOM_ID and MAX_CUSTOM_ID
 static void getMapping(int customId)
 {
 	switch(customId)
 	{
-		case -13: strcpy(mapping, "Slow Down Mouse"); break;
+		case -25: strcpy(mapping, "Slow Down Mouse"); break;
+		case -24: strcpy(mapping, "4th Joystick RIGHT"); break;
+		case -23: strcpy(mapping, "4th Joystick LEFT"); break;
+		case -22: strcpy(mapping, "4th Joystick DOWN"); break;
+		case -21: strcpy(mapping, "4th Joystick UP"); break;
+		case -20: strcpy(mapping, "4th Joystick Fire 2"); break;
+		case -19: strcpy(mapping, "4th Joystick Fire 1"); break;
+		case -18: strcpy(mapping, "3rd Joystick RIGHT"); break;
+		case -17: strcpy(mapping, "3rd Joystick LEFT"); break;
+		case -16: strcpy(mapping, "3rd Joystick DOWN"); break;
+		case -15: strcpy(mapping, "3rd Joystick UP"); break;
+		case -14: strcpy(mapping, "3rd Joystick Fire 2"); break;
+		case -13: strcpy(mapping, "3rd Joystick Fire 1"); break;
 		case -12: strcpy(mapping, "2nd Joystick RIGHT"); break;
 		case -11: strcpy(mapping, "2nd Joystick LEFT"); break;
 		case -10: strcpy(mapping, "2nd Joystick DOWN"); break;
@@ -182,7 +195,7 @@ static void getMapping(int customId)
 		case 96: strcpy(mapping, "F10");
 	}
 	  /*
-	  -13 slow mouse modifier
+	  -25 slow mouse modifier
 	  -12 2nd joy right
 	  -11 2nd joy left
 	  -10 2nd joy down

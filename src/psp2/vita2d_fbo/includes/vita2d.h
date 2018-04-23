@@ -175,6 +175,7 @@ int vita2d_pgf_text_width(vita2d_pgf *font, float scale, const char *text);
 int vita2d_pgf_text_height(vita2d_pgf *font, float scale, const char *text);
 
 vita2d_shader *vita2d_create_shader(const SceGxmProgram* vertexProgramGxp, const SceGxmProgram* fragmentProgramGxp);
+vita2d_shader *vita2d_create_shader_untextured(const SceGxmProgram* vertexProgramGxp, const SceGxmProgram* fragmentProgramGxp);
 void vita2d_texture_set_program(SceGxmVertexProgram *vertexProgram, SceGxmFragmentProgram *fragmentProgram);
 void vita2d_texture_set_wvp(SceGxmProgramParameter *wvpParam);
 void vita2d_texture_set_vertexInput(vita2d_shader_input *input);

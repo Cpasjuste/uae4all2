@@ -63,8 +63,9 @@ extern int n_frames;
 
 extern uae_u16 adkcon;
 
-extern unsigned int joy0dir, joy1dir;
-extern int joy0button, joy1button;
+// number 2 and 3 are parallel port joysticks
+extern unsigned int joy0dir, joy1dir, joy2dir, joy3dir;
+extern int joy0button, joy1button, joy2button, joy3button;
 
 extern void INTREQ (uae_u16);
 extern void INTREQ_0 (uae_u16);

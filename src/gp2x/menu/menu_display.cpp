@@ -38,10 +38,6 @@ static const char *text_str_11k="11k";
 static const char *text_str_8k="8k";
 static const char *text_str_status_line="Status Line";
 
-
-#define MAX_CUSTOM_ID 96
-#define MIN_CUSTOM_ID -5
-
 int menuDisplay = 0;
 
 extern int moveY;

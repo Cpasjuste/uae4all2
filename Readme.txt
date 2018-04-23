@@ -125,6 +125,10 @@ single finger drag = move the mouse pointer
 dual finger drag = drag'n'drop (left mouse button is held down)
 
 CHANGELOG:
+1.66
+
+- Prevent accidental clicks when moving pointer using touch
+
 1.65
 
 - eliminate transparent keyboard slowdown

@@ -126,8 +126,10 @@ safe_read
   return n_chars;
 }
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
+#ifdef __PSP2__ // NOT __SWITCH__
 #include <psp2/io/devctl.h>
+#endif
 
 /*
 typedef struct {

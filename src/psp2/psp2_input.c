@@ -1,4 +1,7 @@
 #include "psp2_input.h"
+#ifdef USE_SDL2
+#include "sdl2_to_sdl1.h"
+#endif
 
 extern int inside_menu;
 

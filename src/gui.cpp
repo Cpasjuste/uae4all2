@@ -42,8 +42,12 @@
 #include "gp2x.h"
 #include "gp2xutil.h"
 
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 #include <psp2/shellutil.h>
+#endif
+
+#ifdef USE_SDL2
+#include "sdl2_to_sdl1.h"
 #endif
 
 #ifdef ANDROIDSDL
@@ -93,7 +97,7 @@ extern SDL_Surface *prSDLScreen;
 
 extern SDL_Joystick *uae4all_joy0, *uae4all_joy1, *uae4all_joy2, *uae4all_joy3;
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 //Predefined quick switch resolutions to select via TRIGGER R+START+DPAD LEFT/RIGHT
 static int can_change_quickSwitchModeID = 1;
 static int can_change_custom_controlSet = 1;
@@ -174,7 +178,7 @@ extern int mainMenu_case;
 int no_limiter = 0;
 #endif
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 void remap_custom_controls() // assign custom 1-3 to currently used custom set
 {
 	for (int i=0; i<4; i++)
@@ -252,7 +256,7 @@ int gui_init (void)
 		uae4all_init_sound();
 		init_kickstart();
 
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 		//Lock PS Button to prevent file corruption
 		sceShellUtilLock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
 #endif
@@ -307,7 +311,7 @@ static void goMenu(void)
 	if (quit_program != 0)
 		return;
 	emulating=1;
-#ifndef __PSP2__ //no need to erase all the vkbd graphics from memory on Vita
+#if !defined(__PSP2__) && !defined(__SWITCH__) //no need to erase all the vkbd graphics from memory on Vita
 #ifdef USE_UAE4ALL_VKBD
 	vkbd_quit();
 #endif	
@@ -333,7 +337,7 @@ static void goMenu(void)
 	quit_text();
 #endif
 #ifdef USE_UAE4ALL_VKBD
-#ifndef __PSP2__ //no need to reload all the vkbd graphics everytime on Vita
+#if !defined(__PSP2__) && !defined(__SWITCH__) //no need to reload all the vkbd graphics everytime on Vita
 	vkbd_init();
 #endif
 #endif
@@ -547,8 +551,13 @@ void getMapping(int customId)
 
 void gui_handle_events (void)
 {
+#ifdef USE_SDL2
+	//Uint8 *keystate = (Uint8 *)((hostptr) SDL_GetKeyboardState(NULL));
+	Uint8 *keystate=const_cast<Uint8*>(SDL_GetKeyboardState(NULL));
+#else
 	Uint8 *keystate = SDL_GetKeyState(NULL);
-#ifdef __PSP2__
+#endif
+#if defined(__PSP2__) || defined(__SWITCH__)
 	SDL_JoystickUpdate();
 	SDL_Joystick *currentJoy = uae4all_joy0;
 	int lX, lY, rX, rY;
@@ -609,10 +618,10 @@ void gui_handle_events (void)
 		// Main Controller is special (it does mouse controls vkeyboard etc.)
 		// On Main Controller, always use either the left of right analog for mouse pointer movement
 		// the other stick replicates the dpad inputs
-		dpadRight[i]  = SDL_JoystickGetButton(currentJoy, 9);
-		dpadLeft[i]  = SDL_JoystickGetButton(currentJoy, 7);
-		dpadUp[i]  = SDL_JoystickGetButton(currentJoy, 8);
-		dpadDown[i]  = SDL_JoystickGetButton(currentJoy, 6);
+		dpadRight[i]  = SDL_JoystickGetButton(currentJoy, PAD_RIGHT);
+		dpadLeft[i]  = SDL_JoystickGetButton(currentJoy, PAD_LEFT);
+		dpadUp[i]  = SDL_JoystickGetButton(currentJoy, PAD_UP);
+		dpadDown[i]  = SDL_JoystickGetButton(currentJoy, PAD_DOWN);
 		// analog joystick acts as digital controls with proper circular deadzone
 		if (i==0 && mainMenu_leftStickMouse) 
 		{
@@ -863,7 +872,7 @@ void gui_handle_events (void)
 if(!vkbd_mode)
 #endif
 {
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	if(buttonStart[0] && triggerL[0]) //toggle custom control config 1-3
 	{
 		if (can_change_custom_controlSet)
@@ -925,7 +934,7 @@ if(!vkbd_mode)
 		//left
 		else if(dpadLeft[0])
 		{
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 // Change zoom:
 // quickSwitch resolution presets
 			if (can_change_quickSwitchModeID)
@@ -957,7 +966,7 @@ if(!vkbd_mode)
 		//right
 		else if(dpadRight[0])
 		{
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 			if (can_change_quickSwitchModeID)
 			{
 				if (quickSwitchModeID==0)
@@ -1847,7 +1856,7 @@ if(!vkbd_mode)
 		}
 	}
 	
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	//VITA Controls: If not using custom controls, use L=right mouse, R=left mouse 
 	//because analog stick = mouse movement is always on for Vita
 	if(!mainMenu_customControls)
@@ -1890,7 +1899,7 @@ if(!vkbd_mode)
 } // if(!vkbd_mode)
 
 #ifdef USE_UAE4ALL_VKBD
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	//on Vita, Start brings up the  virtual keyboard, but Trigger R + Start is used for
 	//quickswitch resolution etc. and Trigger L + Start is used for switching between
 	//custom control configs

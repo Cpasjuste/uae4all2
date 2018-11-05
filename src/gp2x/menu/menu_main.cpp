@@ -31,9 +31,12 @@
 /* PocketUAE config file. Used for parsing PocketUAE-like options. */
 #include "savestate.h"
 
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 #include <psp2/shellutil.h>
-#include <psp2/io/fcntl.h> 
+#include <psp2/io/fcntl.h>
+#endif
+ 
+#if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
 int inside_menu = 0;
 #endif
@@ -69,7 +72,7 @@ extern char filename0[256];
 extern char filename1[256];
 extern char filename2[256];
 extern char filename3[256];
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 static const char *text_str_title=    "----- UAE4All Vita -----";
 #else
 #ifdef PANDORA
@@ -82,7 +85,7 @@ static const char *text_str_df0=		"DF0:";
 static const char *text_str_df1=		"DF1:";
 static const char *text_str_df2=		"DF2:";
 static const char *text_str_df3=		"DF3:";
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 static const char* text_str_hdnmem="Harddisk and Memory Options";
 static const char *text_str_display="Display and Sound";
 static const char *text_str_savestates="Savestates";
@@ -98,17 +101,17 @@ static const char *text_str_reset="Reset (R-trigger)";
 #else
 static const char *text_str_reset="Reset (Start Emulator)";
 #endif
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 static const char *text_str_exit= "Quit (L-trigger)";
 #else
 static const char *text_str_exit= "Quit (Q)";
 #endif
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 static const char *text_str_custom= "Custom Control Config";
 #else
 static const char *text_str_custom= "Custom Control Config (Y)";
 #endif
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 static const char *text_str_more= "More Options";
 #else
 static const char *text_str_more= "More Options (B)";
@@ -126,7 +129,7 @@ int force_quit=0;
 int lastCpuSpeed=600;
 int ntsc=0;
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 int ps_button_locked = 0;
 #endif
 
@@ -500,7 +503,7 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				case SDLK_HOME: hit0=1; break;
 				case SDLK_LALT: hit1=1; break;
 				case SDLK_LCTRL: hit2=1; break;
-#ifdef __PSP2__ //RSHIFT is PAD_L on Vita
+#if defined(__PSP2__) || defined(__SWITCH__) //RSHIFT is PAD_L on Vita
 				case SDLK_RSHIFT: hitQ=1; break;
 #else
 				case SDLK_RSHIFT: hit3=1; break;
@@ -809,7 +812,7 @@ static void raise_mainMenu()
 	int i;
 	text_draw_background();
 	text_flip();
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -822,7 +825,7 @@ static void raise_mainMenu()
 static void unraise_mainMenu()
 {
 	int i;
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();
@@ -844,7 +847,7 @@ int run_mainMenu()
 	mainMenu_case=-1;
 	init_text(0);
 	
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	inside_menu = 1;
 	SDL_Event event;
 	while (SDL_PollEvent(&event) > 0);
@@ -864,8 +867,10 @@ int run_mainMenu()
 		switch(mainMenu_case)
 		{
 		case MAIN_MENU_CASE_LOAD:
+		{
+			int autostate_loaded = 0;
 			if(run_menuLoad(currentDir, MENU_LOAD_FLOPPY) && current_drive==0)
-			{ 
+			{
 				// Check for disk-specific config
 				char path[300];
 				create_configfilename(path, uae4all_image_file0, 0);
@@ -876,9 +881,36 @@ int run_mainMenu()
 					fclose(f);
 					loadconfig();
 				}
+				// Check for disk-specific Auto Savestate and load it automatically if possible
+				if (emulating)
+				{
+					int old_saveMenu_n_savestate = saveMenu_n_savestate;
+					saveMenu_n_savestate=4;
+					make_savestate_filenames(savestate_filename,NULL);
+					f=fopen(savestate_filename,"rb");
+					if (f)
+					{
+						fclose(f);
+						savestate_state=STATE_DORESTORE;
+						autostate_loaded=1;
+					} else 
+					{
+						saveMenu_n_savestate=old_saveMenu_n_savestate;
+						make_savestate_filenames(savestate_filename,NULL);
+					}
+				}
 			}
-			mainMenu_case=-1;
+			if (autostate_loaded==1)
+			{
+				setCpuSpeed();
+				mainMenu_case=1;
+			} 
+			else 
+			{
+				mainMenu_case=-1;
+			}
 			break;
+		}
 		case MAIN_MENU_CASE_MEMDISK:
 			run_menuMemDisk();
 			if (quit_pressed_in_submenu) //User quit menu while in sub-menu
@@ -1021,13 +1053,13 @@ int run_mainMenu()
 #endif
 			saveAdfDir();	
 
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 			//unlock PS Button
 			sceShellUtilUnlock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
 #endif
 
       	leave_program();
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 			sync();
 #endif
 			exit(0);
@@ -1055,7 +1087,7 @@ int run_mainMenu()
 	init_joystick();
 	
 	update_display();
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	inside_menu = 0;
 #endif
 	return mainMenu_case;

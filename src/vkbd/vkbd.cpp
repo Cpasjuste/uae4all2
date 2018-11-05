@@ -2,6 +2,10 @@
 #include<stdlib.h>
 #include<SDL.h>
 
+#ifdef USE_SDL2
+#include "sdl2_to_sdl1.h"
+#endif
+
 #include "vkbd.h"
 
 #include "keyboard.h"
@@ -561,7 +565,7 @@ int vkbd_init(void)
 	vkbd_rect=vkbd_rect_Small;	
 #endif
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	snprintf(tmpchar, 256, "%s%s", DATA_PREFIX, vkbdFileName);
 	snprintf(tmpchar2, 256, "%s%s", DATA_PREFIX, vkbdHiresFileName);
 #else
@@ -605,7 +609,7 @@ int vkbd_init(void)
 
 //for large keyboard, load another image for shifted keys, and set transparency
 #ifdef LARGEKEYBOARD 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	snprintf(tmpchar, 256, "%s%s", DATA_PREFIX, vkbdShiftFileName);
 	snprintf(tmpchar2, 256, "%s%s", DATA_PREFIX, vkbdShiftHiresFileName);
 #else
@@ -652,7 +656,7 @@ int vkbd_init(void)
 		vkey[i]=NULL;
 	for(i=0;i<MAX_KEY_SMALL;i++)
 	{
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 		snprintf(tmpchar, 256, "app0:/data/key%i.bmp", i);
 #else
 #ifdef GP2X
@@ -675,7 +679,7 @@ int vkbd_init(void)
 #endif // LARGEKEYBOARD
 
 	vkbd_actual=0;
-#ifndef __PSP2__ //no need to show keyboard on first startup
+#if !defined(__PSP2__) && !defined(__SWITCH__) //no need to show keyboard on first startup
 	vkbd_redraw();
 #endif
 	for (int i=0; i<NUM_STICKY; i++)

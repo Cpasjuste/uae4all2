@@ -5,7 +5,7 @@
 
 #ifdef DEBUG_UAE4ALL
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 #include <psp2shell.h>
 #define puts psp2shell_print
 #define printf psp2shell_print

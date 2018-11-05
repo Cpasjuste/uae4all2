@@ -80,7 +80,7 @@
 #endif
 
 #if HAVE_DIRENT_H
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 # include "psp2-dirent.h"
 #else
 # include <dirent.h>
@@ -194,6 +194,27 @@ typedef signed char uae_s8;
 
 typedef struct { uae_u8 RGB[3]; } RGB;
 
+#ifdef __64BIT__ //used with __SWITCH__ to try to compile on Switch (64bit only Toolchain)
+typedef uint16_t uae_u16;
+typedef int16_t uae_s16;
+
+typedef uint32_t uae_u32;
+typedef int32_t uae_s32;
+
+#undef uae_s64
+#undef uae_u64
+
+#define uae_s64 int64_t
+#define uae_u64 uint64_t
+#define VAL64(a) (a)
+#define UVAL64(a) (a)
+
+typedef uae_u32 uaecptr;
+typedef uae_u64 hostptr;
+//another possibility to achieve the same:
+//typedef uintptr_t hostptr;
+
+#else
 
 #if SIZEOF_SHORT == 2
 typedef unsigned short uae_u16;
@@ -215,8 +236,6 @@ typedef long uae_s32;
 #error No 4 byte type, you lose.
 #endif
 
-typedef uae_u32 uaecptr;
-
 #undef uae_s64
 #undef uae_u64
 
@@ -235,6 +254,11 @@ typedef uae_u32 uaecptr;
 #define uae_u64 unsigned long;
 #define VAL64(a) (a ## l)
 #define UVAL64(a) (a ## ul)
+#endif
+
+typedef uae_u32 uaecptr;
+typedef uae_u32 hostptr;
+
 #endif
 
 #ifdef HAVE_STRDUP
@@ -378,7 +402,7 @@ extern void mallocemu_free (void *ptr);
 
 #ifdef UAE_CONSOLE
 #undef write_log
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 #define write_log psp2shell_print
 #else
 #define write_log write_log_standard

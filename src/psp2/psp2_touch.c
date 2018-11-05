@@ -25,6 +25,8 @@ float forcerange[SCE_TOUCH_PORT_MAX_NUM];
 extern int mainMenu_touchControls;
 extern int lastmx;
 extern int lastmy;
+static int hiresdx = 0;
+static int hiresdy = 0;
 
 enum {
 	MAX_NUM_FINGERS = 3, // number of fingers to track per panel
@@ -343,14 +345,6 @@ void psp2ProcessFingerMotion(TouchEvent *event) {
 	}
 
 	if (numFingersDown >= 1) {
-		int x = lastmx;
-		int y = lastmy;
-		int xrel = (int)(event->tfinger.dx * 960.0);
-		int yrel = (int)(event->tfinger.dy * 544.0);
-
-		x = lastmx + (int)(event->tfinger.dx * 960.0);
-		y = lastmy + (int)(event->tfinger.dy * 544.0);
-
 		// If we are starting a multi-finger drag, start holding down the mouse button
 		if (numFingersDown >= 2) {
 			if (!_multiFingerDragging[port]) {
@@ -400,13 +394,26 @@ void psp2ProcessFingerMotion(TouchEvent *event) {
 			}
 		}
 		if (updatePointer) {
-			SDL_Event ev0;
-			ev0.type = SDL_MOUSEMOTION;
-			ev0.motion.x = x;
-			ev0.motion.y = y;
-			ev0.motion.xrel = xrel;
-			ev0.motion.yrel = yrel;
-			SDL_PushEvent(&ev0);
+			const int slowdown = 16;
+			hiresdx += (int)(event->tfinger.dx * 960.0 * slowdown);
+			hiresdy += (int)(event->tfinger.dy * 544.0 * slowdown);
+			int xrel = hiresdx / slowdown;
+			int yrel = hiresdy / slowdown;
+
+			if (xrel || yrel) {
+				int x = lastmx + xrel;
+				int y = lastmy + yrel;
+				SDL_Event ev0;
+				ev0.type = SDL_MOUSEMOTION;
+				ev0.motion.x = x;
+				ev0.motion.y = y;
+				ev0.motion.xrel = xrel;
+				ev0.motion.yrel = yrel;
+				SDL_PushEvent(&ev0);
+
+				hiresdx %= slowdown;
+				hiresdy %= slowdown;
+			}
 		}
 	}
 }

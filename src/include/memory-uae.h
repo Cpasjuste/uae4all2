@@ -244,7 +244,7 @@ extern "C" {
 #else
 
 /* 4-byte alignment */
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 #define UAE4ALL_ALIGN __attribute__ ((__aligned__ (16)))
 #else
 #define UAE4ALL_ALIGN __attribute__ ((__aligned__ (4)))

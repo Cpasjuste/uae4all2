@@ -61,7 +61,7 @@ extern SDL_Surface *current_screenshot;
 #include "vkbd.h"
 #endif
 
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 //Allow locking PS Button
 #include <psp2/shellutil.h>
 //Touch input
@@ -69,6 +69,11 @@ extern SDL_Surface *current_screenshot;
 #ifdef DEBUG_UAE4ALL
 #include <psp2shell.h>
 #endif
+#endif
+
+#if defined(__SWITCH__)
+//Touch input
+#include "switch_touch.h"
 #endif
 
 long int version = 256*65536L*UAEMAJOR + 65536L*UAEMINOR + UAESUBREV;
@@ -199,12 +204,14 @@ void do_start_program (void)
 void do_leave_program (void)
 {
 #ifdef USE_SDL
-#ifdef __PSP2__ //On Vita, only remove keyboard graphics from memory when quitting the emu
+#if defined(__PSP2__) || defined(__SWITCH__) //On Vita, only remove keyboard graphics from memory when quitting the emu
 #ifdef USE_UAE4ALL_VKBD
 	vkbd_quit();
 #endif
+#ifdef __PSP2__ // NOT __SWITCH__
 	//De-Initialize touch panels
 	psp2QuitTouch();
+#endif
 #endif
   if(current_screenshot != NULL)
     SDL_FreeSurface(current_screenshot);
@@ -232,7 +239,7 @@ void leave_program (void)
 
 void real_main (int argc, char **argv)
 {
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 	scePowerSetArmClockFrequency(444);
     scePowerSetGpuClockFrequency(222);
     scePowerSetBusClockFrequency(222);
@@ -242,7 +249,7 @@ void real_main (int argc, char **argv)
 #endif
 #endif
 
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 	//Initialize ShellUtil to allow us to disable "PS" Button (corrupts hdf files)
 	sceShellUtilInitEvents(0);
 	// prevent suspend (corrupts hdf files)
@@ -263,13 +270,19 @@ void real_main (int argc, char **argv)
   g_uae_epoch = read_processor_time();
   syncbase = 1000000; // Microseconds
 
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 	mkdir("ux0:/data/uae4all", 0777);
 	mkdir("ux0:/data/uae4all/roms", 0777);
 	mkdir("ux0:/data/uae4all/saves", 0777);
 	mkdir("ux0:/data/uae4all/conf", 0777);
 	mkdir("ux0:/data/uae4all/kickstarts", 0777);
 	strcpy(launchDir, "ux0:/data/uae4all");
+#elif defined(__SWITCH__)
+	mkdir("./roms", 0777);
+	mkdir("./saves", 0777);
+	mkdir("./conf", 0777);
+	mkdir("./kickstarts", 0777);
+    strcpy(launchDir, ".");
 #else
 	getcwd(launchDir,250);
 #endif
@@ -286,7 +299,6 @@ void real_main (int argc, char **argv)
     if (! graphics_setup ()) {
 		exit (1);
     }
-
     rtarea_init ();
 
 	hardfile_install();

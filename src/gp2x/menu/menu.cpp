@@ -16,9 +16,15 @@
 #include "fade.h"
 #include "xwin.h"
 
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 #include <SDL_gp2x.h>
+#endif
 
-#ifdef __PSP2__
+#ifdef USE_SDL2
+#include "sdl2_to_sdl1.h"
+#endif
+
+#if defined(__PSP2__) // NOT __SWITCH__
 #include "psp2_shader.h"
 #include "vita2d_fbo/includes/vita2d.h"
 extern PSP2Shader *shader;
@@ -62,6 +68,7 @@ int menu_moving=1;
 Uint32 menu_msg_time=0x12345678;
 int skipintro=1;
 int kickstart_warning=0;
+int displaying_menu = 1;
 
 static void obten_colores(void)
 {
@@ -208,7 +215,7 @@ int save_thumb(int code,char *path)
 
 void menu_raise(void)
 {
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	int i;
 	for(i=80;i>=0;i-=16)
 	{
@@ -229,7 +236,7 @@ void menu_raise(void)
 
 void menu_unraise(void)
 {
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	int i;
 	for(i=0;i<=80;i+=16)
 	{
@@ -381,7 +388,7 @@ void init_kickstart()
 
 void init_text(int splash)
 {
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	//Display menu always in 320*240 on Vita
 	if(prSDLScreen != NULL) {
 		for (int i=0; i<10; i++)
@@ -389,15 +396,20 @@ void init_text(int splash)
 			SDL_FillRect(prSDLScreen,NULL,0);
 			SDL_Flip(prSDLScreen);
 		}
+#ifdef __PSP2__ // NOT __SWITCH__
 		private_hwdata *myhwdata=prSDLScreen->hwdata;
       vita2d_wait_rendering_done();
 		vita2d_free_texture(prSDLScreen->hwdata->texture);
 		SDL_free(prSDLScreen->hwdata);
 		prSDLScreen->hwdata = NULL;
 		prSDLScreen->pixels = NULL;
+#endif
 		SDL_FreeSurface(prSDLScreen);
       prSDLScreen = NULL;
 	};
+
+	displaying_menu = 1;
+
 	prSDLScreen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE|SDL_DOUBLEBUF);
 	printf("init_text: SDL_SetVideoMode(%i, %i, 16)\n", 320, 240);
 
@@ -414,11 +426,13 @@ void init_text(int splash)
    //to compile
 	SDL_SetVideoModeBilinear(0);
 
+#ifdef __PSP2__ // NOT __SWITCH__
 	if(shader != NULL) {
         delete(shader);
         shader = NULL;
    }
    shader = new PSP2Shader((PSP2Shader::Shader)0);
+#endif
 
 #elif PANDORA
 	setenv("SDL_OMAP_LAYER_SIZE","640x480",1);
@@ -445,8 +459,12 @@ void init_text(int splash)
 		SDL_FreeSurface(tmp);
 		if (text_image==NULL)
 			exit(-2);
+#ifdef USE_SDL2
+		SDL_SetColorKey(text_image,SDL_TRUE,SDL_MapRGB(text_image -> format, 0, 0, 0));
+		SDL_SetSurfaceRLE(text_image, 1);
+#else
 		SDL_SetColorKey(text_image,(SDL_SRCCOLORKEY | SDL_RLEACCEL),SDL_MapRGB(text_image -> format, 0, 0, 0));
-
+#endif
 		tmp=SDL_LoadBMP(MENU_FILE_BACKGROUND_0);
 		if (tmp==NULL)
 			exit(-3);
@@ -528,7 +546,7 @@ void init_text(int splash)
 	}
 	else
 	{
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 		SDL_FillRect(text_screen,NULL,0xFFFFFFFF);
 #endif
 		text_flip();

@@ -309,7 +309,7 @@ void REGPARAM2 call_calltrap(int func)
     }
 }
 
-/* @$%&§ compiler bugs */
+/* @$%&ï¿½ compiler bugs */
 static volatile int four = 4;
 
 uaecptr libemu_InstallFunctionFlags (TrapFunction f, uaecptr libbase, int offset,
@@ -437,7 +437,7 @@ static void rtarea_init_mem (void)
     rtarea = mapped_malloc (0x10000, "rtarea");
     if (!rtarea) {
 	write_log ("virtual memory exhausted (rtarea)!\n");
-	return;
+    return;
     }
     
     /* TODO: *** reinitializing rtarea with filesys/expansion code *** 
@@ -453,12 +453,10 @@ static void rtarea_init_mem (void)
 void rtarea_init (void)
 {
     rtarea_init_mem ();
-
 #ifdef USE_AUTOCONFIG
     uae_u32 a;
     char uaever[32];
     snprintf (uaever, 32, "uae-%d.%d.%d", UAEMAJOR, UAEMINOR, UAESUBREV);
-
     EXPANSION_uaeversion = ds (uaever);
     EXPANSION_explibname = ds ("expansion.library");
     EXPANSION_doslibname = ds ("dos.library");

@@ -7,14 +7,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if !( defined(WIN32) || defined(AROS) || defined(__PSP2__))
+#if !( defined(WIN32) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__))
 #include <sys/mman.h>
 #endif
 
 #include <unistd.h>
 #include <fcntl.h>
 
-#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS) || defined(__PSP2__))
+#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__))
 #include <sys/soundcard.h>
 #endif
 
@@ -27,7 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS) || defined(__PSP2__))
+#if !( defined(WIN32) || defined(ANDROIDSDL) || defined(AROS) || defined(__PSP2__) || defined(__SWITCH__))
 #include <linux/soundcard.h>
 #endif
 
@@ -54,7 +54,7 @@ int flashLED;
 
 int gp2xMouseEmuOn=0;
 int gp2xButtonRemappingOn=0;
-#if !defined(PANDORA) && !defined(__PSP2__)
+#if !defined(PANDORA) && !defined(__PSP2__) && !defined(__SWITCH__)
 int hasGp2xButtonRemapping=1;
 #endif
 int GFXVIDINFO_HEIGHT=240;
@@ -112,9 +112,12 @@ void gp2x_init(int argc, char **argv)
 #endif
 	
 	SDL_ShowCursor(SDL_DISABLE);
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 	strcpy(launchDir, "ux0:/data/uae4all");
 	strcpy(currentDir, "ux0:/data/uae4all");
+#elif defined(__SWITCH__)
+	strcpy(launchDir, ".");
+	strcpy(currentDir, ".");
 #else
 	getcwd(launchDir, 250);
 	getcwd(currentDir, 250);
@@ -165,7 +168,7 @@ void switch_to_hw_sdl(int first_time)
 {
 	GFXVIDINFO_HEIGHT=240;
 	SDL_ShowCursor(SDL_DISABLE);
-#ifdef __PSP2__
+#if defined(__PSP2__)
 	SDL_Delay(100);
 #else
 	usleep(100*1000);

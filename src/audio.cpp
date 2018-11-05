@@ -57,17 +57,68 @@ typedef uae_s8 sample8_t;
 	sndbufpt = (uae_u16 *)(((uae_u8 *)sndbufpt) + 2); \
 }
 
+#ifdef __SWITCH__
+#define CHECK_SOUND_BUFFERS() \
+{ \
+      if ((hostptr)sndbufpt - (hostptr)render_sndbuff >= SNDBUFFER_LEN*2) { \
+  	    finish_sound_buffer (); } \
+} \
+
+#define SAMPLE_HANDLER \
+	{ \
+		register uae_u32 d0 = audio_channel_current_sample[0]; \
+		register uae_u32 d1 = audio_channel_current_sample[1]; \
+		register uae_u32 d2 = audio_channel_current_sample[2]; \
+		register uae_u32 d3 = audio_channel_current_sample[3]; \
+		d0 *= audio_channel_vol[0]; \
+		d1 *= audio_channel_vol[1]; \
+		d2 *= audio_channel_vol[2]; \
+		d3 *= audio_channel_vol[3]; \
+		d0 &= audio_channel_adk_mask[0]; \
+		d1 &= audio_channel_adk_mask[1]; \
+		d2 &= audio_channel_adk_mask[2]; \
+		d3 &= audio_channel_adk_mask[3]; \
+		if (mainMenu_soundStereo) { \
+			switch (mainMenu_soundStereoSep) { \
+				case 3: \
+					PUT_SOUND_WORD (d0+d3) \
+					PUT_SOUND_WORD (d1+d2) \
+					break; \
+				case 2: \
+					PUT_SOUND_WORD (((d0+d3)*28+(d1+d2)*4)/32) \
+					PUT_SOUND_WORD (((d1+d2)*28+(d0+d3)*4)/32) \
+					break; \
+				case 1: \
+					PUT_SOUND_WORD (((d0+d3)*24+(d1+d2)*8)/32) \
+					PUT_SOUND_WORD (((d1+d2)*24+(d0+d3)*8)/32) \
+					break; \
+				case 0: \
+					PUT_SOUND_WORD (((d0+d3)*20+(d1+d2)*12)/32) \
+					PUT_SOUND_WORD (((d1+d2)*20+(d0+d3)*12)/32) \
+					break; \
+				default: \
+					PUT_SOUND_WORD (d0+d3) \
+					PUT_SOUND_WORD (d1+d2) \
+					break; } \
+		} else { \
+			PUT_SOUND_WORD (((d0+d3)*16+(d1+d2)*16)/32) \
+			PUT_SOUND_WORD (((d1+d2)*16+(d0+d3)*16)/32) \
+		} \
+		CHECK_SOUND_BUFFERS(); \
+	} \
+
+#else
+
 #define CHECK_SOUND_BUFFERS() \
 { \
     if(mainMenu_soundStereo) { \
-      if ((unsigned)sndbufpt - (unsigned)render_sndbuff >= SNDBUFFER_LEN*2) { \
+      if ((hostptr)sndbufpt - (hostptr)render_sndbuff >= SNDBUFFER_LEN*2) { \
   	    finish_sound_buffer (); } \
     } else { \
-      if ((unsigned)sndbufpt - (unsigned)render_sndbuff >= SNDBUFFER_LEN) { \
+      if ((hostptr)sndbufpt - (hostptr)render_sndbuff >= SNDBUFFER_LEN) { \
   	    finish_sound_buffer (); } \
   	 } \
 } \
-      
 
 #define SAMPLE_HANDLER \
 	{ \
@@ -110,6 +161,7 @@ typedef uae_s8 sample8_t;
 		CHECK_SOUND_BUFFERS(); \
 	} \
 
+#endif
 
 #define SCHEDULE_AUDIO(CHN) \
 	if (audio_channel_state[CHN]) { \

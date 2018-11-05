@@ -8,7 +8,7 @@
 #include<SDL.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 #include "psp2-dirent.h"
 #else
 #include<dirent.h>
@@ -77,7 +77,7 @@ static void raise_fileinfoMenu()
 
 	text_draw_background();
 	text_flip();
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -91,7 +91,7 @@ static void unraise_fileinfoMenu()
 {
 	int i;
 
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();

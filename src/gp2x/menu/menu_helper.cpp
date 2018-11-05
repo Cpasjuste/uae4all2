@@ -18,7 +18,11 @@
 #include <android/log.h>
 #endif
 
-#ifdef __PSP2__
+#ifdef USE_SDL2
+#include "sdl2_to_sdl1.h"
+#endif
+
+#if defined(__PSP2__) // NOT __SWITCH__
 #include "psp2_shader.h"
 #include "vita2d_fbo/includes/vita2d.h"
 PSP2Shader *shader = NULL;
@@ -40,6 +44,8 @@ extern int ntsc;
 
 extern char launchDir[300];
 extern char currentDir[300];
+
+extern int displaying_menu;
 
 int saveAdfDir() {
     char path[300];
@@ -131,7 +137,7 @@ void update_display() {
     snprintf(layersize, 20, "%dx480", screenWidth);
 
 #ifndef WIN32
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
     setenv("SDL_OMAP_LAYER_SIZE",layersize,1);
 #endif
 #endif
@@ -140,7 +146,7 @@ void update_display() {
     snprintf(bordercut, 20, "%d,%d,0,0", mainMenu_cutLeft, mainMenu_cutRight);
 
 #ifndef WIN32
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
     setenv("SDL_OMAP_BORDER_CUT",bordercut,1);
 #endif
 #endif
@@ -149,24 +155,30 @@ void update_display() {
     update_onscreen();
 #endif
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
     if (prSDLScreen != NULL) {
 		for (int i=0; i<10; i++)
 		{
 			SDL_FillRect(prSDLScreen,NULL,0);
 			SDL_Flip(prSDLScreen);
 		}
+#ifdef __PSP2__ // NOT __SWITCH__
 		vita2d_wait_rendering_done();
 		vita2d_free_texture(prSDLScreen->hwdata->texture);
 		SDL_free(prSDLScreen->hwdata);
 		prSDLScreen->hwdata = NULL;
 		prSDLScreen->pixels = NULL;
+#endif
 		SDL_FreeSurface(prSDLScreen);
       prSDLScreen = NULL;
     }
 
+#ifdef __PSP2__ // NOT __SWITCH__
 	// speed up rendering
 	vita2d_texture_set_alloc_memblock_type(SCE_KERNEL_MEMBLOCK_TYPE_USER_RW);
+#endif
+
+	displaying_menu = 0;
 
     prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_HWSURFACE | SDL_DOUBLEBUF);
     printf("update_display: SDL_SetVideoMode(%i, %i, 16)\n", visibleAreaWidth, mainMenu_displayedLines);
@@ -209,12 +221,14 @@ void update_display() {
 
     SDL_SetVideoModeSync(1);
 
+#ifdef __PSP2__ // NOT __SWITCH__
     // set vita2d shader
     if(shader != NULL) {
         delete(shader);
         shader = NULL;
     }
     shader = new PSP2Shader((PSP2Shader::Shader)mainMenu_shader);
+#endif
 #else
 #if defined(PANDORA) && !(defined(WIN32) || defined(AROS))
     prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_SWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF);
@@ -236,7 +250,7 @@ void update_display() {
 static bool cpuSpeedChanged = false;
 
 void setCpuSpeed() {
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
     char speedCmd[128];
 
     if(mainMenu_cpuSpeed != lastCpuSpeed)

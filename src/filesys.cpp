@@ -444,7 +444,11 @@ struct hardfiledata *get_hardfile_data (int nr)
 #define dp_Arg4 32
 
 /* result codes */
+#ifdef __64BIT__
+#define DOS_TRUE ((uint32_t)-1L)
+#else
 #define DOS_TRUE ((unsigned long)-1L)
+#endif
 #define DOS_FALSE (0L)
 
 /* Passed as type to Lock() */
@@ -2106,15 +2110,15 @@ action_read (Unit *unit, dpacket packet)
 		 * If realpt is at odd address, we have to swab the first word.
 		 * That word will be re-swabbed after data has been read.
 		 */
-		if (((int)realpt & 1) > 0)
-			swab_memory ((unsigned char *)((int)realpt & ~1), 2);
+		if (((hostptr)realpt & 1) > 0)
+			swab_memory ((unsigned char *)((hostptr)realpt & ~1), 2);
 		
 		actual = read(k->fd, (char *)realpt, size);
 		
 	    /* If realpt is at odd address, we also have to swab the
 	     * word in which the last byte has been written.
 	     */
-		swab_memory((unsigned char *)((int)realpt & ~1), (((actual + 1) & ~1) + ((int)realpt & 1)) & ~1);
+		swab_memory((unsigned char *)((hostptr)realpt & ~1), (((actual + 1) & ~1) + ((hostptr)realpt & 1)) & ~1);
 #else
 		actual = read(k->fd, (char *) realpt, size);
 #endif
@@ -2571,7 +2575,7 @@ action_set_file_size (Unit *unit, dpacket packet)
        The write is supposed to guarantee that the file can't be smaller than
        the requested size, the truncate guarantees that it can't be larger.
        If we were to write one byte earlier we'd clobber file data.  */
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
     if (truncate (k->aino->nname, offset) == -1) {
 	PUT_PCK_RES1 (packet, DOS_FALSE);
 	PUT_PCK_RES2 (packet, dos_errno ());
@@ -2659,7 +2663,7 @@ action_set_date (Unit *unit, dpacket packet)
     ut.actime = ut.modtime = put_time(get_long (date), get_long (date + 4),
 				      get_long (date + 8));
     a = find_aino (unit, lock, bstr (unit, name), &err);
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
     if (err == 0 && utime (a->nname, &ut) == -1)
 #endif
 	err = dos_errno ();

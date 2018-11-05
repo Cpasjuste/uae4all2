@@ -161,7 +161,7 @@ static char *drive_id_name (drive *drv)
     switch (drv->drive_id)
     {
     case DRIVE_ID_35HD : return "3.5HD";
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
     case DRIVE_ID_525DD: return "5.25DD";
 #endif
     case DRIVE_ID_35DD : return "3.5DD";
@@ -1578,7 +1578,7 @@ uae_u8 *restore_disk(int num,uae_u8 *src)
 	}
     }
 
-    src = (uae_u8 *)(((unsigned)src)+strlen((char *)src) + 1);
+    src = (uae_u8 *)(((hostptr)src)+strlen((char *)src) + 1);
 
     return src;
 }
@@ -1613,7 +1613,7 @@ uae_u8 *save_disk(int num,int *len)
 	dst[0]=dst[1]=0;
     }
 
-    dst = (uae_u8 *)(((unsigned)dst)+strlen((char *)dst) + 1);
+    dst = (uae_u8 *)(((hostptr)dst)+strlen((char *)dst) + 1);
     *len = dst - dstbak;
     return dstbak;
 }

@@ -40,7 +40,7 @@ void fsdb_fill_file_attrs (a_inode *aino)
     			  | (S_IWUSR & statbuf.st_mode ? 0 : A_FIBF_WRITE)
     			  | (S_IRUSR & statbuf.st_mode ? 0 : A_FIBF_READ));
 
-#if defined(WIN32) || defined(ANDROIDSDL) || defined(__PSP2__)
+#if defined(WIN32) || defined(ANDROIDSDL) || defined(__PSP2__) || defined(__SWITCH__)
     // Always give execute & read permission
     aino->amigaos_mode &= ~A_FIBF_EXECUTE;
     aino->amigaos_mode &= ~A_FIBF_READ;
@@ -73,7 +73,7 @@ int fsdb_set_file_attrs (a_inode *aino, int mask)
 	else
 	    mode |= S_IXUSR;
 
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	chmod (aino->nname, mode);
 #endif
     }
@@ -108,7 +108,7 @@ char *fsdb_create_unique_nname (a_inode *base, const char *suggestion)
 	/* tmpnam isn't reentrant and I don't really want to hack configure
 	 * right now to see whether tmpnam_r is available...  */
 	for (i = 0; i < 8; i++) {
-#if WIN32 || __PSP2__
+#if WIN32 || __PSP2__ || __SWITCH__
 	    tmp[i] = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[rand () % 63];
 #else
 	    tmp[i] = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[random () % 63];

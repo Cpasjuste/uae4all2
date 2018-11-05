@@ -15,7 +15,7 @@
 #include <SDL_ttf.h>
 #include "savestate.h"
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
 #endif
 
@@ -25,8 +25,11 @@ static const char *text_str_0="0";
 static const char *text_str_1="1";
 static const char *text_str_2="2";
 static const char *text_str_3="3";
+static const char *text_str_auto="auto";
 static const char *text_str_loadmem="Load State";
 static const char *text_str_savemem="Save State";
+static const char *text_str_deletemem="Delete State";
+static const char *text_str_savestateslocation="Location";
 static const char *text_str_separator="----------------------";
 static const char *text_str_exit="Back to Main Menu";
 
@@ -34,10 +37,13 @@ extern int emulating;
 extern int saveMenu_n_savestate;
 extern int quit_pressed_in_submenu;
 extern int mainMenu_bootHD;
+extern int mainMenu_useSavesFolder;
+
+extern void extractFileName(char * str,char *buffer);
 
 int saveMenu_case=-1;
 
-enum { SAVE_MENU_CASE_EXIT, SAVE_MENU_CASE_LOAD_MEM, SAVE_MENU_CASE_SAVE_MEM, SAVE_MENU_CASE_LOAD_VMU, SAVE_MENU_CASE_SAVE_VMU, SAVE_MENU_CASE_CANCEL };
+enum { SAVE_MENU_CASE_EXIT, SAVE_MENU_CASE_LOAD_MEM, SAVE_MENU_CASE_SAVE_MEM, SAVE_MENU_CASE_DELETE_MEM, SAVE_MENU_CASE_LOAD_VMU, SAVE_MENU_CASE_SAVE_VMU, SAVE_MENU_CASE_CANCEL };
 
 static inline void draw_savestatesMenu(int c)
 {
@@ -54,21 +60,26 @@ static inline void draw_savestatesMenu(int c)
 	
 	write_text(9,7,text_str_savestate);
 	if ((saveMenu_n_savestate==0)&&((c!=0)||(bb)))
-		write_text_inv(22,7,text_str_0);
+		write_text_inv(19,7,text_str_0);
 	else
-		write_text(22,7,text_str_0);
+		write_text(19,7,text_str_0);
 	if ((saveMenu_n_savestate==1)&&((c!=0)||(bb)))
-		write_text_inv(24,7,text_str_1);
+		write_text_inv(21,7,text_str_1);
 	else
-		write_text(24,7,text_str_1);
+		write_text(21,7,text_str_1);
 	if ((saveMenu_n_savestate==2)&&((c!=0)||(bb)))
-		write_text_inv(26,7,text_str_2);
+		write_text_inv(23,7,text_str_2);
 	else
-		write_text(26,7,text_str_2);
+		write_text(23,7,text_str_2);
 	if ((saveMenu_n_savestate==3)&&((c!=0)||(bb)))
-		write_text_inv(28,7,text_str_3);
+		write_text_inv(25,7,text_str_3);
 	else
-		write_text(28,7,text_str_3);
+		write_text(25,7,text_str_3);
+	if ((saveMenu_n_savestate==4)&&((c!=0)||(bb)))
+		write_text_inv(27,7,text_str_auto);
+	else
+		write_text(27,7,text_str_auto);
+
 	write_text(9,8,text_str_separator);
 
 	write_text(9,10,text_str_separator);
@@ -87,11 +98,32 @@ static inline void draw_savestatesMenu(int c)
 
 	write_text(9,14,text_str_separator);
 
+	if ((c==3)&&(bb))
+		write_text_inv(9,15,text_str_deletemem);
+	else
+		write_text(9,15,text_str_deletemem);
+
 	write_text(9,20,text_str_separator);
+
+	write_text(9,21,text_str_savestateslocation);
+	if (mainMenu_useSavesFolder==0)
+	{
+		if ((c!=4)||(bb))
+			write_text_inv(19,21,"Same as ROM ");
+		else
+			write_text(19,21,"Same as ROM ");
+	}
+	else if (mainMenu_useSavesFolder==1)
+	{
+		if ((c!=4)||(bb))
+			write_text_inv(19,21,"Saves Folder");
+		else
+			write_text(19,21,"Saves Folder");
+	}
 
 	write_text(9,22,text_str_separator);
 
-	if ((c==3)&&(bb))
+	if ((c==5)&&(bb))
 		write_text_inv(9,23,text_str_exit);
 	else
 		write_text(9,23,text_str_exit);
@@ -146,24 +178,24 @@ static inline int key_saveMenu(int *cp)
 		}
 		else if (up)
 		{
-			if (c>0) c=(c-1)%4;
-			else c=3;
+			if (c>0) c=(c-1)%6;
+			else c=5;
 		}
 		else if (down)
 		{
-			c=(c+1)%4;
+			c=(c+1)%6;
 		}
 		else
-		if (left)
+		if (left && c!=4)
 		{
 			if (saveMenu_n_savestate>0)
 				saveMenu_n_savestate--;
 			else
-				saveMenu_n_savestate=3;
+				saveMenu_n_savestate=4;
 		}
-		else if (right)
+		else if (right && c!=4)
 		{
-			if (saveMenu_n_savestate<3)
+			if (saveMenu_n_savestate<4)
 				saveMenu_n_savestate++;
 			else
 				saveMenu_n_savestate=0;
@@ -189,6 +221,23 @@ static inline int key_saveMenu(int *cp)
 			case 3:
 			if (hit0)
 			{
+				saveMenu_case=SAVE_MENU_CASE_DELETE_MEM;
+				end=1;
+			}
+			break;
+			case 4:
+			if (left || right)
+			{
+				if (mainMenu_useSavesFolder==0)
+					mainMenu_useSavesFolder=1;
+				else
+					mainMenu_useSavesFolder=0;
+				make_savestate_filenames(savestate_filename, NULL);
+			}
+			break;
+			case 5:
+			if (hit0)
+			{
 				saveMenu_case=SAVE_MENU_CASE_EXIT;
 				end=1;
 			}
@@ -206,7 +255,7 @@ static inline void raise_saveMenu()
 
 	text_draw_background();
 	text_flip();
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=0;i<8;i++)
 	{
 		text_draw_background();
@@ -220,7 +269,7 @@ static inline void raise_saveMenu()
 static inline void unraise_saveMenu()
 {
 	int i;
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=7;i>=0;i--)
 	{
 		text_draw_background();
@@ -323,10 +372,24 @@ void make_savestate_filenames(char *save, char *thumb)
 			if (thumb!=NULL)
 				strcat(thumb,"-3.png"); 
 			break;
+		case 4:
+			strcat(save,"-auto.asf"); 
+			if (thumb!=NULL)
+				strcat(thumb,"-auto.png"); 
+			break;
 		default: 
 			strcat(save,".asf");
 			if (thumb!=NULL)
 				strcat(thumb,".png"); 
+	}
+	if (mainMenu_useSavesFolder==1) {
+		char buffer[256];
+		if (save[0]!='\0' && save!=NULL) {
+			memset(buffer, 0, 256);
+			extractFileName(save, buffer);
+			memset(save, 0, 255);
+			snprintf(save, 255, "%s%s", SAVE_PREFIX, buffer);
+		}
 	}
 }
 
@@ -372,9 +435,25 @@ int run_menuSavestates()
 				}
 				break;
 			case SAVE_MENU_CASE_SAVE_MEM:
+				make_savestate_filenames(savestate_filename,NULL);
 				savestate_state = STATE_DOSAVE;
 				saveMenu_case=1;
 				break;
+			case SAVE_MENU_CASE_DELETE_MEM:
+			{
+				make_savestate_filenames(savestate_filename,NULL);
+				FILE *f=fopen(savestate_filename,"rb");
+				if (f) {
+					fclose(f);
+					if (remove(savestate_filename) == 0) {
+						show_error("File deleted");
+					} else {
+						show_error("File doesn't exist.");
+					}
+				}
+				saveMenu_case=-1;
+				break;
+			}
 			case SAVE_MENU_CASE_EXIT:	
 			case SAVE_MENU_CASE_CANCEL:	
 				saveMenu_case=1;

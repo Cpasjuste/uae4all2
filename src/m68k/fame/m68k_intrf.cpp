@@ -21,7 +21,7 @@ void clear_fame_mem_dummy(void)
 	memset((void *)&mimemoriadummy[0],0,65536);
 }
 
-static unsigned micontexto_fpa[256];
+static hostptr micontexto_fpa[256];
 
 
 void process_exception(unsigned int vect);
@@ -96,21 +96,21 @@ void init_memmaps(addrbank* banco)
   M68K_CONTEXT *context = m68k_get_context();
   
 	memset(context,0,sizeof(M68K_CONTEXT));
-	memset(&micontexto_fpa,0,sizeof(unsigned)*256);
+	memset(&micontexto_fpa,0,sizeof(hostptr)*256);
 
-	micontexto_fpa[0x04]=(unsigned)&uae_chk_handler;
+	micontexto_fpa[0x04]=(hostptr)&uae_chk_handler;
 
 	/* PocketUAE/WinUAE traps */
-	micontexto_fpa[0x0A]=(unsigned)&uae_chk_handler;
-	micontexto_fpa[0x10]=(unsigned)&uae_chk_handler;
-	micontexto_fpa[0x14]=(unsigned)&uae_chk_handler;
-	micontexto_fpa[0x15]=(unsigned)&uae_chk_handler;
+	micontexto_fpa[0x0A]=(hostptr)&uae_chk_handler;
+	micontexto_fpa[0x10]=(hostptr)&uae_chk_handler;
+	micontexto_fpa[0x14]=(hostptr)&uae_chk_handler;
+	micontexto_fpa[0x15]=(hostptr)&uae_chk_handler;
 
-	context->icust_handler = (unsigned int*)&micontexto_fpa;
+	context->icust_handler = (hostptr *)&micontexto_fpa;
 
 	for(i=0;i<256;i++)
 	{
-		unsigned offset=(unsigned)banco->baseaddr;
+		hostptr offset=(hostptr)banco->baseaddr;
 		unsigned low_addr=(i<<16);
 		unsigned high_addr=((i+1)<<16)-1;
 		void *data=NULL;
@@ -129,14 +129,14 @@ void init_memmaps(addrbank* banco)
 			mem_handler_w16=(void *)banco->wput;
 		}
 
-    famec_SetBank(low_addr, high_addr, ((unsigned)&mimemoriadummy)-low_addr, mem_handler_r8, 
+    famec_SetBank(low_addr, high_addr, ((hostptr)&mimemoriadummy)-low_addr, mem_handler_r8, 
       mem_handler_r16, mem_handler_w8, mem_handler_w16, data);
 	}
 }
 
 void map_zone(unsigned addr, addrbank* banco, unsigned realstart)
 {
-	unsigned offset=(unsigned)banco->baseaddr;
+	hostptr offset=(hostptr)banco->baseaddr;
 	if (addr>255)
 		return;
 
@@ -150,7 +150,7 @@ void map_zone(unsigned addr, addrbank* banco, unsigned realstart)
 	}
 	else
 	{
-    famec_SetBank(low_addr, high_addr, ((unsigned)&mimemoriadummy)-low_addr, 
+    famec_SetBank(low_addr, high_addr, ((hostptr)&mimemoriadummy)-low_addr, 
       (void*)banco->bget, (void*)banco->wget, (void*)banco->bput, (void*)banco->wput, NULL);
 	}
 }

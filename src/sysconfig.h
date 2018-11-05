@@ -379,11 +379,13 @@
 #	define uae_malloc(len) malloc((len + 1) & ~1);
 #endif
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 #undef HAVE_SYS_MOUNT_H
 #undef HAVE_SYS_VFS_H
 #undef HAVE_SYS_STATFS_H
+#ifdef __PSP2__ // NOT __SWITCH__
 #include <psp2/power.h>
+#endif
 #include "psp2_input.h"
 #ifdef DEBUG_UAE4ALL
 #include <psp2shell.h>

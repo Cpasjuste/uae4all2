@@ -47,9 +47,16 @@
 #include "rpt.h"
 #include "events.h"
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
+#endif
+
+#ifdef __PSP2__ // NOT __SWITCH__
 #include "psp2/psp2_touch.h"
+#endif
+
+#ifdef __SWITCH__
+#include "switch/switch_touch.h"
 #endif
 
 bool mouse_state = true;
@@ -119,11 +126,11 @@ static unsigned long next_synctime = 0;
 
 void flush_block ()
 {
-#ifndef __PSP2__ //no need to unlock screen on Vita unless we have to
+#if !defined(__PSP2__) //no need to unlock screen on Vita unless we have to
 	SDL_UnlockSurface(prSDLScreen);
 #endif
 #ifdef USE_UAE4ALL_VKBD	//draw vkbd and process user input
-#ifdef __PSP2__ //even on Vita, vkbd blitting requires unlock/lock
+#if defined(__PSP2__) //even on Vita, vkbd blitting requires unlock/lock
 	if (vkbd_mode)
 	{
 		SDL_UnlockSurface(prSDLScreen); 
@@ -146,7 +153,7 @@ void flush_block ()
 #endif
     unsigned long start = read_processor_time();
     if(start < next_synctime && next_synctime - start > time_per_frame - 1000)
-#ifdef __PSP2__
+#if defined(__PSP2__)
 		SDL_Delay(((next_synctime - start) - 1000) / 1000);
 #else
       usleep((next_synctime - start) - 1000);
@@ -164,7 +171,10 @@ void flush_block ()
     else
       next_synctime = next_synctime + time_per_frame * (1 + prefs_gfx_framerate);
 	}
-#ifndef __PSP2__
+#if defined(__SWITCH__)
+	SDL_LockSurface (prSDLScreen);
+#endif
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	SDL_LockSurface (prSDLScreen);
 	if(stylusClickOverride)
 	{
@@ -530,13 +540,24 @@ void handle_events (void)
 	/* Handle GUI events */
 	gui_handle_events ();
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 /* SDL events on PSP2 with all keyboard/mouse inputs for BT keyboard and mouse, and touch */
+#ifdef __PSP2__	 // NOT __SWITCH__	
 	if (mainMenu_touchControls) {
 		psp2PollTouch();
 	}
+#endif
+#ifdef __SWITCH__
+	// need to call this once per frame
+	if (mainMenu_touchControls)
+		SWITCH_FinishSimulatedMouseClicks();
+#endif
     while (SDL_PollEvent(&rEvent))
 	{
+#ifdef __SWITCH__
+		if (mainMenu_touchControls)
+			SWITCH_HandleTouch(&rEvent);
+#endif
 		switch (rEvent.type)
 		{
 		case SDL_QUIT:

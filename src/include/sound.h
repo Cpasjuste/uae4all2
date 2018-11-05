@@ -21,7 +21,11 @@ extern void finish_sound_buffer (void);
 #define DEFAULT_SOUND_CHANNELS 1
 #endif
 
+#ifdef __SWITCH__
+#define DEFAULT_SOUND_FREQ 48000
+#else
 #define DEFAULT_SOUND_FREQ 44100
+#endif
 
 extern void sound_default_evtime(void);
 extern void uae4all_pause_music(void);

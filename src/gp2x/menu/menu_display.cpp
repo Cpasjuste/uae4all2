@@ -7,7 +7,7 @@
 #include "menu.h"
 #include <sys/stat.h>
 #include <unistd.h>
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 #include "psp2-dirent.h"
 #else
 #include <dirent.h>
@@ -20,7 +20,7 @@
 #include <SDL_ttf.h>
 #include "menu_config.h"
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
 #endif
 
@@ -31,6 +31,7 @@ static const char *text_str_fast="Fast";
 static const char *text_str_accurate="Accurate";
 static const char *text_str_off="Off";
 static const char *text_str_sndrate="Sound Rate";
+static const char *text_str_48k="48k";
 static const char *text_str_44k="44k";
 static const char *text_str_32k="32k";
 static const char *text_str_22k="22k";
@@ -51,17 +52,17 @@ enum {
 	MENUDISPLAY_PRESETWIDTH,
 	MENUDISPLAY_PRESETHEIGHT,
 	MENUDISPLAY_DISPLINES,
-#ifndef __PSP2__ //screenwidth has no meaning on Vita and is never used
+#if !defined(__PSP2__) && !defined(__SWITCH__) //screenwidth has no meaning on Vita and is never used
 	MENUDISPLAY_SCREENWIDTH,
 #endif
 	MENUDISPLAY_VERTPOS,
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	MENUDISPLAY_CUTLEFT,
 	MENUDISPLAY_CUTRIGHT,
 #endif
 	MENUDISPLAY_FRAMESKIP,
 	MENUDISPLAY_REFRESHRATE,
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 	MENUDISPLAY_SHADER,
 #endif
 	MENUDISPLAY_STATUSLINE,
@@ -75,7 +76,7 @@ enum {
 	MENUDISPLAY_END
 };
 
-#ifdef __PSP2__
+#if defined(__PSP2__)
 enum {
 	SHADER_NONE = 0,
 	SHADER_LCD3X,
@@ -84,6 +85,14 @@ enum {
 	SHADER_SHARP_BILINEAR,
 	SHADER_SHARP_BILINEAR_SIMPLE,
 	SHADER_FXAA,
+	NUM_SHADERS, //NUM_SHADERS - 1 is the max allowed number in mainMenu_shader
+};
+#endif
+
+#if defined(__SWITCH__)
+enum {
+	SHADER_NONE = 0,
+	SHADER_BILINEAR,
 	NUM_SHADERS, //NUM_SHADERS - 1 is the max allowed number in mainMenu_shader
 };
 #endif
@@ -100,6 +109,8 @@ static void draw_displayMenu(int c)
 	int tabstop7 = 29;
 	int tabstop8 = 31;
 	int tabstop9 = 33;
+	int tabstop10 = 35;
+	int tabstop11 = 37;
 
 	int menuLine = 3;
 	static int b=0;
@@ -153,7 +164,7 @@ static void draw_displayMenu(int c)
 		write_text(tabstop3,menuLine,value);
 	else
 		write_text_inv(tabstop3,menuLine,value);
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	// MENUDISPLAY_SCREENWIDTH
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Screen Width");
@@ -171,7 +182,7 @@ static void draw_displayMenu(int c)
 		write_text(tabstop3,menuLine,value);
 	else
 		write_text_inv(tabstop3,menuLine,value);
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	// MENUDISPLAY_CUTLEFT
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Cut Left");
@@ -251,7 +262,7 @@ static void draw_displayMenu(int c)
 		write_text_inv(tabstop3+1,menuLine,"60Hz");
 	else
 		write_text(tabstop3+1,menuLine,"60Hz");
-#ifdef __PSP2__	
+#if defined(__PSP2__) || defined(__SWITCH__)	
 	//Shader settings on Vita
 	//MENUDISPLAY_SHADER
 	menuLine+=2;
@@ -259,6 +270,14 @@ static void draw_displayMenu(int c)
   
   	switch (mainMenu_shader)
   	{
+#ifdef __SWITCH__
+		case SHADER_NONE:
+			snprintf((char*)value, 25, "NONE (auto 2x/3x/4x)");
+			break;
+		case SHADER_BILINEAR:
+			snprintf((char*)value, 25, "BILINEAR");
+			break;
+#else
 		case SHADER_NONE:
 			snprintf((char*)value, 25, "NONE (perfect 2x)");
 			break;
@@ -280,6 +299,7 @@ static void draw_displayMenu(int c)
 		case SHADER_FXAA:
 			snprintf((char*)value, 25, "FXAA");
 			break;
+#endif
 		default:
 			break;
 	}
@@ -381,6 +401,11 @@ static void draw_displayMenu(int c)
 		write_text_inv(tabstop9,menuLine,text_str_44k);
 	else
 		write_text(tabstop9,menuLine,text_str_44k);
+
+	if ((sound_rate==48000)&&((menuDisplay!=MENUDISPLAY_SNDRATE)||(bb)))
+		write_text_inv(tabstop11,menuLine,text_str_48k);
+	else
+		write_text(tabstop11,menuLine,text_str_48k);
 
 	// MENUDISPLAY_STEREO
 	menuLine+=2;
@@ -531,7 +556,7 @@ static int key_displayMenu(int *c)
 						mainMenu_displayedLines++;
 				}
 				break;
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 			case MENUDISPLAY_SCREENWIDTH:
 				if (left)
 				{
@@ -559,7 +584,7 @@ static int key_displayMenu(int *c)
 						moveY++;
 				}
 				break;
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 			case MENUDISPLAY_CUTLEFT:
 				if (left)
 				{
@@ -610,7 +635,7 @@ static int key_displayMenu(int *c)
 				if ((left)||(right))
 						mainMenu_ntsc = !mainMenu_ntsc;
 				break;
-#ifdef __PSP2__ //shader choice on VITA
+#if defined(__PSP2__) || defined(__SWITCH__) //shader choice on VITA
 			case MENUDISPLAY_SHADER:
 				if (left)
 				{
@@ -678,14 +703,16 @@ static int key_displayMenu(int *c)
 				case MENUDISPLAY_SNDRATE:
 					if ((left)||(right))
 					{
-						static int rates[] = { 8000, 11025, 22050, 32000, 44100 };
+#ifndef __SWITCH__
+						static int rates[] = { 8000, 11025, 22050, 32000, 44100, 48000 };
 						int sel;
 						for (sel = 0; sel < sizeof(rates) / sizeof(rates[0]); sel++)
 							if (rates[sel] == sound_rate) break;
 						sel += left ? -1 : 1;
-						if (sel < 0) sel = 4;
-						if (sel > 4) sel = 0;
+						if (sel < 0) sel = 5;
+						if (sel > 5) sel = 0;
 						sound_rate = rates[sel];
+#endif
 					}
 					break;
 		
@@ -735,7 +762,7 @@ static void raise_displayMenu()
 
 	text_draw_background();
 	text_flip();
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -748,7 +775,7 @@ static void raise_displayMenu()
 static void unraise_displayMenu()
 {
 	int i;
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();

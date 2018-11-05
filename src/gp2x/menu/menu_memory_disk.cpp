@@ -10,7 +10,7 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 #include "psp2-dirent.h"
 #else
 #include <dirent.h>
@@ -28,7 +28,7 @@
 /* PocketUAE config file. Used for parsing PocketUAE-like options. */
 #include "cfgfile.h" 
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
 #endif
 
@@ -568,7 +568,7 @@ static void raise_memDiskMenu()
 
 	text_draw_background();
 	text_flip();
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -581,7 +581,7 @@ static void raise_memDiskMenu()
 static void unraise_memDiskMenu()
 {
 	int i;
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();

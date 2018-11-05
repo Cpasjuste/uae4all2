@@ -5,11 +5,13 @@
 #include "sysdeps.h"
 #include "config.h"
 #include "menu.h"
-#ifdef __PSP2__
+#if defined(__PSP2__) // NOT __SWITCH__
 #include <unistd.h>
 #include "psp2-dirent.h"
 #else
+#ifndef __SWITCH__
 #include <sys/mman.h>
+#endif
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
@@ -29,7 +31,7 @@
 	#define PATH_MAX 256
 #endif
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
 #endif
 
@@ -57,7 +59,7 @@ static int min_in_dir=0, max_in_dir=SHOW_MAX_FILES;
 extern int current_drive;
 extern int current_hdf;
 
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 #ifdef PANDORA
 static int scandir_cmp(const void *p1, const void *p2)
 {
@@ -119,7 +121,7 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	r.x=80-64; r.y=0; r.w=150-24+64+64; r.h=240;
 	text_draw_background();
 	if (menu_load_type == MENU_LOAD_HD_DIR)
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 		text_draw_window(2,2,41,25,"  Press SELECT to load HD-dir  ");
 #else
 		text_draw_window(2,2,41,25,"  Press L-key to load HD-dir  ");
@@ -175,7 +177,7 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	b++;
 }
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 static int cmpDirentString(const void *first, const void *second)
 {
 	dirent *direntA = *(dirent * const *) first;
@@ -219,7 +221,8 @@ static int menuLoadLoop(char *curr_path)
 	min_in_dir=0;
 	max_in_dir=SHOW_MAX_FILES;
 
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
+#if !defined(__SWITCH__)
 	if(strcmp(curr_path, "/") == 0 || curr_path[0] == 0) 
 	{
 		struct dirent *ent = NULL;
@@ -228,16 +231,22 @@ static int menuLoadLoop(char *curr_path)
 		namelist[0] = (struct dirent *)malloc(sizeof(struct dirent));
 		strcpy(namelist[0]->d_name, ".");
 		namelist[0]->d_type = DT_DIR; n++;
+#if defined(__SWITCH__)
+		namelist[1] = (struct dirent *)malloc(sizeof(struct dirent));
+		strcpy(namelist[1]->d_name, "sdmc:");
+		namelist[1]->d_type = DT_DIR; n++;
+#else
 		namelist[1] = (struct dirent *)malloc(sizeof(struct dirent));
 		strcpy(namelist[1]->d_name, "ux0:");
 		namelist[1]->d_type = DT_DIR; n++;
 		namelist[2] = (struct dirent *)malloc(sizeof(struct dirent));
 		strcpy(namelist[2]->d_name, "uma0:");
 		namelist[2]->d_type = DT_DIR; n++;
-
+#endif
 		curr_path[0] == 0;
 	}
 	else
+#endif
 	{
 		if ((dir = opendir(curr_path)) == NULL)
 		{
@@ -345,13 +354,13 @@ static int menuLoadLoop(char *curr_path)
 					case SDLK_PAGEDOWN: hit0=1; break;
 					case SDLK_HOME: hit0=1; break;
 					case SDLK_LALT: hit1=1; break;
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 					case SDLK_LCTRL: hit2=1; break;
 #endif
 					case SDLK_RSHIFT: hit3=1; break;
 					case SDLK_RCTRL: hit4=1; break;
 					case SDLK_END: hit0=1; break;
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 					case SDLK_LCTRL: hitL=1; break;
 #else
 					case SDLK_PAGEUP: hit0=1; break;
@@ -443,6 +452,10 @@ static int menuLoadLoop(char *curr_path)
 						{
 							strcpy(newdir, "ux0:/");
 						}
+						//else if (strcmp(namelist[sel+1]->d_name, "sdmc:") == 0)
+						//{
+						//	strcpy(newdir, "sdmc:/");
+						//}
 						else 
 						{
 							strcpy(newdir, curr_path);
@@ -477,7 +490,7 @@ static void raise_loadMenu()
 
 	text_draw_background();
 	text_flip();
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -490,7 +503,7 @@ static void raise_loadMenu()
 static void unraise_loadMenu()
 {
 	int i;
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();

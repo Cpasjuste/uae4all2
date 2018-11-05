@@ -7,7 +7,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#ifndef __SWITCH__
 #include <semaphore.h>
+#endif
 #include <pthread.h>
 #include <errno.h>
 
@@ -117,15 +119,24 @@ static void sound_thread_mixer(void *ud, Uint8 *stream, int len)
 #endif
 	cnt++;
 	//__android_log_print(ANDROID_LOG_INFO, "UAE4ALL2","Sound callback cnt %d buf %d\n", cnt, cnt%SOUND_BUFFERS_COUNT);
+#ifdef __SWITCH__
+	memcpy(stream, sndbuffer[cnt%SOUND_BUFFERS_COUNT], MIN(SNDBUFFER_LEN*2, len));
+#else
 	if(mainMenu_soundStereo)
 		memcpy(stream, sndbuffer[cnt%SOUND_BUFFERS_COUNT], MIN(SNDBUFFER_LEN*2, len));
 	else
 	  	memcpy(stream, sndbuffer[cnt%SOUND_BUFFERS_COUNT], MIN(SNDBUFFER_LEN, len));
-
+#endif
 }
 
 static int gp2x_start_sound(int rate, int bits, int stereo)
 {
+#ifdef __SWITCH__
+	// only stereo, 48kHz supported on Switch
+	stereo = 1;
+	rate = 48000;
+#endif
+	
 	int frag = 0, buffers, ret;
 	unsigned int bsize;
 	static int audioOpened = 0;
@@ -145,7 +156,7 @@ static int gp2x_start_sound(int rate, int bits, int stereo)
 
 	if( audioOpened ) {
 		// __android_log_print(ANDROID_LOG_INFO, "UAE4ALL2", "UAE tries to open SDL sound device 2 times, ignoring that.");
-#ifdef __PSP2__
+#if defined(__PSP2__) || defined(__SWITCH__)
 		//this allows the user to change sound settings on the fly
 		//without having to save config and restart
 		//safely stop sound
@@ -167,10 +178,14 @@ static int gp2x_start_sound(int rate, int bits, int stereo)
 	as.freq = rate;
 	as.format = (bits == 8 ? AUDIO_S8 : AUDIO_S16);
 	as.channels = (stereo ? 2 : 1);
+#ifdef __SWITCH__
+	  as.samples = SNDBUFFER_LEN*2 / as.channels / 2;
+#else
 	if(mainMenu_soundStereo)
 	  as.samples = SNDBUFFER_LEN*2 / as.channels / 2;
 	else
 	  as.samples = SNDBUFFER_LEN / as.channels / 2;
+#endif
 	as.callback = sound_thread_mixer;
 	SDL_OpenAudio(&as, NULL);
 	audioOpened = 1;

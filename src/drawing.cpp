@@ -59,7 +59,7 @@
 
 #define GFXVIDINFO_PIXBYTES 2
 //#define GFXVIDINFO_WIDTH 320
-//#ifdef __PSP2__
+//#if defined(__PSP2__) || defined(__SWITCH__)
 //#define GFXVIDINFO_HEIGHT 240
 //#else
 #define GFXVIDINFO_HEIGHT 270
@@ -2320,7 +2320,7 @@ void vsync_handle_redraw (int long_frame, int lof_changed)
 			custom_prepare_savestate ();
 			savestate_state = STATE_SAVE;
 			pause_sound();
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 			save_thumb(SCREENSHOT, screenshot_filename);
 #endif
 			save_state (savestate_filename, "Description!");

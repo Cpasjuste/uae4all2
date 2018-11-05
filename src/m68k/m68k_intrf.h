@@ -16,7 +16,7 @@ void m68k_go(int may_quit);
 
 
 #include "m68k/fame/fame.h"
-#ifndef __PSP2__
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 #include "memory.h"
 #endif
 

@@ -2,6 +2,10 @@
 #define VKBD_H
 #include<SDL.h>
 
+#ifdef USE_SDL2
+#include "sdl2_to_sdl1.h"
+#endif
+
 #define VKBD_X 20
 #define VKBD_Y 200
 

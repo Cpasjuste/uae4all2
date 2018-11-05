@@ -98,6 +98,21 @@
 #undef s32
 #endif
 
+#ifdef __64BIT__
+#define u8	uint8_t
+#define s8	int8_t
+#define u16	uint16_t
+#define s16	int16_t
+#define u32	uint32_t
+#define s32	int32_t
+
+#define u64 uint64_t
+#define s64 int64_t
+
+#define hostptr u64
+
+#else
+
 #define u8	unsigned char
 #define s8	signed char
 #define u16	unsigned short
@@ -108,6 +123,8 @@
 #define u64 unsigned long long
 #define s64 long long
 
+#define hostptr u32
+#endif
 
 /* M68K registers */
 typedef enum {
@@ -148,7 +165,7 @@ typedef struct
 {
 	famec_union32   dreg[8];
 	famec_union32   areg[8];
-	u32 *icust_handler;
+	hostptr *icust_handler;
 	u32 usp;
 	u32 pc;
 	u32 cycles_counter;
@@ -171,8 +188,8 @@ typedef struct
   u32 flag_m;
   u32 flag_t;
   u16 *_pc;
-  u32 basepc;
-  u32 fetch[256];
+  hostptr basepc;
+  hostptr fetch[256];
   s32 more_cycles_to_do;
   s32 cycles_not_done;
   s32 io_cycle_counter;
@@ -195,7 +212,7 @@ int      m68k_fetch(unsigned address);
 
 /* CPU context handling functions */
 M68K_CONTEXT *m68k_get_context(void);
-void famec_SetBank(u32 low_addr, u32 high_addr, u32 fetch, void *rb, void *rw, void *wb, void *ww, void *data);
+void famec_SetBank(u32 low_addr, u32 high_addr, hostptr fetch, void *rb, void *rw, void *wb, void *ww, void *data);
 int  m68k_set_register(m68k_register reg, unsigned value);
 
 /* Timing functions */

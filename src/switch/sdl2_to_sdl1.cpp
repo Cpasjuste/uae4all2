@@ -3,7 +3,15 @@
 
 static SDL_Window* window = NULL;
 static SDL_Texture* texture = NULL;
+static SDL_Texture* prescaled = NULL;
 static SDL_Renderer* renderer = NULL;
+int prescale_factor_x = 1;
+int prescale_factor_y = 1;
+int prescaled_width = 320;
+int prescaled_height = 240;
+int surface_width = 320;
+int surface_height = 240;
+
 static int x_offset;
 static int y_offset;
 static int scaled_height;
@@ -22,7 +30,7 @@ extern int displaying_menu;
 SDL_Surface *SDL_SetVideoMode(int w, int h, int bpp, int flags) {
 	if (!renderer) {
 		window = SDL_CreateWindow("uae4all2", 0, 0, 0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP);
-		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 		SDL_RenderClear(renderer);
 		SDL_DisplayMode DM;
 		SDL_GetCurrentDisplayMode(0, &DM);
@@ -30,11 +38,8 @@ SDL_Surface *SDL_SetVideoMode(int w, int h, int bpp, int flags) {
 		display_height = DM.h;
 	}
 	SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormat(0, w, h, 16, SDL_PIXELFORMAT_RGB565);
-	//if (texture) {
-	//	SDL_DestroyTexture(texture);
-	//	texture = NULL;
-	//}
-	//texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+	surface_width = w;
+	surface_height = h;
 	return surface;
 }
 
@@ -60,10 +65,22 @@ void SDL_SetVideoModeScaling(int x, int y, float sw, float sh) {
 		x_offset = (display_width - scaled_width) / 2;
 		y_offset = (display_height - scaled_height) / 2;
 	}
+	if (prescaled) {
+		SDL_DestroyTexture(prescaled);
+		prescaled = NULL;
+	}
+	if (mainMenu_shader == 1) {
+		prescale_factor_x = scaled_width / surface_width;
+		prescale_factor_y = scaled_height / surface_height;
+		prescaled_width = prescale_factor_x * surface_width;
+		prescaled_height = prescale_factor_y * surface_height;
+		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+		prescaled = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, prescaled_width, prescaled_height);
+	}
 }
 
 void SDL_SetVideoModeBilinear(int value) {
-	if (value)
+	if (value && (mainMenu_shader != 3)) // no linear filtering when shader = SHADER_POINT
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 	else
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
@@ -78,24 +95,32 @@ void SDL_SetVideoModeSync(int value) {
 
 void SDL_Flip(SDL_Surface *surface) {
 	if (surface && renderer && window) {
-		//SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
-		Uint32 *texture_pixels = NULL;
-		int texture_pitch;
-		Uint32 texture_format;
-		//SDL_QueryTexture(texture, &texture_format, NULL, NULL, NULL);
-		//SDL_LockTexture(texture, NULL, (void **) texture_pixels, &texture_pitch);
-		//SDL_ConvertPixels(surface->w, surface->h, surface->format->format, surface->pixels, surface->pitch, texture_format, texture_pixels, texture_pitch);
-		//SDL_UnlockTexture(texture);
 		if (texture) {
 			SDL_DestroyTexture(texture);
 			texture = NULL;
 		}
-		texture = SDL_CreateTextureFromSurface(renderer, surface);
+		if (mainMenu_shader == 1 && !displaying_menu) {
+			SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+			texture = SDL_CreateTextureFromSurface(renderer, surface);
+			
+			SDL_SetRenderTarget(renderer, prescaled);
+			SDL_Rect dst_rect_prescale = { 0, 0, prescaled_width, prescaled_height };
+			SDL_Rect *src_rect_prescale = NULL;
+			SDL_RenderCopy(renderer, texture, src_rect_prescale, &dst_rect_prescale);
 
-		SDL_Rect dst_rect = { x_offset, y_offset, scaled_width, scaled_height };
-		SDL_Rect *src_rect = NULL;
-		SDL_RenderCopy(renderer, texture, src_rect, &dst_rect);
-		SDL_RenderPresent(renderer);
+			SDL_SetRenderTarget(renderer, NULL);
+			SDL_Rect dst_rect = { x_offset, y_offset, scaled_width , scaled_height };
+			SDL_Rect *src_rect = NULL;
+			SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+			SDL_RenderCopy(renderer, prescaled, src_rect, &dst_rect);
+			SDL_RenderPresent(renderer);
+		} else {
+			texture = SDL_CreateTextureFromSurface(renderer, surface);
+			SDL_Rect dst_rect = { x_offset, y_offset, scaled_width, scaled_height };
+			SDL_Rect *src_rect = NULL;
+			SDL_RenderCopy(renderer, texture, src_rect, &dst_rect);
+			SDL_RenderPresent(renderer);
+		}
 	}
 }
 #endif

@@ -2,7 +2,9 @@
 #ifdef USE_SDL2
 #include "sdl2_to_sdl1.h"
 #endif
-
+#ifdef __SWITCH__
+extern int mainMenu_swapAB;
+#endif
 extern int inside_menu;
 
 SDLKey getKey(Uint8 button) {
@@ -28,9 +30,19 @@ SDLKey getKey(Uint8 button) {
 		return SDLK_LCTRL;
 
 		case PAD_CROSS:
+#ifdef __SWITCH__
+		if (mainMenu_swapAB) {
+			return SDLK_END;
+		}
+#endif
 		return SDLK_PAGEDOWN;
 
 		case PAD_CIRCLE:
+#ifdef __SWITCH__
+		if (mainMenu_swapAB) {
+			return SDLK_PAGEDOWN;
+		}
+#endif
 		return SDLK_END;
 
 		case PAD_TRIANGLE:

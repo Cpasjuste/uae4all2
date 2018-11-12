@@ -77,6 +77,9 @@ enum {
 #if !defined(__PSP2__) && !defined(__SWITCH__) // No stylus on Vita
 	MENUMISC_STYLUSOFFSET,
 #endif
+#ifdef __SWITCH__
+	MENUMISC_SWAPAB,
+#endif
 #if defined(__PSP2__) || defined(__SWITCH__)
 	MENUMISC_DEADZONE,
 	MENUMISC_TOUCHCONTROLS,
@@ -381,6 +384,14 @@ static void draw_miscMenu(int c)
 		case 6:
 			strcpy(tmpString,"R");
 			break;
+#ifdef __SWITCH__
+		case 7:
+			strcpy(tmpString,"ZL");
+			break;
+		case 8:
+			strcpy(tmpString,"ZR");
+			break;
+#endif
 	}
 	if ((menuMisc!=MENUMISC_CUSTOMAUTOFIREBUTTON)||(bb))
 		write_text_inv(tabstop6,menuLine,tmpString);
@@ -434,6 +445,25 @@ static void draw_miscMenu(int c)
 	else
 		write_text(tabstop2,menuLine,cpuSpeed);
 
+#ifdef __SWITCH__
+	// MENUMISC_SWAPAB
+	write_text(tabstop6-2,menuLine,"Menu OK");
+	if (mainMenu_swapAB==0)
+	{
+		if ((menuMisc!=MENUMISC_SWAPAB)||(bb))
+			write_text_inv(tabstop9,menuLine,"B Btn.");
+		else
+			write_text(tabstop9,menuLine,"B Btn. ");
+	}
+	else if (mainMenu_swapAB==1)
+	{
+		if ((menuMisc!=MENUMISC_SWAPAB)||(bb))
+			write_text_inv(tabstop9,menuLine,"A Btn.");
+		else
+			write_text(tabstop9,menuLine,"A Btn. ");
+	}
+#endif
+
 #if !defined(__PSP2__) && !defined(__SWITCH__)
 	// MENUMISC_STYLUSOFFSET
 	menuLine+=2;
@@ -481,30 +511,30 @@ static void draw_miscMenu(int c)
 	if (mainMenu_touchControls==0)
 	{
 		if ((menuMisc!=MENUMISC_TOUCHCONTROLS)||(bb))
-			write_text_inv(tabstop9-1,menuLine,"Off");
+			write_text_inv(tabstop9,menuLine,"Off");
 		else
-			write_text(tabstop9-1,menuLine,"Off  ");
+			write_text(tabstop9,menuLine,"Off  ");
 	}
 	else if (mainMenu_touchControls==1)
 	{
 		if ((menuMisc!=MENUMISC_TOUCHCONTROLS)||(bb))
-			write_text_inv(tabstop9-1,menuLine,"Front");
+			write_text_inv(tabstop9,menuLine,"Front");
 		else
-			write_text(tabstop9-1,menuLine,"Front  ");
+			write_text(tabstop9,menuLine,"Front  ");
 	}
 	else if (mainMenu_touchControls==2)
 	{
 		if ((menuMisc!=MENUMISC_TOUCHCONTROLS)||(bb))
 #ifdef __SWITCH__
-			write_text_inv(tabstop9-1,menuLine,"Front");
+			write_text_inv(tabstop9,menuLine,"Front");
 #else
-			write_text_inv(tabstop9-1,menuLine,"Both");
+			write_text_inv(tabstop9,menuLine,"Both");
 #endif
 		else
 #ifdef __SWITCH__
-			write_text(tabstop9-1,menuLine,"Front  ");
+			write_text(tabstop9,menuLine,"Front  ");
 #else
-			write_text(tabstop9-1,menuLine,"Both  ");
+			write_text(tabstop9,menuLine,"Both  ");
 #endif
 	}
 
@@ -762,6 +792,12 @@ static int key_miscMenu(int *c)
 				}
 				break;
 #endif
+#ifdef __SWITCH__
+				case MENUMISC_SWAPAB:
+					if (left || right)
+						mainMenu_swapAB = !mainMenu_swapAB;
+				break;
+#endif
 #endif
 
 #ifdef ANDROIDSDL
@@ -833,10 +869,17 @@ static int key_miscMenu(int *c)
 				}
 				else if (right)
 				{
+#ifdef __SWITCH__
+					if (mainMenu_customAutofireButton < 8)
+						mainMenu_customAutofireButton++;
+					else
+						mainMenu_customAutofireButton=8;
+#else
 					if (mainMenu_customAutofireButton < 6)
 						mainMenu_customAutofireButton++;
 					else
 						mainMenu_customAutofireButton=6;
+#endif
 				}
 				break;
 #endif

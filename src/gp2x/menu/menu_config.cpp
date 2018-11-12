@@ -89,6 +89,12 @@ int mainMenu_custom_X[4] = {0,0,0,0};
 int mainMenu_custom_Y[4] = {0,0,0,0};
 int mainMenu_custom_L[4] = {0,0,0,0};
 int mainMenu_custom_R[4] = {0,0,0,0};
+#ifdef __SWITCH__
+int mainMenu_custom_L2[4] = {0,0,0,0};
+int mainMenu_custom_R2[4] = {0,0,0,0};
+int mainMenu_custom_L3[4] = {0,0,0,0};
+int mainMenu_custom_R3[4] = {0,0,0,0};
+#endif
 #if defined(__PSP2__) || defined(__SWITCH__)
 int mainMenu_custom_controlSet = 0; //This controls which custom config is used
 int mainMenu_custom1_up[4] = {0,0,0,0};
@@ -101,6 +107,12 @@ int mainMenu_custom1_X[4] = {0,0,0,0};
 int mainMenu_custom1_Y[4] = {0,0,0,0};
 int mainMenu_custom1_L[4] = {0,0,0,0};
 int mainMenu_custom1_R[4] = {0,0,0,0};
+#ifdef __SWITCH__
+int mainMenu_custom1_L2[4] = {0,0,0,0};
+int mainMenu_custom1_R2[4] = {0,0,0,0};
+int mainMenu_custom1_L3[4] = {0,0,0,0};
+int mainMenu_custom1_R3[4] = {0,0,0,0};
+#endif
 int mainMenu_custom2_up[4] = {0,0,0,0};
 int mainMenu_custom2_down[4] = {0,0,0,0};
 int mainMenu_custom2_left[4] = {0,0,0,0};
@@ -111,6 +123,12 @@ int mainMenu_custom2_X[4] = {0,0,0,0};
 int mainMenu_custom2_Y[4] = {0,0,0,0};
 int mainMenu_custom2_L[4] = {0,0,0,0};
 int mainMenu_custom2_R[4] = {0,0,0,0};
+#ifdef __SWITCH__
+int mainMenu_custom2_L2[4] = {0,0,0,0};
+int mainMenu_custom2_R2[4] = {0,0,0,0};
+int mainMenu_custom2_L3[4] = {0,0,0,0};
+int mainMenu_custom2_R3[4] = {0,0,0,0};
+#endif
 int mainMenu_custom3_up[4] = {0,0,0,0};
 int mainMenu_custom3_down[4] = {0,0,0,0};
 int mainMenu_custom3_left[4] = {0,0,0,0};
@@ -121,6 +139,12 @@ int mainMenu_custom3_X[4] = {0,0,0,0};
 int mainMenu_custom3_Y[4] = {0,0,0,0};
 int mainMenu_custom3_L[4] = {0,0,0,0};
 int mainMenu_custom3_R[4] = {0,0,0,0};
+#ifdef __SWITCH__
+int mainMenu_custom3_L2[4] = {0,0,0,0};
+int mainMenu_custom3_R2[4] = {0,0,0,0};
+int mainMenu_custom3_L3[4] = {0,0,0,0};
+int mainMenu_custom3_R3[4] = {0,0,0,0};
+#endif
 #endif
 int mainMenu_autofire = DEFAULT_AUTOFIRE;
 
@@ -147,6 +171,9 @@ int mainMenu_shader = 5;
 int mainMenu_leftStickMouse = 0;
 int mainMenu_touchControls = 1;
 int mainMenu_deadZone = 1000;
+#endif
+#ifdef __SWITCH__
+int mainMenu_swapAB = DEFAULT_SWAPAB;
 #endif
 
 // The following params in use, but can't be changed with gui
@@ -265,6 +292,12 @@ void SetDefaultMenuSettings(int general)
 		 mainMenu_custom_Y[i] = 0;
 		 mainMenu_custom_L[i] = 0;
 		 mainMenu_custom_R[i] = 0;
+#ifdef __SWITCH__
+		 mainMenu_custom_L2[i] = 0;
+		 mainMenu_custom_R2[i] = 0;
+		 mainMenu_custom_L3[i] = 0;
+		 mainMenu_custom_R3[i] = 0;
+#endif
 	}
 #if defined(__PSP2__) || defined(__SWITCH__)
 	 mainMenu_custom_controlSet = 0;
@@ -280,6 +313,12 @@ void SetDefaultMenuSettings(int general)
 		 mainMenu_custom1_Y[i] = 0;
 		 mainMenu_custom1_L[i] = 0;
 		 mainMenu_custom1_R[i] = 0;
+#ifdef __SWITCH__
+		 mainMenu_custom1_L2[i] = 0;
+		 mainMenu_custom1_R2[i] = 0;
+		 mainMenu_custom1_L3[i] = 0;
+		 mainMenu_custom1_R3[i] = 0;
+#endif
 		 mainMenu_custom2_up[i] = 0;
 		 mainMenu_custom2_down[i] = 0;
 		 mainMenu_custom2_left[i] = 0;
@@ -290,6 +329,12 @@ void SetDefaultMenuSettings(int general)
 		 mainMenu_custom2_Y[i] = 0;
 		 mainMenu_custom2_L[i] = 0;
 		 mainMenu_custom2_R[i] = 0;
+#ifdef __SWITCH__
+		 mainMenu_custom2_L2[i] = 0;
+		 mainMenu_custom2_R2[i] = 0;
+		 mainMenu_custom2_L3[i] = 0;
+		 mainMenu_custom2_R3[i] = 0;
+#endif
 		 mainMenu_custom3_up[i] = 0;
 		 mainMenu_custom3_down[i] = 0;
 		 mainMenu_custom3_left[i] = 0;
@@ -300,6 +345,13 @@ void SetDefaultMenuSettings(int general)
 		 mainMenu_custom3_Y[i] = 0;
 		 mainMenu_custom3_L[i] = 0;
 		 mainMenu_custom3_R[i] = 0;
+#ifdef __SWITCH__
+		 mainMenu_custom3_L2[i] = 0;
+		 mainMenu_custom3_R2[i] = 0;
+		 mainMenu_custom3_L3[i] = 0;
+		 mainMenu_custom3_R3[i] = 0;
+#endif
+
 	}
 #endif //__PSP2__
     SetPresetMode(2);
@@ -322,7 +374,9 @@ void SetDefaultMenuSettings(int general)
     mainMenu_touchControls = 1;
     mainMenu_deadZone = 1000;
 #endif
-
+#ifdef __SWITCH__
+    mainMenu_swapAB = DEFAULT_SWAPAB;
+#endif
     // The following params can't be changed in gui
     skipintro = DEFAULT_SKIPINTRO;
     mainMenu_autosave = DEFAULT_AUTOSAVE;
@@ -1088,6 +1142,16 @@ int saveconfig(int general)
 		 fputs(buffer,f);
 		 snprintf((char*)buffer, 255, "custom1_R_Ply%d=%d\n",i,mainMenu_custom1_R[i]);
 		 fputs(buffer,f);
+#ifdef __SWITCH__
+		 snprintf((char*)buffer, 255, "custom1_L2_Ply%d=%d\n",i,mainMenu_custom1_L2[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom1_R2_Ply%d=%d\n",i,mainMenu_custom1_R2[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom1_L3_Ply%d=%d\n",i,mainMenu_custom1_L3[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom1_R3_Ply%d=%d\n",i,mainMenu_custom1_R3[i]);
+		 fputs(buffer,f);
+#endif
 		 snprintf((char*)buffer, 255, "custom2_up_Ply%d=%d\n",i,mainMenu_custom2_up[i]);
 		 fputs(buffer,f);
 		 snprintf((char*)buffer, 255, "custom2_down_Ply%d=%d\n",i,mainMenu_custom2_down[i]);
@@ -1108,6 +1172,16 @@ int saveconfig(int general)
 		 fputs(buffer,f);
 		 snprintf((char*)buffer, 255, "custom2_R_Ply%d=%d\n",i,mainMenu_custom2_R[i]);
 		 fputs(buffer,f);
+#ifdef __SWITCH__
+		 snprintf((char*)buffer, 255, "custom2_L2_Ply%d=%d\n",i,mainMenu_custom2_L2[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom2_R2_Ply%d=%d\n",i,mainMenu_custom2_R2[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom2_L3_Ply%d=%d\n",i,mainMenu_custom2_L3[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom2_R3_Ply%d=%d\n",i,mainMenu_custom2_R3[i]);
+		 fputs(buffer,f);
+#endif
 		 snprintf((char*)buffer, 255, "custom3_up_Ply%d=%d\n",i,mainMenu_custom3_up[i]);
 		 fputs(buffer,f);
 		 snprintf((char*)buffer, 255, "custom3_down_Ply%d=%d\n",i,mainMenu_custom3_down[i]);
@@ -1128,6 +1202,16 @@ int saveconfig(int general)
 		 fputs(buffer,f);
 		 snprintf((char*)buffer, 255, "custom3_R_Ply%d=%d\n",i,mainMenu_custom3_R[i]);
 		 fputs(buffer,f);
+#ifdef __SWITCH__
+		 snprintf((char*)buffer, 255, "custom3_L2_Ply%d=%d\n",i,mainMenu_custom3_L2[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom3_R2_Ply%d=%d\n",i,mainMenu_custom3_R2[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom3_L3_Ply%d=%d\n",i,mainMenu_custom3_L3[i]);
+		 fputs(buffer,f);
+		 snprintf((char*)buffer, 255, "custom3_R3_Ply%d=%d\n",i,mainMenu_custom3_R3[i]);
+		 fputs(buffer,f);
+#endif
 	 }
 #endif
     snprintf((char*)buffer, 255, "cpu=%d\n",mainMenu_CPU_model);
@@ -1279,7 +1363,10 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "useSavesFolder=%d\n",mainMenu_useSavesFolder);
     fputs(buffer,f);
-
+#ifdef __SWITCH__
+    snprintf((char*)buffer, 255, "swapAB=%d\n",mainMenu_swapAB);
+    fputs(buffer,f);
+#endif
     fclose(f);
     return 1;
 }
@@ -1361,7 +1448,7 @@ void loadconfig(int general)
 #if defined(__PSP2__) || defined(__SWITCH__)
         fscanf(f,"shader=%d\n",&mainMenu_shader);
 #if defined(__SWITCH__)
-        if (mainMenu_shader > 1) mainMenu_shader = 1;
+        if (mainMenu_shader > 3) mainMenu_shader = 1;
 #endif
         fscanf(f,"leftstickmouse=%d\n",&mainMenu_leftStickMouse);
         fscanf(f,"touchcontrols=%d\n",&mainMenu_touchControls);
@@ -1447,6 +1534,7 @@ void loadconfig(int general)
         fscanf(f,"custom_R=%d\n",&mainMenu_custom_R[0]);
 #else
 		  fscanf(f,"custom_controlSet=%d\n",&mainMenu_custom_controlSet);
+        int config_1_73 = -1;
         for (int i=0; i<4; i++)
         {
 			  int j;
@@ -1460,7 +1548,30 @@ void loadconfig(int general)
 			  fscanf(f,"custom1_Y_Ply%d=%d\n",&j,&mainMenu_custom1_Y[i]);
 			  fscanf(f,"custom1_L_Ply%d=%d\n",&j,&mainMenu_custom1_L[i]);
 			  fscanf(f,"custom1_R_Ply%d=%d\n",&j,&mainMenu_custom1_R[i]);
+#ifdef __SWITCH__
+				if (config_1_73 > 0) {
+					fscanf(f,"custom1_L2_Ply%d=%d\n",&j,&mainMenu_custom1_L2[i]);
+					fscanf(f,"custom1_R2_Ply%d=%d\n",&j,&mainMenu_custom1_R2[i]);
+					fscanf(f,"custom1_L3_Ply%d=%d\n",&j,&mainMenu_custom1_L3[i]);
+					fscanf(f,"custom1_R3_Ply%d=%d\n",&j,&mainMenu_custom1_R3[i]);
+					fscanf(f,"custom2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
+				} else if (config_1_73 == 0) {
+					fscanf(f,"custom2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
+				} else if (config_1_73 < 0) {
+					if (fscanf(f,"custom1_L2_Ply%d=%d\n",&j,&mainMenu_custom1_L2[i])) {
+						fscanf(f,"custom1_R2_Ply%d=%d\n",&j,&mainMenu_custom1_R2[i]);
+    					fscanf(f,"custom1_L3_Ply%d=%d\n",&j,&mainMenu_custom1_L3[i]);
+    					fscanf(f,"custom1_R3_Ply%d=%d\n",&j,&mainMenu_custom1_R3[i]);
+						fscanf(f,"custom2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
+						config_1_73 = 1;
+					} else {
+						fscanf(f,"2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
+						config_1_73 = 0;
+					}
+				}
+#else
 			  fscanf(f,"custom2_up_Ply%d=%d\n",&j,&mainMenu_custom2_up[i]);
+#endif
 			  fscanf(f,"custom2_down_Ply%d=%d\n",&j,&mainMenu_custom2_down[i]);
 			  fscanf(f,"custom2_left_Ply%d=%d\n",&j,&mainMenu_custom2_left[i]);
 			  fscanf(f,"custom2_right_Ply%d=%d\n",&j,&mainMenu_custom2_right[i]);
@@ -1470,6 +1581,14 @@ void loadconfig(int general)
 			  fscanf(f,"custom2_Y_Ply%d=%d\n",&j,&mainMenu_custom2_Y[i]);
 			  fscanf(f,"custom2_L_Ply%d=%d\n",&j,&mainMenu_custom2_L[i]);
 			  fscanf(f,"custom2_R_Ply%d=%d\n",&j,&mainMenu_custom2_R[i]);
+#ifdef __SWITCH__
+			  if (config_1_73 != 0) {
+				  fscanf(f,"custom2_L2_Ply%d=%d\n",&j,&mainMenu_custom2_L2[i]);
+				  fscanf(f,"custom2_R2_Ply%d=%d\n",&j,&mainMenu_custom2_R2[i]);
+				  fscanf(f,"custom2_L3_Ply%d=%d\n",&j,&mainMenu_custom2_L3[i]);
+				  fscanf(f,"custom2_R3_Ply%d=%d\n",&j,&mainMenu_custom2_R3[i]);
+			  }
+#endif
 			  fscanf(f,"custom3_up_Ply%d=%d\n",&j,&mainMenu_custom3_up[i]);
 			  fscanf(f,"custom3_down_Ply%d=%d\n",&j,&mainMenu_custom3_down[i]);
 			  fscanf(f,"custom3_left_Ply%d=%d\n",&j,&mainMenu_custom3_left[i]);
@@ -1480,6 +1599,14 @@ void loadconfig(int general)
 			  fscanf(f,"custom3_Y_Ply%d=%d\n",&j,&mainMenu_custom3_Y[i]);
 			  fscanf(f,"custom3_L_Ply%d=%d\n",&j,&mainMenu_custom3_L[i]);
 			  fscanf(f,"custom3_R_Ply%d=%d\n",&j,&mainMenu_custom3_R[i]);
+#ifdef __SWITCH__
+			  if (config_1_73 != 0) {
+				  fscanf(f,"custom3_L2_Ply%d=%d\n",&j,&mainMenu_custom3_L2[i]);
+				  fscanf(f,"custom3_R2_Ply%d=%d\n",&j,&mainMenu_custom3_R2[i]);
+				  fscanf(f,"custom3_L3_Ply%d=%d\n",&j,&mainMenu_custom3_L3[i]);
+				  fscanf(f,"custom3_R3_Ply%d=%d\n",&j,&mainMenu_custom3_R3[i]);
+			  }
+#endif
 			}
 			remap_custom_controls(); // update the custom variables with the appropriate set.
 #endif //__PSP2__
@@ -1599,11 +1726,8 @@ void loadconfig(int general)
             }
             if (uae4all_hard_file3[0] == '*')
                 uae4all_hard_file3[0] = '\0';
-            fscanf(f,"chipmemory=%d\n",&mainMenu_chipMemory);
         }
-        else {
-            fscanf(f,"hipmemory=%d\n",&mainMenu_chipMemory);
-        }
+        fscanf(f,"chipmemory=%d\n",&mainMenu_chipMemory);
         fscanf(f,"slowmemory=%d\n",&mainMenu_slowMemory);
         fscanf(f,"fastmemory=%d\n",&mainMenu_fastMemory);
 #ifdef ANDROIDSDL
@@ -1647,6 +1771,9 @@ void loadconfig(int general)
             strcpy(custom_kickrom, filebuffer);
         }
         fscanf(f,"useSavesFolder=%d\n",&mainMenu_useSavesFolder);
+#ifdef __SWITCH__ 
+        fscanf(f,"swapAB=%d\n",&mainMenu_swapAB);
+#endif
         fclose(f);
     }
 // make sure the just-loaded mainMenu_displayedLines is not changed by setPresetMode

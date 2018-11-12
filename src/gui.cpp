@@ -70,6 +70,12 @@ int justPressedX[4]={0,0,0,0};
 int justPressedY[4]={0,0,0,0};
 int justPressedL[4]={0,0,0,0};
 int justPressedR[4]={0,0,0,0};
+#ifdef __SWITCH__
+int justPressedL2[4]={0,0,0,0};
+int justPressedR2[4]={0,0,0,0};
+int justPressedL3[4]={0,0,0,0};
+int justPressedR3[4]={0,0,0,0};
+#endif
 int justPressedQ=0;
 int stylusClickOverride=0;
 int stylusAdjustX=0, stylusAdjustY=0;
@@ -170,6 +176,12 @@ int buttonX[4]={0,0,0,0}; // Vita Cross, GP2X_BUTTON_X
 int buttonY[4]={0,0,0,0}; // Vita Triangle, GP2X_BUTTON_Y
 int triggerL[4]={0,0,0,0};
 int triggerR[4]={0,0,0,0};
+#ifdef __SWITCH__
+int triggerL2[4]={0,0,0,0};
+int triggerR2[4]={0,0,0,0};
+int triggerL3[4]={0,0,0,0};
+int triggerR3[4]={0,0,0,0};
+#endif
 int buttonSelect[4]={0,0,0,0};
 int buttonStart[4]={0,0,0,0};
 
@@ -196,6 +208,12 @@ void remap_custom_controls() // assign custom 1-3 to currently used custom set
 				mainMenu_custom_Y[i] = mainMenu_custom1_Y[i];
 				mainMenu_custom_L[i] = mainMenu_custom1_L[i];
 				mainMenu_custom_R[i] = mainMenu_custom1_R[i];
+#ifdef __SWITCH__
+				mainMenu_custom_L2[i] = mainMenu_custom1_L2[i];
+				mainMenu_custom_R2[i] = mainMenu_custom1_R2[i];
+				mainMenu_custom_L3[i] = mainMenu_custom1_L3[i];
+				mainMenu_custom_R3[i] = mainMenu_custom1_R3[i];
+#endif
 				break;
 			case 1:
 				mainMenu_custom_up[i] = mainMenu_custom2_up[i];
@@ -208,6 +226,12 @@ void remap_custom_controls() // assign custom 1-3 to currently used custom set
 				mainMenu_custom_Y[i] = mainMenu_custom2_Y[i];
 				mainMenu_custom_L[i] = mainMenu_custom2_L[i];
 				mainMenu_custom_R[i] = mainMenu_custom2_R[i];
+#ifdef __SWITCH__
+				mainMenu_custom_L2[i] = mainMenu_custom2_L2[i];
+				mainMenu_custom_R2[i] = mainMenu_custom2_R2[i];
+				mainMenu_custom_L3[i] = mainMenu_custom2_L3[i];
+				mainMenu_custom_R3[i] = mainMenu_custom2_R3[i];
+#endif
 				break;
 			case 2:
 				mainMenu_custom_up[i] = mainMenu_custom3_up[i];
@@ -220,6 +244,12 @@ void remap_custom_controls() // assign custom 1-3 to currently used custom set
 				mainMenu_custom_Y[i] = mainMenu_custom3_Y[i];
 				mainMenu_custom_L[i] = mainMenu_custom3_L[i];
 				mainMenu_custom_R[i] = mainMenu_custom3_R[i];
+#ifdef __SWITCH__
+				mainMenu_custom_L2[i] = mainMenu_custom3_L2[i];
+				mainMenu_custom_R2[i] = mainMenu_custom3_R2[i];
+				mainMenu_custom_L3[i] = mainMenu_custom3_L3[i];
+				mainMenu_custom_R3[i] = mainMenu_custom3_R3[i];
+#endif
 				break;
 			default:
 				break;
@@ -675,6 +705,12 @@ void gui_handle_events (void)
 		buttonY[i] = SDL_JoystickGetButton(currentJoy, PAD_TRIANGLE);
 		triggerL[i] = SDL_JoystickGetButton(currentJoy, PAD_L);
 		triggerR[i] = SDL_JoystickGetButton(currentJoy, PAD_R);
+#ifdef __SWITCH__
+		triggerL2[i] = SDL_JoystickGetButton(currentJoy, PAD_L2);
+		triggerR2[i] = SDL_JoystickGetButton(currentJoy, PAD_R2);
+		triggerL3[i] = SDL_JoystickGetButton(currentJoy, PAD_L3);
+		triggerR3[i] = SDL_JoystickGetButton(currentJoy, PAD_R3);
+#endif
 		buttonSelect[i] = SDL_JoystickGetButton(currentJoy, PAD_SELECT);
 		buttonStart[i] = SDL_JoystickGetButton(currentJoy, PAD_START);
 	}
@@ -709,6 +745,14 @@ void gui_handle_events (void)
 				case 6:
 					autoButton = &triggerR[i];
 					break;
+#ifdef __SWITCH__
+				case 7:
+					autoButton = &triggerL2[i];
+					break;
+				case 8:
+					autoButton = &triggerR2[i];
+					break;
+#endif
 			}
 			if (*autoButton)
 			{
@@ -1489,6 +1533,123 @@ if(!vkbd_mode)
 				}
 				justPressedR[i]=0;
 			}
+#ifdef __SWITCH__
+			//(L2)
+			if(triggerL2[i])
+			{
+				if(!justPressedL2[i])
+				{
+					if(mainMenu_custom_L2[i] == -1) buttonstate[0]=1;
+					else if(mainMenu_custom_L2[i] == -2) buttonstate[2]=1;
+					else if(mainMenu_custom_L2[i] > 0)
+					{
+						getMapping(mainMenu_custom_L2[i]);
+						uae4all_keystate[customKey] = 1;
+						record_key(customKey << 1);
+					}
+					justPressedL2[i]=1;
+				}
+			}
+			else if(justPressedL2[i])
+			{
+				if(mainMenu_custom_L2[i] == -1) buttonstate[0]=0;
+				else if(mainMenu_custom_L2[i] == -2) buttonstate[2]=0;
+				else if(mainMenu_custom_L2[i] > 0)
+				{		
+					getMapping(mainMenu_custom_L2[i]);
+					uae4all_keystate[customKey] = 0;
+					record_key((customKey << 1) | 1);
+				}
+				justPressedL2[i]=0;
+			}
+
+			//(R2)
+			if(triggerR2[i])
+			{
+				if(!justPressedR2[i])
+				{
+					if(mainMenu_custom_R2[i] == -1) buttonstate[0]=1;
+					else if(mainMenu_custom_R2[i] == -2) buttonstate[2]=1;
+					else if(mainMenu_custom_R2[i] > 0)
+					{
+						getMapping(mainMenu_custom_R2[i]);
+						uae4all_keystate[customKey] = 1;
+						record_key(customKey << 1);
+					}
+					justPressedR2[i]=1;
+				}
+			}
+			else if(justPressedR2[i])
+			{
+				if(mainMenu_custom_R2[i] == -1) buttonstate[0]=0;
+				else if(mainMenu_custom_R2[i] == -2) buttonstate[2]=0;
+				else if(mainMenu_custom_R2[i] > 0)
+				{		
+					getMapping(mainMenu_custom_R2[i]);
+					uae4all_keystate[customKey] = 0;
+					record_key((customKey << 1) | 1);
+				}
+				justPressedR2[i]=0;
+			}
+
+			//(L3)
+			if(triggerL3[i])
+			{
+				if(!justPressedL3[i])
+				{
+					if(mainMenu_custom_L3[i] == -1) buttonstate[0]=1;
+					else if(mainMenu_custom_L3[i] == -2) buttonstate[2]=1;
+					else if(mainMenu_custom_L3[i] > 0)
+					{
+						getMapping(mainMenu_custom_L3[i]);
+						uae4all_keystate[customKey] = 1;
+						record_key(customKey << 1);
+					}
+					justPressedL3[i]=1;
+				}
+			}
+			else if(justPressedL3[i])
+			{
+				if(mainMenu_custom_L3[i] == -1) buttonstate[0]=0;
+				else if(mainMenu_custom_L3[i] == -2) buttonstate[2]=0;
+				else if(mainMenu_custom_L3[i] > 0)
+				{		
+					getMapping(mainMenu_custom_L3[i]);
+					uae4all_keystate[customKey] = 0;
+					record_key((customKey << 1) | 1);
+				}
+				justPressedL3[i]=0;
+			}
+
+			//(R3)
+			if(triggerR3[i])
+			{
+				if(!justPressedR3[i])
+				{
+					if(mainMenu_custom_R3[i] == -1) buttonstate[0]=1;
+					else if(mainMenu_custom_R3[i] == -2) buttonstate[2]=1;
+					else if(mainMenu_custom_R3[i] > 0)
+					{
+						getMapping(mainMenu_custom_R3[i]);
+						uae4all_keystate[customKey] = 1;
+						record_key(customKey << 1);
+					}
+					justPressedR3[i]=1;
+				}
+			}
+			else if(justPressedR3[i])
+			{
+				if(mainMenu_custom_R3[i] == -1) buttonstate[0]=0;
+				else if(mainMenu_custom_R3[i] == -2) buttonstate[2]=0;
+				else if(mainMenu_custom_R3[i] > 0)
+				{		
+					getMapping(mainMenu_custom_R3[i]);
+					uae4all_keystate[customKey] = 0;
+					record_key((customKey << 1) | 1);
+				}
+				justPressedR3[i]=0;
+			}
+#endif
 		}
 	}//end of nr_joysticks loop
 	else if(!gp2xMouseEmuOn)

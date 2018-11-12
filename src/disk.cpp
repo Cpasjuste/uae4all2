@@ -81,6 +81,9 @@ static uae_u8 selected = 15, disabled=0;
 
 static uae_u8 writebuffer[544 * 22 * DDHDMULT];
 
+// delay increasing floppy speed for a little bit to prevent problems during boot
+static int newly_inserted_countdown = 100;
+
 typedef enum { TRACK_AMIGADOS, TRACK_RAW, TRACK_RAW1, TRACK_PCDOS } image_tracktype;
 typedef struct {
     uae_u32 offs;
@@ -380,6 +383,7 @@ static int drive_insert (drive *drv, int dnum, const char *fname)
     }
     drive_settype_id (drv);	/* Set DD or HD drive */
     drv->buffered_side = 2;	/* will force read */
+    newly_inserted_countdown = 100; // fix problems when booting with speed >1x
     drive_fill_bigbuf (drv);
     return 1;
 }
@@ -653,7 +657,12 @@ static void drive_fill_bigbuf (drive * drv)
     }
     drv->buffered_side = side;
     drv->buffered_cyl = drv->cyl;
-    drv->trackspeed = get_floppy_speed() * drv->tracklen / (2 * 8 * FLOPPY_WRITE_LEN);
+    if (newly_inserted_countdown) {
+        drv->trackspeed = NORMAL_FLOPPY_SPEED * drv->tracklen / (2 * 8 * FLOPPY_WRITE_LEN);
+        newly_inserted_countdown--;
+    } else {
+        drv->trackspeed = get_floppy_speed() * drv->tracklen / (2 * 8 * FLOPPY_WRITE_LEN);
+    }
 }
 
 /* Update ADF_EXT2 track header */

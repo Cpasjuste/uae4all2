@@ -156,7 +156,7 @@ static int gp2x_start_sound(int rate, int bits, int stereo)
 
 	if( audioOpened ) {
 		// __android_log_print(ANDROID_LOG_INFO, "UAE4ALL2", "UAE tries to open SDL sound device 2 times, ignoring that.");
-#if defined(__PSP2__) || defined(__SWITCH__)
+#if defined(__PSP2__)
 		//this allows the user to change sound settings on the fly
 		//without having to save config and restart
 		//safely stop sound
@@ -323,7 +323,10 @@ void pause_sound (void)
     dbg("sound.c : pause_sound");
 #endif
 
+#ifndef __SWITCH__
+	// not pausing/unpausing audio fixes savestates on Switch
 	SDL_PauseAudio (1);
+#endif
     /* nothing to do */
 
 #ifdef DEBUG_SOUND
@@ -337,7 +340,10 @@ void resume_sound (void)
     dbg("sound.c : resume_sound");
 #endif
 
+#ifndef __SWITCH__
+	// not pausing/unpausing audio fixes savestates on Switch
 	SDL_PauseAudio (0);
+#endif
     /* nothing to do */
 
 #ifdef DEBUG_SOUND

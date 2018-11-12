@@ -34,6 +34,10 @@ int PSP2_PollEvent(SDL_Event *event);
 #define PAD_START 10
 #define PAD_L 6
 #define PAD_R 7
+#define PAD_L2 8
+#define PAD_R2 9
+#define PAD_L3 4
+#define PAD_R3 5
 #endif
 
 #ifdef __cplusplus

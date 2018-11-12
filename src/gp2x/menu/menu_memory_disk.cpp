@@ -516,7 +516,9 @@ static int key_memDiskMenu(int *c)
 						else if (current_hdf==3)
 							make_hard_file_cfg_line(uae4all_hard_file3);
 						reset_hdConf();
-						loadconfig(2);
+						if (current_hdf == 0) {
+							loadconfig(2);
+						}
 					}
 				} else if (del) {
 					if (current_hdf==0)

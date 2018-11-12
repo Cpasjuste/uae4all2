@@ -47,6 +47,12 @@ extern int buttonX[4];
 extern int buttonY[4];
 extern int triggerL[4];
 extern int triggerR[4];
+#ifdef __SWITCH__
+extern int triggerL2[4];
+extern int triggerR2[4];
+extern int triggerL3[4];
+extern int triggerR3[4];
+#endif
 extern int buttonSelect[4];
 extern int buttonStart[4];
 #endif
@@ -151,6 +157,14 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 					(mainMenu_custom_L[i]==-25 && triggerL[i]) ||
 					(mainMenu_custom_R[i]==-25 && triggerR[i])
 				) ||
+#ifdef __SWITCH__
+				(
+					(mainMenu_custom_L2[i]==-25 && triggerL2[i]) ||
+					(mainMenu_custom_R2[i]==-25 && triggerR2[i]) ||
+					(mainMenu_custom_L3[i]==-25 && triggerL3[i]) ||
+					(mainMenu_custom_R3[i]==-25 && triggerR3[i])
+				) ||
+#endif
 				(
 					(mainMenu_custom_dpad == 0) && 
 					(
@@ -166,6 +180,19 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 			}
 		}
 	}
+#ifdef __SWITCH__
+	// or if custom controls are OFF but ZR is held on Switch, then also use slow-mouse
+	else {
+		for (int i=0; i<nr_joysticks; i++)
+		{
+			if (triggerR2[i] || triggerL2[i])
+			{
+				mouseScale/=8;
+				break;
+			}
+		}
+	}
+#endif
 
 //Digital mouseemu hotkeys: Triangle changes mouse speed etc.
 #if !defined(__PSP2__) && !defined(__SWITCH__) && defined(USE_UAE4ALL_VKBD)
@@ -432,7 +459,12 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				default:
 					break;
 			}
-			if((mainMenu_custom_A[i]==u && buttonA[i]) || (mainMenu_custom_B[i]==u && buttonB[i]) || (mainMenu_custom_X[i]==u && buttonX[i]) || (mainMenu_custom_Y[i]==u && buttonY[i]) || (mainMenu_custom_L[i]==u && triggerL[i]) || (mainMenu_custom_R[i]==u && triggerR[i]))
+			if((mainMenu_custom_A[i]==u && buttonA[i]) || (mainMenu_custom_B[i]==u && buttonB[i]) || (mainMenu_custom_X[i]==u && buttonX[i]) || (mainMenu_custom_Y[i]==u && buttonY[i]) || (mainMenu_custom_L[i]==u && triggerL[i]) || (mainMenu_custom_R[i]==u && triggerR[i])
+#ifdef __SWITCH__
+			|| (mainMenu_custom_L2[i]==u && triggerL2[i]) || (mainMenu_custom_R2[i]==u && triggerR2[i])
+			|| (mainMenu_custom_L3[i]==u && triggerL3[i]) || (mainMenu_custom_R3[i]==u && triggerR3[i])
+#endif
+			)
 				top = 1;
 			else if(mainMenu_custom_dpad == 0)
 			{
@@ -440,7 +472,12 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 					top = 1;
 			}
 
-			if((mainMenu_custom_A[i]==d && buttonA[i]) || (mainMenu_custom_B[i]==d && buttonB[i]) || (mainMenu_custom_X[i]==d && buttonX[i]) || (mainMenu_custom_Y[i]==d && buttonY[i]) || (mainMenu_custom_L[i]==d && triggerL[i]) || (mainMenu_custom_R[i]==d && triggerR[i]))
+			if((mainMenu_custom_A[i]==d && buttonA[i]) || (mainMenu_custom_B[i]==d && buttonB[i]) || (mainMenu_custom_X[i]==d && buttonX[i]) || (mainMenu_custom_Y[i]==d && buttonY[i]) || (mainMenu_custom_L[i]==d && triggerL[i]) || (mainMenu_custom_R[i]==d && triggerR[i])
+#ifdef __SWITCH__
+			|| (mainMenu_custom_L2[i]==d && triggerL2[i]) || (mainMenu_custom_R2[i]==d && triggerR2[i])
+			|| (mainMenu_custom_L3[i]==d && triggerL3[i]) || (mainMenu_custom_R3[i]==d && triggerR3[i])
+#endif
+			)
 				bot = 1;
 			else if(mainMenu_custom_dpad == 0)
 			{
@@ -448,7 +485,12 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 					bot = 1;
 			}
 
-			if((mainMenu_custom_A[i]==l && buttonA[i]) || (mainMenu_custom_B[i]==l && buttonB[i]) || (mainMenu_custom_X[i]==l && buttonX[i]) || (mainMenu_custom_Y[i]==l && buttonY[i]) || (mainMenu_custom_L[i]==l && triggerL[i]) || (mainMenu_custom_R[i]==l && triggerR[i]))
+			if((mainMenu_custom_A[i]==l && buttonA[i]) || (mainMenu_custom_B[i]==l && buttonB[i]) || (mainMenu_custom_X[i]==l && buttonX[i]) || (mainMenu_custom_Y[i]==l && buttonY[i]) || (mainMenu_custom_L[i]==l && triggerL[i]) || (mainMenu_custom_R[i]==l && triggerR[i])
+#ifdef __SWITCH__
+			|| (mainMenu_custom_L2[i]==l && triggerL2[i]) || (mainMenu_custom_R2[i]==l && triggerR2[i])
+			|| (mainMenu_custom_L3[i]==l && triggerL3[i]) || (mainMenu_custom_R3[i]==l && triggerR3[i])
+#endif
+			)
 				left = 1;
 			else if(mainMenu_custom_dpad == 0)
 			{
@@ -456,7 +498,12 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 					left = 1;
 			}
 
-			if((mainMenu_custom_A[i]==r && buttonA[i]) || (mainMenu_custom_B[i]==r && buttonB[i]) || (mainMenu_custom_X[i]==r && buttonX[i]) || (mainMenu_custom_Y[i]==r && buttonY[i]) || (mainMenu_custom_L[i]==r && triggerL[i]) || (mainMenu_custom_R[i]==r && triggerR[i]))
+			if((mainMenu_custom_A[i]==r && buttonA[i]) || (mainMenu_custom_B[i]==r && buttonB[i]) || (mainMenu_custom_X[i]==r && buttonX[i]) || (mainMenu_custom_Y[i]==r && buttonY[i]) || (mainMenu_custom_L[i]==r && triggerL[i]) || (mainMenu_custom_R[i]==r && triggerR[i])
+#ifdef __SWITCH__
+			|| (mainMenu_custom_L2[i]==r && triggerL2[i]) || (mainMenu_custom_R2[i]==r && triggerR2[i])
+			|| (mainMenu_custom_L3[i]==r && triggerL3[i]) || (mainMenu_custom_R3[i]==r && triggerR3[i])
+#endif
+			)
 				right = 1;
 			else if(mainMenu_custom_dpad == 0)
 			{
@@ -504,14 +551,24 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 						break;
 				}
 				//mapping buttons
-				if((mainMenu_custom_A[i]==b1 && buttonA[i]) || (mainMenu_custom_B[i]==b1 && buttonB[i]) || (mainMenu_custom_X[i]==b1 && buttonX[i]) || (mainMenu_custom_Y[i]==b1 && buttonY[i]) || (mainMenu_custom_L[i]==b1 && triggerL[i]) || (mainMenu_custom_R[i]==b1 && triggerR[i]))
+				if((mainMenu_custom_A[i]==b1 && buttonA[i]) || (mainMenu_custom_B[i]==b1 && buttonB[i]) || (mainMenu_custom_X[i]==b1 && buttonX[i]) || (mainMenu_custom_Y[i]==b1 && buttonY[i]) || (mainMenu_custom_L[i]==b1 && triggerL[i]) || (mainMenu_custom_R[i]==b1 && triggerR[i])
+#ifdef __SWITCH__
+				|| (mainMenu_custom_L2[i]==b1 && triggerL2[i]) || (mainMenu_custom_R2[i]==b1 && triggerR2[i])
+				|| (mainMenu_custom_L3[i]==b1 && triggerL3[i]) || (mainMenu_custom_R3[i]==b1 && triggerR3[i])
+#endif
+				)
 					*button = 1;
 				else if(mainMenu_custom_dpad == 0)
 				{
 					if((mainMenu_custom_up[i]==b1 && dpadUp[i]) || (mainMenu_custom_down[i]==b1 && dpadDown[i]) || (mainMenu_custom_left[i]==b1 && dpadLeft[i]) || (mainMenu_custom_right[i]==b1 && dpadRight[i]))
 						*button = 1;
 				}
-				if((mainMenu_custom_A[i]==b2 && buttonA[i]) || (mainMenu_custom_B[i]==b2 && buttonB[i]) || (mainMenu_custom_X[i]==b2 && buttonX[i]) || (mainMenu_custom_Y[i]==b2 && buttonY[i]) || (mainMenu_custom_L[i]==b2 && triggerL[i]) || (mainMenu_custom_R[i]==b2 && triggerR[i]))
+				if((mainMenu_custom_A[i]==b2 && buttonA[i]) || (mainMenu_custom_B[i]==b2 && buttonB[i]) || (mainMenu_custom_X[i]==b2 && buttonX[i]) || (mainMenu_custom_Y[i]==b2 && buttonY[i]) || (mainMenu_custom_L[i]==b2 && triggerL[i]) || (mainMenu_custom_R[i]==b2 && triggerR[i])
+#ifdef __SWITCH__
+				|| (mainMenu_custom_L2[i]==b2 && triggerL2[i]) || (mainMenu_custom_R2[i]==b2 && triggerR2[i])
+				|| (mainMenu_custom_L3[i]==b2 && triggerL3[i]) || (mainMenu_custom_R3[i]==b2 && triggerR3[i])
+#endif
+				)
 					*button |= 1 << 1;
 				else if(mainMenu_custom_dpad == 0)
 				{
@@ -593,7 +650,11 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 					vkbd_move &= ~VKBD_DOWN;
 			}
 #if defined(__PSP2__) || defined(__SWITCH__) //we know the Vita has many buttons available so use those
+#ifdef __SWITCH__
+			if ((!mainMenu_swapAB && buttonX[0]) || (mainMenu_swapAB && buttonB[0]))
+#else
 			if (buttonX[0])
+#endif
 			{
 				vkbd_move=VKBD_BUTTON;
 				buttonX[0] = 0;
@@ -611,7 +672,11 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 				buttonA[0] = 0;
 				*button = 0;
 			}
+#ifdef __SWITCH__
+			else if ((!mainMenu_swapAB && buttonB[0]) || (mainMenu_swapAB && buttonX[0]))
+#else
 			else if (buttonB[0])
+#endif
 			{
 				vkbd_move=VKBD_BUTTON_RESET_STICKY;
 				buttonB[0] = 0;

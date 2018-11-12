@@ -1,3 +1,9 @@
+Changes in this Version
+======
+1.75 (WIP)
+
+- fix crash when booting a floppy with floppy speed >1x 
+
 Description
 =====
 Use4All2 Mod is an Amiga emulator for Vita and Switch. This is my mod of this great Amiga emulator that was originally ported to the Vita by Cpasjuste. Depending on when you read this, this mod might be ahead or behind his version.
@@ -10,7 +16,7 @@ Thanks to ScHlAuChi for extensive testing, ideas, and for contributing the new l
 
 Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya and many more.
 
-Thanks to my supporters on Patreon: Andyways, CountDuckula, Matthew Machnee, and Sean Ritzo.
+Thanks to my supporters on Patreon: Andyways, CountDuckula, Matthew Machnee, and RadicalR.
 
 Installation
 ======
@@ -21,7 +27,7 @@ Installation
 * Switch:
   * Download and unzip `uae4all2_switch.zip`
   * Copy the resulting folder `uae4all2` to `/switch/` onto your SDCard, ensure none of the "archive" flags is set.
-  * You should now have the executable `/switch/uae4all2/uae4all2.nro` and a folders `/switch/uae4all2/data/` with the keyboard icons and other data files on your SDCard. 
+  * You should now have the executable `/switch/uae4all2/uae4all2.nro` and a folder `/switch/uae4all2/data/` with the keyboard icons and other data files on your SDCard. 
   * Obtain and copy BIOS files `kick13.rom` (size: 262,144 bytes), `kick20.rom` (size: 524,288 bytes) and `kick31.rom` (size: 524,288 bytes) to your SDCard into `/switch/uae4all2/kickstarts/`
   * Use your favorite Homebrew Launcher or Homebrew Loader to start Uaeall2
 
@@ -33,32 +39,31 @@ Vita/Switch-exclusive Features
 - Multiple hard-file support: up to 4 hdf files (size <2GB each) can be mounted simultaneously
 - Multiple controller support on Vita TV: up to four paired controllers can be fully mapped
 - Analog mouse control: control the mouse using the analog stick with adjustable sensitivity
-- Shader support: default "sharp_bilinear_simple" uses integer pre-scale for sharp, undistorted pixels with minimum blur, even if game is zoomed to fill the full Vita screen
+- Shader support: default "sharp_bilinear_simple" uses integer pre-scale for sharp, undistorted pixels with minimum blur, even if game is zoomed to fill the full screen
 - Custom autofire: any mapped Vita button can have autofire with adjustable rate
 - Savestate with hard-file support: state can be saved even when hard-files are used
 - Additional emulator settings: sprite-sprite collisions can be enabled, blitter settings can be changed
 - Adjustable stereo separation
 - A button can be mapped to "slow mouse" in custom controls. When custom controls are on and that button is held down, the mouse pointer speed is greatly reduced. This is useful for precisely positioning the cursor.
-- Bluetooth keyboard and mouse support
 - Sticky virtual keyboard modifiers: allows keyboard combos like CTRL-C to be entered easily
-- Touchpad style pointer controls using the front touch panel and (optional) the rear touch panel
-- Supports loading files from ux0: or uma0: partition
+- Touchpad style pointer controls using the touchscreen
 - Parallel port joystick adapter support for multiplayer games with up to 4 joysticks.
 - Additional savestate slot called auto, for automatic savestate loading
 
 Vita-exclusive Features
 ======
-- Shader support: default "sharp_bilinear_simple" uses integer pre-scale for sharp, undistorted pixels with minimum blur, even if game is zoomed to fill the full Vita screen
+- Bluetooth keyboard and mouse support
+- Supports loading files from ux0: or uma0: partition
+- Rear touch panel can be enabled for mouse pointer control
 
 Notes
 ======
 - *Bios:* Please put kickstart files in `ux0:/data/uae4all/kickstarts` on Vita and in `/switch/uae4all2/kickstarts` directory on Switch. Files must be named as kick13.rom, kick20.rom, kick31.rom
 - *Speed:* Most games run full speed. Some slow Amiga 1200 and WHDLoad games actually run faster if the CPU speed is reduced from 14 MHz to 7 MHz, because they rely more on custom chips than CPU. Some graphics glitches in Lionheart WHDLoad inside the caves are fixed by this.
 - *Config File:* If you have problems with settings not saving etc, please delete or rename your config file in the folder `ux0:/data/uae4all` (Vita) or `/switch/uae4all2/conf/` and restart the emu. I heard this can fix many problems when you are replacing an older version of this emulator with a newer version. Lots of things are changing in the config file between releases.
-- *Display on Vita:* On the Vita, the sharp_bilinear_simple shader, on by default, creates a sharp pixel image with minimal blurring. It applies a maximum integer pre-scale first. Then it scales only the small remainder using the builtin bilinear filter, keeping the aspect ratio intact.
-  Many Amiga games fit the screen very nicely. For example, take Chaos Engine with a screen setting of 320*200 and sharp_bilinear_simple shader enabled. The picture can be zoomed using R+Start+Dpad left/right, and moved vertically using R+Start+Dpad up/down to center it on the Vita screen. Once this is done, the picture fills almost the whole screen and looks amazing with no artifacts or blurriness. The game runs smooth with zero frameskip.
+- *Display:* The sharp_bilinear_simple shader, on by default, creates a sharp pixel image with minimal blurring. It applies a maximum integer pre-scale first. Then it scales only the small remainder using the builtin bilinear filter, keeping the aspect ratio intact.
+  Many Amiga games fit the Vita screen very nicely. For example, take Chaos Engine with a screen setting of 320*200 and sharp_bilinear_simple shader enabled. The picture can be zoomed using R+Start+Dpad left/right, and moved vertically using R+Start+Dpad up/down to center it on the Vita screen. Once this is done, the picture fills almost the whole screen and looks amazing with no artifacts or blurriness. The game runs smooth with zero frameskip.
   Selecting a 'Preset Width' of 320, 352 or 384 (max overscan) results in lo-res screen emulation, good for most games, while 640, 704, or 768 results in hi-res screen emulation, good for use with Workbench or some text-based games.
-- *Display on Switch:* On Switch, there is no shader support yet. But the 720p resolution on Switch allows 3* integer scaling in many cases, which can be selected in the display menu under `shader`. There are two settings: `None (perfect integer scaling)` or `bilinear (quite blurry)`.
 - *Blitter:* The blitter settings can help with graphics glitches in some games. Since it seems to work best, "immediate" is the default. But some games require setting blitter to "normal" and re-booting to remove graphics glitches, for example PP Hammer, Spindizzy Worlds, and Shufflepuck Cafe.
 - *WHDLoad:* If you have problems with a WHDLoad .hdf game, maybe try an .adf version of the same game. Rock'n Roll is one of a few games that work on UAE4All2 only using .adf files. It has graphics glitches and runs too fast in WHDLoad with .hdf. To make it work correctly, I loaded the "Rock'n Roll.adf" from Gamebase Amiga, chose the preset A500 config, and changed the Blitter setting to Normal.
 - *Sprite Collisions:* Some games require sprite-to-sprite collisions. Sprite collisions can be turned on in the "more options" menu. The only game I know of that requires this is SpaceTaxi 3.
@@ -123,7 +128,12 @@ Controls
 
 Switch: 
 -----
-Switch uses exactly the same controls as the Vita, with the following meaning:
+The default OK button in menu and on-screen keyboard is B. This can be changed to A in "more options."
+
+ZR button = slow-mouse (if custom controls are off)
+ZL button = slow-mouse (if custom controls are off)
+
+Otherwise Switch uses exactly the same controls as the Vita (see below), with the following meaning:
 Square = Y
 Triangle = X
 Cross = B
@@ -168,10 +178,10 @@ Virtual keyboard controls
 Start = Toggle virtual keyboard  
 Right analog stick up/down = Move virtual keyboard up and down  
 Right analog stick left/right = Change virtual keyboard transparency  
-Cross = Press selected key  
+Cross = Press selected key (on Switch, this can be changed from B to A)
 Square = Backspace  
 Triangle = Toggle shift  
-Circle = Turn off all sticky keys (ctrl, alt, amiga, and shift)  
+Circle = Turn off all sticky keys (ctrl, alt, amiga, and shift) (on Switch, this can be changed from A to B)
 
 Touch controls
 -----
@@ -189,6 +199,22 @@ Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard Wit
 
 CHANGELOG
 =====
+1.75 (WIP)
+
+- fix crash when booting a floppy with floppy speed >1x 
+
+1.74 (Switch only)
+
+- Allow remapping of ZR/ZL on Switch
+- Map ZR/ZL to "slow-down mouse" on Switch if custom controls are off
+- Add option to misc menu to choose either A or B as OK button on Switch
+- Add sharp-bilinear-simple scaling routine, and make it the new default
+- Add point filtering scaling routine
+
+1.73 (Switch only)
+
+- Fix savestates on Switch
+
 1.72switch
 
 - Added Switch release

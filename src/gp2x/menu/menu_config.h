@@ -51,6 +51,12 @@ extern int mainMenu_custom_X[4];
 extern int mainMenu_custom_Y[4];
 extern int mainMenu_custom_L[4];
 extern int mainMenu_custom_R[4];
+#ifdef __SWITCH__
+extern int mainMenu_custom_L2[4];
+extern int mainMenu_custom_R2[4];
+extern int mainMenu_custom_L3[4];
+extern int mainMenu_custom_R3[4];
+#endif
 extern int mainMenu_displayedLines;
 extern int mainMenu_displayHires;
 extern char presetMode[20];
@@ -129,6 +135,12 @@ extern int mainMenu_custom1_X[4];
 extern int mainMenu_custom1_Y[4];
 extern int mainMenu_custom1_L[4];
 extern int mainMenu_custom1_R[4];
+#ifdef __SWITCH__
+extern int mainMenu_custom1_L2[4];
+extern int mainMenu_custom1_R2[4];
+extern int mainMenu_custom1_L3[4];
+extern int mainMenu_custom1_R3[4];
+#endif
 extern int mainMenu_custom2_up[4];
 extern int mainMenu_custom2_down[4];
 extern int mainMenu_custom2_left[4];
@@ -139,6 +151,12 @@ extern int mainMenu_custom2_X[4];
 extern int mainMenu_custom2_Y[4];
 extern int mainMenu_custom2_L[4];
 extern int mainMenu_custom2_R[4];
+#ifdef __SWITCH__
+extern int mainMenu_custom2_L2[4];
+extern int mainMenu_custom2_R2[4];
+extern int mainMenu_custom2_L3[4];
+extern int mainMenu_custom2_R3[4];
+#endif
 extern int mainMenu_custom3_up[4];
 extern int mainMenu_custom3_down[4];
 extern int mainMenu_custom3_left[4];
@@ -149,6 +167,15 @@ extern int mainMenu_custom3_X[4];
 extern int mainMenu_custom3_Y[4];
 extern int mainMenu_custom3_L[4];
 extern int mainMenu_custom3_R[4];
+#ifdef __SWITCH__
+extern int mainMenu_custom3_L2[4];
+extern int mainMenu_custom3_R2[4];
+extern int mainMenu_custom3_L3[4];
+extern int mainMenu_custom3_R3[4];
+#endif
+#ifdef __SWITCH__
+extern int mainMenu_swapAB;
+#endif
 #endif
 
 #endif

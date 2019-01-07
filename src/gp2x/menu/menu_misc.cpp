@@ -28,8 +28,13 @@
 #define SDL_PollEvent PSP2_PollEvent
 #endif
 
-const char *text_str_misc_separator="----------------------------------";
-static const char *text_str_misc_title=    "            Miscellanous         -";
+#ifdef __SWITCH__
+#include <switch.h>
+static int justSwitchedSingleJoycons = 0;
+#endif
+
+const char *text_str_misc_separator="-------------------------------------";
+static const char *text_str_misc_title=    "            Miscellanous            -";
 static const char *text_str_stylus_offset="StylusOffset";
 static const char *text_str_0px="0px";
 static const char *text_str_1px="1px";
@@ -71,6 +76,9 @@ enum {
 #endif
 #if defined(__PSP2__) || defined(__SWITCH__)
 	MENUMISC_MOUSEEMULATION,
+#ifdef __SWITCH__
+	MENUMISC_SINGLEJOYCONS,
+#endif
 	MENUMISC_LEFTSTICKMOUSE,
 #endif
 	MENUMISC_MOUSEMULTIPLIER,
@@ -179,6 +187,11 @@ static void draw_miscMenu(int c)
 	else
 		write_text(tabstop7,menuLine,"3.1");
 
+	if ((kickstart==4)&&((menuMisc!=MENUMISC_KICKSTART)||(bb)))
+		write_text_inv(tabstop9,menuLine,"Custom");
+	else
+		write_text(tabstop9,menuLine,"Custom");
+
 	// MENUMISC_CPUSPEED
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"CPU Speed");
@@ -193,9 +206,14 @@ static void draw_miscMenu(int c)
 		write_text(tabstop4,menuLine,"14MHz");
 
 	if ((mainMenu_CPU_speed==2)&&((menuMisc!=MENUMISC_CPUSPEED)||(bb)))
-		write_text_inv(tabstop8,menuLine,"28MHz");
+		write_text_inv(tabstop7,menuLine,"28MHz");
 	else
-		write_text(tabstop8,menuLine,"28MHz");
+		write_text(tabstop7,menuLine,"28MHz");
+
+	if ((mainMenu_CPU_speed==3)&&((menuMisc!=MENUMISC_CPUSPEED)||(bb)))
+		write_text_inv(tabstop7+6,menuLine,"56MHz");
+	else
+		write_text(tabstop7+6,menuLine,"56MHz");
 
 	// MENUMISC_BLITTER
 	menuLine+=2;
@@ -414,8 +432,26 @@ static void draw_miscMenu(int c)
 		write_text_inv(tabstop3-8,menuLine,"On");
 	else
 		write_text(tabstop3-8,menuLine,"On");	
+#ifdef __SWITCH__
+	// MENUMISC_SINGLEJOYCONS
+	write_text(tabstop2,menuLine,"Split JoyCons");
+	if (mainMenu_singleJoycons==0)
+	{
+		if ((menuMisc!=MENUMISC_SINGLEJOYCONS)||(bb))
+			write_text_inv(tabstop9,menuLine,"Off");
+		else
+			write_text(tabstop9,menuLine,"Off ");
+	}
+	else if (mainMenu_singleJoycons==1)
+	{
+		if ((menuMisc!=MENUMISC_SINGLEJOYCONS)||(bb))
+			write_text_inv(tabstop9,menuLine,"On");
+		else
+			write_text(tabstop9,menuLine,"On ");
+	}
+#else
 	write_text(tabstop3-5,menuLine,"(can disturb 2nd player)");
-
+#endif
 	// MENUMISC_LEFTSTICKMOUSE
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Mouse Control");	
@@ -569,6 +605,34 @@ static int key_miscMenu(int *c)
 	int left=0, right=0, up=0, down=0, hit0=0, hit1=0, hit2=0;
 	SDL_Event event;
 
+	int directionHeld = 0;
+
+	static int holdingUp=0;
+	static int holdingDown=0;
+	static int holdingRight=0;
+	static int holdingLeft=0;
+	static Uint32 menu_last_press_time=0;
+	static Uint32 menu_last_move_time=0;
+	Uint32 now=SDL_GetTicks();
+	if (holdingLeft || holdingRight || holdingUp || holdingDown)
+	{
+		if (now-menu_last_press_time>MENU_MIN_HOLDING_TIME && now-menu_last_move_time>MENU_MOVE_DELAY)
+		{
+			menu_last_move_time=now;
+			SDL_Event ev;
+			ev.type = SDL_KEYDOWN;
+			if (holdingLeft)
+				ev.key.keysym.sym = SDLK_LEFT;
+			else if (holdingRight)
+				ev.key.keysym.sym = SDLK_RIGHT;
+			else if (holdingUp)
+				ev.key.keysym.sym = SDLK_UP;
+			else if (holdingDown)
+				ev.key.keysym.sym = SDLK_DOWN;
+			SDL_PushEvent(&ev);
+		}
+	}
+
 	while (SDL_PollEvent(&event) > 0)
 	{
 		left=right=up=down=hit0=hit1=hit2=0;
@@ -582,14 +646,69 @@ static int key_miscMenu(int *c)
 			case SDLK_UP: up=1; break;
 			case SDLK_DOWN: down=1; break;
 			case SDLK_PAGEDOWN: hit0=1; break;
+			case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
+			//note SDLK_CTRL corresponds to ButtonSelect on Vita
+#if defined(__PSP2__) || defined(__SWITCH__)
+			case SDLK_END: hit1=1; break;
+#else
 			case SDLK_HOME: hit0=1; break;
 			case SDLK_LALT: hit1=1; break;
-			case SDLK_END: hit0=1; break;
 			case SDLK_PAGEUP: hit0=1;
-			case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
-				//note SDLK_CTRL corresponds to ButtonSelect on Vita
+			case SDLK_END: hit0=1; break;
+#endif
 			}
 		}
+
+		if (event.type == SDL_KEYUP)
+		{
+			switch(event.key.keysym.sym)
+			{
+				case SDLK_RIGHT:
+					holdingRight=0;
+					break;
+				case SDLK_LEFT:
+					holdingLeft=0;
+					break;
+				case SDLK_UP:
+					holdingUp=0;
+					break;
+				case SDLK_DOWN:
+					holdingDown=0;
+					break;
+				default:
+					break;
+			}
+		}
+		
+		if (left && !holdingLeft)
+		{
+			holdingLeft=1;
+			menu_last_press_time=now;
+		}
+		if (right && !holdingRight) 
+		{
+			holdingRight=1;
+			menu_last_press_time=now;
+		}
+		if (up && !holdingUp) 
+		{
+			holdingUp=1;
+			menu_last_press_time=now;
+		}
+		if (down && !holdingDown) 
+		{
+			holdingDown=1;
+			menu_last_press_time=now;
+		}
+
+#ifdef __SWITCH__
+		if (justSwitchedSingleJoycons) {
+			if (left != 0 || right != 0 || up != 0 || down != 0)
+				directionHeld = 1;
+			continue;
+		}
+#endif
+
 		if (hit2) //Does the user want to cancel the menu completely?
 		{
 			if (emulating)
@@ -598,10 +717,12 @@ static int key_miscMenu(int *c)
 				quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
 			}
 		}	
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 		else if (hit0)
 		{
 			end = -1;
 		}
+#endif
 		else if (hit1)
 		{
 			end = -1;
@@ -618,6 +739,10 @@ static int key_miscMenu(int *c)
 		}
 		switch (menuMisc)
 		{
+			case MENUMISC_RETURNMAIN:
+				if (hit0)
+					end = 1;
+				break;
 			case MENUMISC_CPU:
 				if (left)
 				{
@@ -717,7 +842,7 @@ static int key_miscMenu(int *c)
 				
 			case MENUMISC_SPRITECOLLISIONS:
 				if (left||right)
-			   	mainMenu_spriteCollisions = !mainMenu_spriteCollisions;
+					mainMenu_spriteCollisions = !mainMenu_spriteCollisions;
 			   break;
 		
 			case MENUMISC_KICKSTART:
@@ -726,11 +851,11 @@ static int key_miscMenu(int *c)
 					if (kickstart>0)
 						kickstart--;
 					else
-						kickstart=3;
+						kickstart=4;
 				}
 				else if (right)
 				{
-					if (kickstart<3)
+					if (kickstart<4)
 						kickstart++;
 					else
 						kickstart=0;
@@ -742,11 +867,11 @@ static int key_miscMenu(int *c)
 					if (mainMenu_CPU_speed>0)
 						mainMenu_CPU_speed--;
 					else
-						mainMenu_CPU_speed=2;
+						mainMenu_CPU_speed=3;
 				}
 				else if (right)
 				{
-					if (mainMenu_CPU_speed<2)
+					if (mainMenu_CPU_speed<3)
 						mainMenu_CPU_speed++;
 					else
 						mainMenu_CPU_speed=0;
@@ -774,6 +899,13 @@ static int key_miscMenu(int *c)
 					mainMenu_touchControls = 1;
 				if (left || right)
 					mainMenu_touchControls = !mainMenu_touchControls;
+				break;
+			case MENUMISC_SINGLEJOYCONS:
+				if (left || right) {
+					mainMenu_singleJoycons = !mainMenu_singleJoycons;
+					justSwitchedSingleJoycons = 1;
+					directionHeld = 1;
+				}
 				break;
 #else
 				if (left) 
@@ -991,6 +1123,11 @@ static int key_miscMenu(int *c)
 #endif
 		}
 	}
+#ifdef __SWITCH__
+	if (justSwitchedSingleJoycons && !directionHeld) {
+		justSwitchedSingleJoycons = 0;
+	}
+#endif
 
 	return end;
 }

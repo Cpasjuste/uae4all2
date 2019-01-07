@@ -41,21 +41,25 @@ extern int mainMenu_tapDelay;
 extern int mainMenu_customControls;
 extern int mainMenu_custom_currentlyEditingControllerNr;
 extern int mainMenu_custom_dpad;
-extern int mainMenu_custom_up[4];
-extern int mainMenu_custom_down[4];
-extern int mainMenu_custom_left[4];
-extern int mainMenu_custom_right[4];
-extern int mainMenu_custom_A[4];
-extern int mainMenu_custom_B[4];
-extern int mainMenu_custom_X[4];
-extern int mainMenu_custom_Y[4];
-extern int mainMenu_custom_L[4];
-extern int mainMenu_custom_R[4];
+extern int mainMenu_custom_up[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_down[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_left[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_right[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_stickup[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_stickdown[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_stickleft[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_stickright[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_A[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_B[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_X[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_Y[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_L[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_R[MAX_NUM_CONTROLLERS];
 #ifdef __SWITCH__
-extern int mainMenu_custom_L2[4];
-extern int mainMenu_custom_R2[4];
-extern int mainMenu_custom_L3[4];
-extern int mainMenu_custom_R3[4];
+extern int mainMenu_custom_L2[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_R2[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_L3[MAX_NUM_CONTROLLERS];
+extern int mainMenu_custom_R3[MAX_NUM_CONTROLLERS];
 #endif
 extern int mainMenu_displayedLines;
 extern int mainMenu_displayHires;
@@ -125,56 +129,29 @@ extern int mainMenu_touchControls;
 extern int mainMenu_shader;
 extern int mainMenu_deadZone;
 extern int mainMenu_custom_controlSet;
-extern int mainMenu_custom1_up[4];
-extern int mainMenu_custom1_down[4];
-extern int mainMenu_custom1_left[4];
-extern int mainMenu_custom1_right[4];
-extern int mainMenu_custom1_A[4];
-extern int mainMenu_custom1_B[4];
-extern int mainMenu_custom1_X[4];
-extern int mainMenu_custom1_Y[4];
-extern int mainMenu_custom1_L[4];
-extern int mainMenu_custom1_R[4];
+extern int mainMenu_customPreset_up[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_down[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_left[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_right[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_stickup[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_stickdown[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_stickleft[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_stickright[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_A[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_B[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_X[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_Y[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_L[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_R[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
 #ifdef __SWITCH__
-extern int mainMenu_custom1_L2[4];
-extern int mainMenu_custom1_R2[4];
-extern int mainMenu_custom1_L3[4];
-extern int mainMenu_custom1_R3[4];
-#endif
-extern int mainMenu_custom2_up[4];
-extern int mainMenu_custom2_down[4];
-extern int mainMenu_custom2_left[4];
-extern int mainMenu_custom2_right[4];
-extern int mainMenu_custom2_A[4];
-extern int mainMenu_custom2_B[4];
-extern int mainMenu_custom2_X[4];
-extern int mainMenu_custom2_Y[4];
-extern int mainMenu_custom2_L[4];
-extern int mainMenu_custom2_R[4];
-#ifdef __SWITCH__
-extern int mainMenu_custom2_L2[4];
-extern int mainMenu_custom2_R2[4];
-extern int mainMenu_custom2_L3[4];
-extern int mainMenu_custom2_R3[4];
-#endif
-extern int mainMenu_custom3_up[4];
-extern int mainMenu_custom3_down[4];
-extern int mainMenu_custom3_left[4];
-extern int mainMenu_custom3_right[4];
-extern int mainMenu_custom3_A[4];
-extern int mainMenu_custom3_B[4];
-extern int mainMenu_custom3_X[4];
-extern int mainMenu_custom3_Y[4];
-extern int mainMenu_custom3_L[4];
-extern int mainMenu_custom3_R[4];
-#ifdef __SWITCH__
-extern int mainMenu_custom3_L2[4];
-extern int mainMenu_custom3_R2[4];
-extern int mainMenu_custom3_L3[4];
-extern int mainMenu_custom3_R3[4];
+extern int mainMenu_customPreset_L2[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_R2[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_L3[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
+extern int mainMenu_customPreset_R3[MAX_NUM_CUSTOM_PRESETS][MAX_NUM_CONTROLLERS];
 #endif
 #ifdef __SWITCH__
 extern int mainMenu_swapAB;
+extern int mainMenu_singleJoycons;
 #endif
 #endif
 

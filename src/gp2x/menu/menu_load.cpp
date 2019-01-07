@@ -45,6 +45,7 @@ extern char filename1[256];
 extern char filename2[256];
 extern char filename3[256];
 extern char currentDir[300];
+extern char config_load_filename[300];
 
 const char *text_str_load_separator="----------------------------------------";
 const char *text_str_load_dir="#DIR#";
@@ -52,6 +53,7 @@ static const char *text_str_load_title="            Filemanager            -";
 int text_dir_num_files=0, text_dir_num_files_index=0;
 
 #define SHOW_MAX_FILES 13
+#define MAX_FILES_PER_DIR 10240
 
 extern int run_menuFileinfo(char* fileName);
 static int min_in_dir=0, max_in_dir=SHOW_MAX_FILES;
@@ -120,14 +122,67 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	extern SDL_Surface *text_screen;
 	r.x=80-64; r.y=0; r.w=150-24+64+64; r.h=240;
 	text_draw_background();
+
 	if (menu_load_type == MENU_LOAD_HD_DIR)
-#if defined(__PSP2__) || defined(__SWITCH__)
-		text_draw_window(2,2,41,25,"  Press SELECT to load HD-dir  ");
+#ifdef __PSP2__
+		text_draw_window(2,2,41,25,"  Press SELECT to load HD-dir (Tri.=Info)  ");
+#else
+#ifdef __SWITCH__
+		text_draw_window(2,2,41,25,"  Press MINUS to load HD-dir (X = Info)  ");
 #else
 		text_draw_window(2,2,41,25,"  Press L-key to load HD-dir  ");
 #endif
+#endif
 	else if (menu_load_type == MENU_LOAD_HDF)
+#ifdef __PSP2__
+		text_draw_window(2,2,41,25,"       Select .HDF-file (Triangle = Info)      ");
+#else
+#ifdef __SWITCH__
+		text_draw_window(2,2,41,25,"       Select .HDF-file (X = Info)      ");
+#else
 		text_draw_window(2,2,41,25,"       Select .HDF-file       ");
+#endif
+#endif
+	else if (menu_load_type == MENU_LOAD_CONFIG)
+#ifdef __PSP2__
+		text_draw_window(2,2,41,25,"       Select .CONF-file (Triangle = Info)      ");
+#else
+#ifdef __SWITCH__
+		text_draw_window(2,2,41,25,"       Select .CONF-file (X = Info)      ");
+#else
+		text_draw_window(2,2,41,25,"       Select .CONF-file       ");
+#endif
+#endif
+	else if (menu_load_type == MENU_LOAD_DELETE_CONFIG)
+#ifdef __PSP2__
+		text_draw_window(2,2,41,25,"       Delete .CONF-file (Triangle = Info)      ");
+#else
+#ifdef __SWITCH__
+		text_draw_window(2,2,41,25,"       Delete .CONF-file (X = Info)      ");
+#else
+		text_draw_window(2,2,41,25,"       Delete .CONF-file       ");
+#endif
+#endif
+#ifdef __PSP2__
+	else if (current_drive==0)
+		text_draw_window(2,2,41,25," Insert .ADF into DF0 (Triangle = Info) ");
+	else if (current_drive==1)
+		text_draw_window(2,2,41,25," Insert .ADF into DF1 (Triangle = Info)");
+	else if (current_drive==2)
+		text_draw_window(2,2,41,25," Insert .ADF into DF2 (Triangle = Info)");
+	else if (current_drive==3)
+		text_draw_window(2,2,41,25," Insert .ADF into DF3 (Triangle = Info)");
+#else
+#ifdef __SWITCH__
+	else if (current_drive==0)
+		text_draw_window(2,2,41,25," Insert .ADF into DF0 (X = Info)");
+	else if (current_drive==1)
+		text_draw_window(2,2,41,25," Insert .ADF into DF1 (X = Info)");
+	else if (current_drive==2)
+		text_draw_window(2,2,41,25," Insert .ADF into DF2 (X = Info)");
+	else if (current_drive==3)
+		text_draw_window(2,2,41,25," Insert .ADF into DF3 (X = Info)");
+#else
 	else if (current_drive==0)
 		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF0 ");
 	else if (current_drive==1)
@@ -136,6 +191,8 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF2 ");
 	else if (current_drive==3)
 		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF3 ");
+#endif
+#endif
 	else
 		text_draw_window(2,2,41,25,text_str_load_title);
 
@@ -227,7 +284,7 @@ static int menuLoadLoop(char *curr_path)
 	{
 		struct dirent *ent = NULL;
 		n = 0;
-		namelist = (struct dirent **)malloc(3*1024 * sizeof(struct dirent *)); // < 3*1024 files
+		namelist = (struct dirent **)malloc(MAX_FILES_PER_DIR * sizeof(struct dirent *));
 		namelist[0] = (struct dirent *)malloc(sizeof(struct dirent));
 		strcpy(namelist[0]->d_name, ".");
 		namelist[0]->d_type = DT_DIR; n++;
@@ -260,7 +317,7 @@ static int menuLoadLoop(char *curr_path)
 
 		struct dirent *ent = NULL;
 		n = 0;
-		namelist =  (struct dirent **)malloc(3*1024 * sizeof(struct dirent *)); // < 3*1024 files
+		namelist =  (struct dirent **)malloc(MAX_FILES_PER_DIR * sizeof(struct dirent *));
 		namelist[0] = (struct dirent *)malloc(sizeof(struct dirent));
 		strcpy(namelist[0]->d_name, ".");
 		namelist[0]->d_type = DT_DIR; n++;
@@ -269,7 +326,7 @@ static int menuLoadLoop(char *curr_path)
 		namelist[1]->d_type = DT_DIR; n++;
 
 		while ((ent = readdir (dir)) != NULL) {
-			if(n >= 3*1024-1)
+			if(n >= MAX_FILES_PER_DIR-1)
 				break;
 			namelist[n] = (struct dirent *)malloc(sizeof(struct dirent));
 			memcpy(namelist[n], ent, sizeof(struct dirent));
@@ -339,6 +396,33 @@ static int menuLoadLoop(char *curr_path)
 		//unsigned long keys;
 		draw_dirlist(curr_path, namelist, n, sel);
 		delay ++;
+		
+		static int holdingUp=0;
+		static int holdingDown=0;
+		static int holdingRight=0;
+		static int holdingLeft=0;
+		static Uint32 menu_last_press_time=0;
+		static Uint32 menu_last_move_time=0;
+		Uint32 now=SDL_GetTicks();
+		if (holdingLeft || holdingRight || holdingUp || holdingDown)
+		{
+			if (now-menu_last_press_time>MENU_MIN_HOLDING_TIME && now-menu_last_move_time>MENU_MOVE_DELAY)
+			{
+				menu_last_move_time=now;
+				SDL_Event ev;
+				ev.type = SDL_KEYDOWN;
+				if (holdingLeft)
+					ev.key.keysym.sym = SDLK_LEFT;
+				else if (holdingRight)
+					ev.key.keysym.sym = SDLK_RIGHT;
+				else if (holdingUp)
+					ev.key.keysym.sym = SDLK_UP;
+				else if (holdingDown)
+					ev.key.keysym.sym = SDLK_DOWN;
+				SDL_PushEvent(&ev);
+			}
+		}
+		
 		while (SDL_PollEvent(&event) > 0 && hit0+hit1+hitL==0)
 		{
 			left=right=up=down=hit0=hit1=hit2=hit3=hit4=hitL=0;
@@ -352,22 +436,69 @@ static int menuLoadLoop(char *curr_path)
 					case SDLK_UP: up=1; break;
 					case SDLK_DOWN: down=1; break;
 					case SDLK_PAGEDOWN: hit0=1; break;
-					case SDLK_HOME: hit0=1; break;
 					case SDLK_LALT: hit1=1; break;
 #if !defined(__PSP2__) && !defined(__SWITCH__)
 					case SDLK_LCTRL: hit2=1; break;
+					case SDLK_HOME: hit0=1; break;
+					case SDLK_END: hit0=1; break;
+					case SDLK_PAGEUP: hit0=1; break;
 #endif
 					case SDLK_RSHIFT: hit3=1; break;
 					case SDLK_RCTRL: hit4=1; break;
-					case SDLK_END: hit0=1; break;
 #if defined(__PSP2__) || defined(__SWITCH__)
+					// SELECT to select HD dir
 					case SDLK_LCTRL: hitL=1; break;
-#else
-					case SDLK_PAGEUP: hit0=1; break;
+					// TRIANGLE for fileinfo
+					case SDLK_PAGEUP: hit2=1; break;
+					// CIRCLE for cancel
+					case SDLK_END: hit1=1; break;
 #endif
 					case SDLK_l: hitL=1;
 				}
 			}
+			
+			if (event.type == SDL_KEYUP)
+			{
+				switch(event.key.keysym.sym)
+				{
+					case SDLK_RIGHT:
+						holdingRight=0;
+						break;
+					case SDLK_LEFT:
+						holdingLeft=0;
+						break;
+					case SDLK_UP:
+						holdingUp=0;
+						break;
+					case SDLK_DOWN:
+						holdingDown=0;
+						break;
+					default:
+						break;
+				}
+			}
+			
+			if (left && !holdingLeft)
+			{
+				holdingLeft=1;
+				menu_last_press_time=now;
+			}
+			if (right && !holdingRight) 
+			{
+				holdingRight=1;
+				menu_last_press_time=now;
+			}
+			if (up && !holdingUp) 
+			{
+				holdingUp=1;
+				menu_last_press_time=now;
+			}
+			if (down && !holdingDown) 
+			{
+				holdingDown=1;
+				menu_last_press_time=now;
+			}
+			
 			if(up)  { sel--;   if (sel < 0)   sel = n-2; /*usleep(10*1024);*/ }
 			if(down)  { sel++;   if (sel > n-2) sel = 0;/*usleep(10*1024);*/}
 			if(left)  { sel-=10; if (sel < 0)   sel = 0;/*usleep(10*1024);*/}
@@ -412,9 +543,17 @@ static int menuLoadLoop(char *curr_path)
 								else if (current_hdf==3)
 									strcpy(uae4all_hard_file3, filename);
 							break;
+						case MENU_LOAD_CONFIG:
+						case MENU_LOAD_DELETE_CONFIG:
+							if (strstr(filename, ".conf") == NULL)
+								showWarning("CONF file must be selected");
+							else
+								strcpy(config_load_filename,filename);
+							break;
 					}
 					loaded=1;
-					strcpy(currentDir,filename);
+					if ((menu_load_type != MENU_LOAD_CONFIG) && (menu_load_type != MENU_LOAD_DELETE_CONFIG))
+						strcpy(currentDir,filename);
 					free(filename);
 					break;
 				}
@@ -464,7 +603,8 @@ static int menuLoadLoop(char *curr_path)
 							strcat(newdir, "/");
 							strcat(newdir, namelist[sel+1]->d_name);
 						}
-						strcpy(currentDir,newdir);
+						if ((menu_load_type != MENU_LOAD_CONFIG) && (menu_load_type != MENU_LOAD_DELETE_CONFIG))
+							strcpy(currentDir,newdir);
 						loaded = menuLoadLoop(newdir);
 						free(newdir);
 						break;

@@ -1065,7 +1065,7 @@ static void TRAPCC_EXECUTE (u32 Opcode)
    /* Width 0 -> 32 */                    \
    WIDTH = (((EXTRA & 0x20 ? DREG(EXTRA & 7) : EXTRA) - 1) & 0x1F) + 1; \
 
-#define BF_FFO(SRC, MASK, OFFSET, WIDTH)  \
+#define BF_FFO(SRC, MASK, OFFSET, WIDTH, EXTRA)  \
 {                                         \
    MASK = 1 << (WIDTH - 1);               \
    while (MASK) {                         \
@@ -1074,12 +1074,20 @@ static void TRAPCC_EXECUTE (u32 Opcode)
       OFFSET++;                           \
       MASK >>= 1;                         \
    }                                      \
-   DREGu32(Opcode >> 12) = OFFSET;        \
+   DREGu32((EXTRA >> 12) & 7) = OFFSET;   \
 }
 
 #define BF_REG_GET(EXTRA, DATA, OFFSET, WIDTH) \
    DATA = DREG((Opcode /*>> 0*/) & 7);    \
    BF_GET_PARM(EXTRA, OFFSET, WIDTH)      \
+   OFFSET &= 0x1F;                        \
+   BF_SHIFT_DOWN(DATA, OFFSET, WIDTH)     \
+   BF_SET_FLAGS(DATA, WIDTH)
+
+#define BF_REG_GET_BFFFO(EXTRA, DATA, OFFSET, OFFSET2, WIDTH) \
+   DATA = DREG((Opcode /*>> 0*/) & 7);    \
+   BF_GET_PARM(EXTRA, OFFSET, WIDTH)      \
+   OFFSET2 = OFFSET;                      \
    OFFSET &= 0x1F;                        \
    BF_SHIFT_DOWN(DATA, OFFSET, WIDTH)     \
    BF_SET_FLAGS(DATA, WIDTH)

@@ -66,7 +66,7 @@ enum {
 	MENUDISPLAY_SHADER,
 #endif
 	MENUDISPLAY_STATUSLINE,
-#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
+#if defined(USE_UAE4ALL_VKBD)
 	MENUDISPLAY_VKBDLANGUAGE,
 #endif
 	MENUDISPLAY_BACKGROUND,
@@ -328,7 +328,7 @@ static void draw_displayMenu(int c)
 	else
 		write_text(tabstop3, menuLine,"On");
 
-#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
+#if defined(USE_UAE4ALL_VKBD)
 	// MENUDISPLAY_VKBDLANGUAGE
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Keyboard");
@@ -453,6 +453,32 @@ static int key_displayMenu(int *c)
 	int left=0, right=0, up=0, down=0, hit0=0, hit1=0, hit2=0;
 	SDL_Event event;
 
+	static int holdingUp=0;
+	static int holdingDown=0;
+	static int holdingRight=0;
+	static int holdingLeft=0;
+	static Uint32 menu_last_press_time=0;
+	static Uint32 menu_last_move_time=0;
+	Uint32 now=SDL_GetTicks();
+	if (holdingLeft || holdingRight || holdingUp || holdingDown)
+	{
+		if (now-menu_last_press_time>MENU_MIN_HOLDING_TIME && now-menu_last_move_time>MENU_MOVE_DELAY)
+		{
+			menu_last_move_time=now;
+			SDL_Event ev;
+			ev.type = SDL_KEYDOWN;
+			if (holdingLeft)
+				ev.key.keysym.sym = SDLK_LEFT;
+			else if (holdingRight)
+				ev.key.keysym.sym = SDLK_RIGHT;
+			else if (holdingUp)
+				ev.key.keysym.sym = SDLK_UP;
+			else if (holdingDown)
+				ev.key.keysym.sym = SDLK_DOWN;
+			SDL_PushEvent(&ev);
+		}
+	}
+
 	while (SDL_PollEvent(&event) > 0)
 	{
 		left=right=up=down=hit0=hit1=hit2=0;
@@ -466,14 +492,61 @@ static int key_displayMenu(int *c)
 			case SDLK_UP: up=1; break;
 			case SDLK_DOWN: down=1; break;
 			case SDLK_PAGEDOWN: hit0=1; break;
+#if defined(__PSP2__) || defined(__SWITCH__)
+			case SDLK_END: hit1=1; break;
+#else
 			case SDLK_HOME: hit0=1; break;
 			case SDLK_LALT: hit1=1; break;
 			case SDLK_END: hit0=1; break;
 			case SDLK_PAGEUP: hit0=1;				
+#endif
 			case SDLK_LCTRL: hit2=1; break; //allow user to quit menu completely at any time
 				//note SDLK_CTRL corresponds to ButtonSelect on Vita
 			}
 		}
+
+		if (event.type == SDL_KEYUP)
+		{
+			switch(event.key.keysym.sym)
+			{
+				case SDLK_RIGHT:
+					holdingRight=0;
+					break;
+				case SDLK_LEFT:
+					holdingLeft=0;
+					break;
+				case SDLK_UP:
+					holdingUp=0;
+					break;
+				case SDLK_DOWN:
+					holdingDown=0;
+					break;
+				default:
+					break;
+			}
+		}
+		
+		if (left && !holdingLeft)
+		{
+			holdingLeft=1;
+			menu_last_press_time=now;
+		}
+		if (right && !holdingRight) 
+		{
+			holdingRight=1;
+			menu_last_press_time=now;
+		}
+		if (up && !holdingUp) 
+		{
+			holdingUp=1;
+			menu_last_press_time=now;
+		}
+		if (down && !holdingDown) 
+		{
+			holdingDown=1;
+			menu_last_press_time=now;
+		}
+
 		if (hit2) //Does the user want to cancel the menu completely?
 		{
 			if (emulating)
@@ -482,10 +555,12 @@ static int key_displayMenu(int *c)
 				quit_pressed_in_submenu = 1; //Tell the mainMenu to cancel, too
 			}
 		}	
+#if !defined(__PSP2__) && !defined(__SWITCH__)
 		else if (hit0)
 		{
 			end = -1;
 		}
+#endif
 		else if (hit1)
 		{
 			end = -1;
@@ -502,6 +577,10 @@ static int key_displayMenu(int *c)
 		}
 		switch (menuDisplay)
 		{
+			case MENUDISPLAY_RETURNMAIN:
+				if (hit0)
+					end = -1;
+				break;
 			case MENUDISPLAY_PRESETWIDTH:
 				if (left)
 				{
@@ -666,7 +745,7 @@ static int key_displayMenu(int *c)
 					mainMenu_showStatus=!mainMenu_showStatus;
 				break;
 
-#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
+#if defined(USE_UAE4ALL_VKBD)
 			case MENUDISPLAY_VKBDLANGUAGE:
 				if (left)
 				{

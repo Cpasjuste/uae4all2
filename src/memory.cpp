@@ -31,8 +31,8 @@ int bReloadKickstart = 0;
 unsigned prefs_chipmem_size;
 unsigned prefs_bogomem_size;
 
-const char *kickstarts_rom_names[] = { "kick12.rom\0", "kick13.rom\0", "kick20.rom\0", "kick31.rom\0", "aros-amiga-m68k-rom.bin\0" };
-const char *extended_rom_names[] = { "\0", "\0", "\0", "\0", "aros-amiga-m68k-ext.bin\0" };
+const char *kickstarts_rom_names[] = { "kick12.rom\0", "kick13.rom\0", "kick20.rom\0", "kick31.rom\0", "kickcustom.rom\0", "aros-amiga-m68k-rom.bin\0" };
+const char *extended_rom_names[] = { "\0", "\0", "\0", "\0", "\0", "aros-amiga-m68k-ext.bin\0" };
 #ifdef ANDROIDSDL
 const char *af_kickstarts_rom_names[] = { "amiga-os-120.rom\0", "amiga-os-130.rom\0", "amiga-os-204.rom\0", "amiga-os-310-a1200.rom\0" };
 #endif

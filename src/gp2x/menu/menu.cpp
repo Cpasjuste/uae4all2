@@ -506,7 +506,9 @@ void init_text(int splash)
 		int i,j;
 
 		obten_colores();
+#if !defined(__SWITCH__) && !defined(__PSP2__)
 		if (skipintro)
+#endif
 			goto skipintro;
 		tmp=SDL_LoadBMP(MENU_FILE_SPLASH);
 		if (tmp==NULL)

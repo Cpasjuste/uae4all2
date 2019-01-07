@@ -25,6 +25,8 @@ extern int visibleAreaWidth;
 extern int displaying_menu;
 //uint32_t *texture_pixels=NULL;
 
+extern void update_joycon_mode(void);
+
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 SDL_Surface *SDL_SetVideoMode(int w, int h, int bpp, int flags) {
@@ -94,6 +96,7 @@ void SDL_SetVideoModeSync(int value) {
 }
 
 void SDL_Flip(SDL_Surface *surface) {
+	update_joycon_mode();
 	if (surface && renderer && window) {
 		if (texture) {
 			SDL_DestroyTexture(texture);

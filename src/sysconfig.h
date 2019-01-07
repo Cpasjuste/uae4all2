@@ -392,3 +392,12 @@
 #define printf psp2shell_print
 #endif
 #endif
+
+#ifdef __SWITCH__
+#define MAX_NUM_CONTROLLERS 8
+#else
+#define MAX_NUM_CONTROLLERS 4
+#endif
+
+#define MAX_NUM_CUSTOM_PRESETS 5
+

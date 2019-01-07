@@ -66,7 +66,7 @@ unsigned int gui_ledstate;
 
 static unsigned long ciaala, ciaalb, ciabla, ciablb;
 static int ciaatodon, ciabtodon;
-static unsigned int ciaapra, ciaaprb, ciaadra, ciaadrb, ciaasdr;
+static unsigned int ciaapra, ciaaprb, ciaadra, ciaadrb, ciaasdr, ciaasdr_cnt;
 static unsigned int ciabprb, ciabdra, ciabdrb, ciabsdr;
 static int div10;
 static int kbstate, kback, ciaasdr_unread = 0;
@@ -156,7 +156,7 @@ static void CIA_update (void)
    if ((ciaacra & 0x21) == 0x01) {
       assert ((ciaata + 1) >= ciaclocks);
       if ((ciaata + 1) == ciaclocks) {
-         if ((ciaacra & 0x48) == 0x40 /*&& ciaasdr_cnt > 0 && --ciaasdr_cnt == 0*/)
+         if ((ciaacra & 0x48) == 0x40 && ciaasdr_cnt > 0 && --ciaasdr_cnt == 0)
             asp = 1;
          aovfla = 1;
          if ((ciaacrb & 0x61) == 0x41 || (ciaacrb & 0x61) == 0x61) {
@@ -639,7 +639,16 @@ static void WriteCIAA (uae_u16 addr,uae_u8 val)
 	}
 	break;
     case 12:
-	ciaasdr = val;
+    CIA_update ();
+    ciaasdr = val;
+    if (ciaacra & 0x40) {
+        kback = 1;
+    } else {
+        ciaasdr_cnt = 0;
+    }
+    if ((ciaacra & 0x41) == 0x41)
+      ciaasdr_cnt = 8 * 2;
+    CIA_calctimers ();
 	break;
     case 13:
 	setclr(&ciaaimask,val);
@@ -767,6 +776,8 @@ void CIA_reset (void)
 {
     kback = 1;
     kbstate = 0;
+    ciaasdr_unread = 0;
+    ciaasdr_cnt = 0;
 
     if (!savestate_state)
     {
@@ -779,7 +790,6 @@ void CIA_reset (void)
     ciaala = ciaalb = ciabla = ciablb = ciaata = ciaatb = ciabta = ciabtb = 0xFFFF;
     ciabpra = 0x8C;
     div10 = 0;
-    ciaasdr_unread = 0;
     }
 
     CIA_calctimers ();

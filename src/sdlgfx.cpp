@@ -60,7 +60,13 @@
 #endif
 
 bool mouse_state = true;
+#if defined(__PSP2__) || defined(__SWITCH__)
+extern bool slow_mouse;
+extern bool fast_mouse;
+#else
 bool slow_mouse = false;
+#endif
+
 extern int moved_x;
 extern int moved_y;
 extern int stylusClickOverride;
@@ -594,6 +600,9 @@ void handle_events (void)
 			mouse_state = true;
 			int mouseScale = mainMenu_mouseMultiplier * 16;
 			mouseScale /= 100;
+
+			if (fast_mouse) mouseScale *= 3;
+			if (slow_mouse) mouseScale /= 8;
 
 			lastmx += rEvent.motion.xrel * mouseScale;
 			lastmy += rEvent.motion.yrel * mouseScale;

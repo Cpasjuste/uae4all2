@@ -36,6 +36,11 @@
 #include <psp2/io/fcntl.h>
 #endif
  
+#ifdef __SWITCH__
+#include <switch.h>
+extern void update_joycon_mode();
+#endif
+ 
 #if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
 int inside_menu = 0;
@@ -72,13 +77,20 @@ extern char filename0[256];
 extern char filename1[256];
 extern char filename2[256];
 extern char filename3[256];
-#if defined(__PSP2__) || defined(__SWITCH__)
+
+extern char config_load_filename[300];
+
+#ifdef __PSP2__
 static const char *text_str_title=    "----- UAE4All Vita -----";
+#else
+#ifdef __SWITCH__
+static const char *text_str_title=    "----- UAE4All Switch -----";
 #else
 #ifdef PANDORA
 static const char *text_str_title=    "----- UAE4All Pandora -----";
 #else
 static const char *text_str_title=    "----- UAE4All Android -----";
+#endif
 #endif
 #endif // __PSP2__
 static const char *text_str_df0=		"DF0:";
@@ -95,7 +107,7 @@ static const char *text_str_display="Display and Sound (L-trigger)";
 static const char *text_str_savestates="Savestates (S)";
 #endif
 static const char *text_str_eject="Eject All Drives";
-const char *text_str_separator="--------------------------------";
+const char *text_str_separator="---------------------------------";
 #ifdef PANDORA
 static const char *text_str_reset="Reset (R-trigger)";
 #else
@@ -217,26 +229,29 @@ static void draw_mainMenu(int c)
 	10 = custom controls
 	11 = more options
 	12 = reset
-	13 = save config current game
-	14 = save general config
-	15 = quit
+	13 = load config
+	14 = save config as...
+	15 = delete config
+	16 = save general config
+	17 = save config current game
+	18 = quit
 	*/
 	static int b=0;
 	int bb=(b%6)/3;
 	int menuLine = 3;
-	int leftMargin = 8;
-	int tabstop1 = 17+4;
-	int tabstop2 = 19+4;
-	int tabstop3 = 21+4;
-	int tabstop4 = 23+4;
-	int tabstop5 = 25+4;
-	int tabstop6 = 27+4;
-	int tabstop7 = 29+4;
-	int tabstop8 = 31+4;
-	int tabstop9 = 33+4;
+	int leftMargin = 7;
+	int tabstop1 = 16+4;
+	int tabstop2 = 18+4;
+	int tabstop3 = 20+4;
+	int tabstop4 = 22+4;
+	int tabstop5 = 24+4;
+	int tabstop6 = 26+4;
+	int tabstop7 = 28+4;
+	int tabstop8 = 30+4;
+	int tabstop9 = 32+4;
 
 	text_draw_background();
-	text_draw_window(leftMargin-1,menuLine-1,34,40,text_str_title);
+	text_draw_window(leftMargin-1,menuLine-1,35,40,text_str_title);
 	// 1
 	if ((c==0)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_df0);
@@ -331,14 +346,14 @@ static void draw_mainMenu(int c)
 	write_text(leftMargin,menuLine,"Preset System Setup:");
 
 	if ((mainMenu_system!=1)&&((c!=6)||(bb)))
-		write_text_inv(tabstop5,menuLine,"A500");
+		write_text_inv(tabstop5+1,menuLine,"A500");
 	else
-		write_text(tabstop5,menuLine,"A500");
+		write_text(tabstop5+1,menuLine,"A500");
 
 	if ((mainMenu_system!=0)&&((c!=6)||(bb)))
-		write_text_inv(tabstop8-1,menuLine,"A1200");
+		write_text_inv(tabstop8,menuLine,"A1200");
 	else
-		write_text(tabstop8-1,menuLine,"A1200");
+		write_text(tabstop8,menuLine,"A1200");
 
 	// 8
 	menuLine+=2;
@@ -347,11 +362,8 @@ static void draw_mainMenu(int c)
 	else
 		write_text(leftMargin,menuLine,text_str_hdnmem);
 
-	menuLine++;
-	write_text(leftMargin,menuLine,text_str_separator);
-	menuLine++;
-
 	// 9
+	menuLine+=2;
 	if ((c==8)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_display);
 	else
@@ -393,24 +405,44 @@ static void draw_mainMenu(int c)
 
 	// 14
 	menuLine++;
+	write_text(leftMargin,menuLine,"Config");
+
 	if ((c==13)&&(bb))
-		write_text_inv(leftMargin,menuLine,"Save Config for Current Game");
+		write_text_inv(leftMargin+7,menuLine,"Load");
 	else
-		write_text(leftMargin,menuLine,"Save Config for Current Game");
+		write_text(leftMargin+7,menuLine,"Load");
 
 	// 15
-	menuLine+=2;
 	if ((c==14)&&(bb))
-		write_text_inv(leftMargin,menuLine,"Save General Config");
+		write_text_inv(leftMargin+13,menuLine,"Save As");
 	else
-		write_text(leftMargin,menuLine,"Save General Config");
+		write_text(leftMargin+13,menuLine,"Save As");
+
+	// 16
+	if ((c==15)&&(bb))
+		write_text_inv(leftMargin+22,menuLine,"Delete");
+	else
+		write_text(leftMargin+22,menuLine,"Delete");
+
+	// 17
+	menuLine+=2;
+	if ((c==16)&&(bb))
+		write_text_inv(leftMargin+7,menuLine,"Save Default");
+	else
+		write_text(leftMargin+7,menuLine,"Save Default");
+
+	// 18
+	if ((c==17)&&(bb))
+		write_text_inv(leftMargin+20,menuLine,"Save Per-Game");
+	else
+		write_text(leftMargin+20,menuLine,"Save Per-Game");
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_separator);
 
-	// 16
+	// 19
 	menuLine++;
-	if ((c==15)&&(bb))
+	if ((c==18)&&(bb))
 		write_text_inv(leftMargin,menuLine,text_str_exit);
 	else
 		write_text(leftMargin,menuLine,text_str_exit);
@@ -482,6 +514,32 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 	
 	force_quit=0;
 
+	static int holdingUp=0;
+	static int holdingDown=0;
+	static int holdingRight=0;
+	static int holdingLeft=0;
+	static Uint32 menu_last_press_time=0;
+	static Uint32 menu_last_move_time=0;
+	Uint32 now=SDL_GetTicks();
+	if (holdingLeft || holdingRight || holdingUp || holdingDown)
+	{
+		if (now-menu_last_press_time>MENU_MIN_HOLDING_TIME && now-menu_last_move_time>MENU_MOVE_DELAY)
+		{
+			menu_last_move_time=now;
+			SDL_Event ev;
+			ev.type = SDL_KEYDOWN;
+			if (holdingLeft)
+				ev.key.keysym.sym = SDLK_LEFT;
+			else if (holdingRight)
+				ev.key.keysym.sym = SDLK_RIGHT;
+			else if (holdingUp)
+				ev.key.keysym.sym = SDLK_UP;
+			else if (holdingDown)
+				ev.key.keysym.sym = SDLK_DOWN;
+			SDL_PushEvent(&ev);
+		}
+	}
+
 	while (SDL_PollEvent(&event) > 0)
 	{
 		left=right=up=down=hit0=hit1=hit2=hit3=hit4=hit5=hit6=hitH=hitS=hitQ=hitN1=hitN2=hitN3=hitN4=0;
@@ -500,17 +558,17 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				case SDLK_UP: up=1; break;
 				case SDLK_DOWN: down=1; break;
 				case SDLK_PAGEDOWN: hit0=1; break;
-				case SDLK_HOME: hit0=1; break;
 				case SDLK_LALT: hit1=1; break;
 				case SDLK_LCTRL: hit2=1; break;
 #if defined(__PSP2__) || defined(__SWITCH__) //RSHIFT is PAD_L on Vita
 				case SDLK_RSHIFT: hitQ=1; break;
 #else
 				case SDLK_RSHIFT: hit3=1; break;
-#endif
-				case SDLK_RCTRL: hit4=1; break;
 				case SDLK_END: hit5=1; break;
 				case SDLK_PAGEUP: hit6=1; break;
+				case SDLK_HOME: hit0=1; break;
+#endif
+				case SDLK_RCTRL: hit4=1; break;
 				case SDLK_i: info=1; break;
 				case SDLK_h: hitH=1; break;
 				case SDLK_s: hitS=1; break;
@@ -520,8 +578,48 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				case SDLK_3: hitN3=1; break;
 				case SDLK_4: hitN4=1;
 			}
+		} else if (event.type == SDL_KEYUP)
+		{
+			switch(event.key.keysym.sym)
+			{
+				case SDLK_RIGHT:
+					holdingRight=0;
+					break;
+				case SDLK_LEFT:
+					holdingLeft=0;
+					break;
+				case SDLK_UP:
+					holdingUp=0;
+					break;
+				case SDLK_DOWN:
+					holdingDown=0;
+					break;
+				default:
+					break;
+			}
 		}
-				
+		
+		if (left && !holdingLeft)
+		{
+			holdingLeft=1;
+			menu_last_press_time=now;
+		}
+		if (right && !holdingRight) 
+		{
+			holdingRight=1;
+			menu_last_press_time=now;
+		}
+		if (up && !holdingUp) 
+		{
+			holdingUp=1;
+			menu_last_press_time=now;
+		}
+		if (down && !holdingDown) 
+		{
+			holdingDown=1;
+			menu_last_press_time=now;
+		}
+
 		if (info)
 			showInfo();
 		else if (hit1)
@@ -615,7 +713,7 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				c=2;
 			else
 				c--;
-			if (c < 0) c = 15;
+			if (c < 0) c = 18;
 		}
 		else if (down)
 		{
@@ -626,7 +724,7 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 			else if(nr_drives<2 && c==0)
 				c=4;
 			else
-				c=(c+1)%16;
+				c=(c+1)%19;
 		}
 
 	/* New Menu
@@ -643,9 +741,12 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 	10 = custom controls
 	11 = more options
 	12 = reset
-	13 = save config current game
-	14 = save general config
-	15 = exit
+	13 = load config
+	14 = save config as...
+	15 = delete config
+	16 = save general config
+	17 = save config current game
+	18 = exit
 	*/
 		switch(c)
 		{
@@ -770,12 +871,26 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 			case 13:
 				if (hit0)
 				{
-					mainMenu_case=MAIN_MENU_CASE_SAVE;
-					if (saveconfig())
-						showWarning("Config saved for this game");
+					mainMenu_case=MAIN_MENU_CASE_LOAD_CONFIG;
+					end=1;
 				}
 				break;
 			case 14:
+				if (hit0)
+				{
+					mainMenu_case=MAIN_MENU_CASE_SAVE;
+					if (saveconfig(4))
+						showWarning("Config saved");
+				}
+				break;
+			case 15:
+				if (hit0)
+				{
+					mainMenu_case=MAIN_MENU_CASE_DELETE_CONFIG;
+					end=1;
+				}
+				break;
+			case 16:
 				if (hit0)
 				{
 					mainMenu_case=MAIN_MENU_CASE_SAVE;
@@ -783,7 +898,15 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 					showWarning("General config file saved");
 				}
 				break;
-			case 15:
+			case 17:
+				if (hit0)
+				{
+					mainMenu_case=MAIN_MENU_CASE_SAVE;
+					if (saveconfig())
+						showWarning("Config saved for this game");
+				}
+				break;
+			case 18:
 				if (hit0 && right)
 				{
 					force_quit=1;
@@ -885,7 +1008,7 @@ int run_mainMenu()
 				if (emulating)
 				{
 					int old_saveMenu_n_savestate = saveMenu_n_savestate;
-					saveMenu_n_savestate=4;
+					saveMenu_n_savestate=11;
 					make_savestate_filenames(savestate_filename,NULL);
 					f=fopen(savestate_filename,"rb");
 					if (f)
@@ -1042,6 +1165,35 @@ int run_mainMenu()
 					mainMenu_case=-1;
 			}
 			break;
+		case MAIN_MENU_CASE_LOAD_CONFIG:
+		{
+			char path[300];
+			snprintf(path, 300, "%s/conf", launchDir);
+
+			if(run_menuLoad(path, MENU_LOAD_CONFIG))
+				loadconfig(5);
+			mainMenu_case=-1;
+			break;
+		}
+		case MAIN_MENU_CASE_DELETE_CONFIG:
+		{
+			char path[300];
+			snprintf(path, 300, "%s/conf", launchDir);
+
+			if(run_menuLoad(path, MENU_LOAD_DELETE_CONFIG)) {
+				FILE *f=fopen(config_load_filename,"rb");
+				if (f) {
+					fclose(f);
+					if (remove(config_load_filename) == 0) {
+						show_error("Config File deleted");
+					} else {
+						show_error("Config File doesn't exist.");
+					}
+				}
+			}
+			mainMenu_case=-1;
+			break;
+		}
 		case MAIN_MENU_CASE_QUIT:
 			if (gui_data.hdled == HDLED_WRITE && force_quit == 0) 
 			{
@@ -1062,6 +1214,10 @@ int run_mainMenu()
 #if !defined(__PSP2__) && !defined(__SWITCH__)
 			sync();
 #endif
+#ifdef __SWITCH__
+            mainMenu_singleJoycons = 0;
+            update_joycon_mode();
+#endif
 			exit(0);
 			break;
 		default:
@@ -1072,7 +1228,7 @@ int run_mainMenu()
 	if (sound_rate != old_sound_rate || mainMenu_soundStereo != old_stereo)
 		init_sound();
 	
-#if defined(USE_UAE4ALL_VKBD) && defined(LARGEKEYBOARD)
+#if defined(USE_UAE4ALL_VKBD)
 	if (mainMenu_vkbdLanguage != old_vkbdLanguage)
 	{
 		vkbd_quit();

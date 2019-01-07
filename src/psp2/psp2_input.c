@@ -8,19 +8,30 @@ extern int mainMenu_swapAB;
 extern int inside_menu;
 
 SDLKey getKey(Uint8 button) {
-	
-	switch(button) {
 
+	switch(button) {
 		case PAD_UP:
+#ifdef __SWITCH__
+		case LSTICK_UP:
+#endif
 		return SDLK_UP;
 
 		case PAD_DOWN:
+#ifdef __SWITCH__
+		case LSTICK_DOWN:
+#endif
 		return SDLK_DOWN;
 
 		case PAD_RIGHT:
+#ifdef __SWITCH__
+		case LSTICK_RIGHT:
+#endif
 		return SDLK_RIGHT;
 	
 		case PAD_LEFT:
+#ifdef __SWITCH__
+		case LSTICK_LEFT:
+#endif
 		return SDLK_LEFT;
 
 		case PAD_START:

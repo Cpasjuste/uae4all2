@@ -46349,11 +46349,13 @@ OPCODE(0xEDC0)
 {
    u32 adr, res;
    u32 src, dst;
-   u32 mask, offset, width;
+   u32 mask, width;
+   s32 offset;
+   u32 offset2;
    
    FETCH_WORD(res)
-   BF_REG_GET(res, src, offset, width)
-   BF_FFO(src, mask, offset, width)
+   BF_REG_GET_BFFFO(res, src, offset, offset2, width)
+   BF_FFO(src, mask, offset2, width, res)
 	RET(18)
 }
 
@@ -46369,9 +46371,10 @@ OPCODE(0xEDD0)
    FETCH_WORD(res)
    adr = AREG((Opcode /*>> 0*/) & 7);
    BF_GET_PARM(res, offset, width)
+   u32 offset2 = offset;
    BF_MEM_GET(&adr, &src, &offset, width, &bf0, &bf1);
    BF_SET_FLAGS(src, width)
-   BF_FFO(src, mask, dst, width)
+   BF_FFO(src, mask, offset2, width, res)
 	RET(28)
 }
 
@@ -46388,9 +46391,10 @@ OPCODE(0xEDE8)
    FETCH_SWORD(adr)
    adr += AREG((Opcode /*>> 0*/) & 7);
    BF_GET_PARM(res, offset, width)
+   u32 offset2 = offset;
    BF_MEM_GET(&adr, &src, &offset, width, &bf0, &bf1);
    BF_SET_FLAGS(src, width)
-   BF_FFO(src, mask, dst, width)
+   BF_FFO(src, mask, offset2, width, res)
 	RET(34)
 }
 
@@ -46407,9 +46411,10 @@ OPCODE(0xEDF0)
    adr = AREG((Opcode /*>> 0*/) & 7);
    DECODE_EXT_WORD(&adr);
    BF_GET_PARM(res, offset, width)
+   u32 offset2 = offset;
    BF_MEM_GET(&adr, &src, &offset, width, &bf0, &bf1);
    BF_SET_FLAGS(src, width)
-   BF_FFO(src, mask, dst, width)
+   BF_FFO(src, mask, offset2, width, res)
 	RET(30)
 }
 
@@ -46425,9 +46430,10 @@ OPCODE(0xEDF8)
    FETCH_WORD(res)
    FETCH_SWORD(adr)
    BF_GET_PARM(res, offset, width)
+   u32 offset2 = offset;
    BF_MEM_GET(&adr, &src, &offset, width, &bf0, &bf1);
    BF_SET_FLAGS(src, width)
-   BF_FFO(src, mask, dst, width)
+   BF_FFO(src, mask, offset2, width, res)
 	RET(28)
 }
 
@@ -46443,9 +46449,10 @@ OPCODE(0xEDF9)
    FETCH_WORD(res)
    FETCH_LONG(adr)
    BF_GET_PARM(res, offset, width)
+   u32 offset2 = offset;
    BF_MEM_GET(&adr, &src, &offset, width, &bf0, &bf1);
    BF_SET_FLAGS(src, width)
-   BF_FFO(src, mask, dst, width)
+   BF_FFO(src, mask, offset2, width, res)
 	RET(28)
 }
 
@@ -46462,9 +46469,10 @@ OPCODE(0xEDFA)
    adr = GET_SWORD + ((hostptr)(PC) - BasePC);
    PC++;
    BF_GET_PARM(res, offset, width)
+   u32 offset2 = offset;
    BF_MEM_GET(&adr, &src, &offset, width, &bf0, &bf1);
    BF_SET_FLAGS(src, width)
-   BF_FFO(src, mask, dst, width)
+   BF_FFO(src, mask, offset2, width, res)
 	RET(34)
 }
 
@@ -46481,9 +46489,10 @@ OPCODE(0xEDFB)
    adr = (hostptr)(PC) - BasePC;
    DECODE_EXT_WORD(&adr);
    BF_GET_PARM(res, offset, width)
+   u32 offset2 = offset;
    BF_MEM_GET(&adr, &src, &offset, width, &bf0, &bf1);
    BF_SET_FLAGS(src, width)
-   BF_FFO(src, mask, dst, width)
+   BF_FFO(src, mask, offset2, width, res)
 	RET(30)
 }
 

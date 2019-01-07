@@ -29,8 +29,8 @@ extern unsigned prefs_chipmem_size;
 extern unsigned prefs_bogomem_size;
 extern unsigned prefs_fastmem_size;
 extern int prefs_gfx_framerate, changed_gfx_framerate;
-extern const char *kickstarts_rom_names[5];
-extern const char *extended_rom_names[5];
+extern const char *kickstarts_rom_names[6];
+extern const char *extended_rom_names[6];
 #ifdef ANDROIDSDL
 extern const char *af_kickstarts_rom_names[4]; 
 #endif

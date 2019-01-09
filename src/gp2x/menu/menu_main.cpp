@@ -427,9 +427,9 @@ static void draw_mainMenu(int c)
 	// 17
 	menuLine+=2;
 	if ((c==16)&&(bb))
-		write_text_inv(leftMargin+7,menuLine,"Save Default");
+		write_text_inv(leftMargin+7,menuLine,"Save General");
 	else
-		write_text(leftMargin+7,menuLine,"Save Default");
+		write_text(leftMargin+7,menuLine,"Save General");
 
 	// 18
 	if ((c==17)&&(bb))

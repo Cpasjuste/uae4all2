@@ -46,6 +46,7 @@ extern char filename2[256];
 extern char filename3[256];
 extern char currentDir[300];
 extern char config_load_filename[300];
+extern char save_import_filename[300];
 
 const char *text_str_load_separator="----------------------------------------";
 const char *text_str_load_dir="#DIR#";
@@ -161,6 +162,26 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 		text_draw_window(2,2,41,25,"       Delete .CONF-file (X = Info)      ");
 #else
 		text_draw_window(2,2,41,25,"       Delete .CONF-file       ");
+#endif
+#endif
+	else if (menu_load_type == MENU_LOAD_IMPORT_SAVE)
+#ifdef __PSP2__
+		text_draw_window(2,2,41,25,"       Select .ASF-file (Triangle = Info)      ");
+#else
+#ifdef __SWITCH__
+		text_draw_window(2,2,41,25,"       Select .ASF-file (X = Info)      ");
+#else
+		text_draw_window(2,2,41,25,"       Select .ASF-file       ");
+#endif
+#endif
+	else if (menu_load_type == MENU_LOAD_DELETE_SAVE)
+#ifdef __PSP2__
+		text_draw_window(2,2,41,25,"       Delete .ASF-file (Triangle = Info)      ");
+#else
+#ifdef __SWITCH__
+		text_draw_window(2,2,41,25,"       Delete .ASF-file (X = Info)      ");
+#else
+		text_draw_window(2,2,41,25,"       Delete .ASF-file       ");
 #endif
 #endif
 #ifdef __PSP2__
@@ -550,9 +571,16 @@ static int menuLoadLoop(char *curr_path)
 							else
 								strcpy(config_load_filename,filename);
 							break;
+						case MENU_LOAD_IMPORT_SAVE:
+						case MENU_LOAD_DELETE_SAVE:
+							if (strstr(filename, ".asf") == NULL)
+								showWarning("ASF file must be selected");
+							else
+								strcpy(save_import_filename,filename);
+							break;
 					}
 					loaded=1;
-					if ((menu_load_type != MENU_LOAD_CONFIG) && (menu_load_type != MENU_LOAD_DELETE_CONFIG))
+					if ((menu_load_type != MENU_LOAD_CONFIG) && (menu_load_type != MENU_LOAD_DELETE_CONFIG) && (menu_load_type != MENU_LOAD_IMPORT_SAVE) && (menu_load_type != MENU_LOAD_DELETE_SAVE))
 						strcpy(currentDir,filename);
 					free(filename);
 					break;
@@ -603,7 +631,7 @@ static int menuLoadLoop(char *curr_path)
 							strcat(newdir, "/");
 							strcat(newdir, namelist[sel+1]->d_name);
 						}
-						if ((menu_load_type != MENU_LOAD_CONFIG) && (menu_load_type != MENU_LOAD_DELETE_CONFIG))
+						if ((menu_load_type != MENU_LOAD_CONFIG) && (menu_load_type != MENU_LOAD_DELETE_CONFIG) && (menu_load_type != MENU_LOAD_IMPORT_SAVE) && (menu_load_type != MENU_LOAD_DELETE_SAVE))
 							strcpy(currentDir,newdir);
 						loaded = menuLoadLoop(newdir);
 						free(newdir);

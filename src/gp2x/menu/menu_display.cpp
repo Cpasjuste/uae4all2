@@ -24,7 +24,7 @@
 #define SDL_PollEvent PSP2_PollEvent
 #endif
 
-const char *text_str_display_separator="----------------------------------";
+const char *text_str_display_separator="--------------------------------------";
 const char *text_str_display_title=    "   Display and Sound Settings    ";
 static const char *text_str_sound="Sound";
 static const char *text_str_fast="Fast";
@@ -70,6 +70,7 @@ enum {
 	MENUDISPLAY_VKBDLANGUAGE,
 #endif
 	MENUDISPLAY_BACKGROUND,
+	MENUDISPLAY_FONT,
 	MENUDISPLAY_SOUND,
 	MENUDISPLAY_SNDRATE,
 	MENUDISPLAY_STEREO,
@@ -359,6 +360,24 @@ static void draw_displayMenu(int c)
 		write_text_inv(tabstop8-2, menuLine,"Moving");
 	else
 		write_text(tabstop8-2, menuLine,"Moving");
+		
+	// MENUDISPLAY_FONT
+	menuLine+=2;
+	write_text(leftMargin, menuLine,"Menu Font");
+	if ((mainMenu_font==0)&&((menuDisplay!=MENUDISPLAY_FONT)||(bb)))
+		write_text_inv(tabstop3,menuLine, "Narrow");
+	else
+		write_text(tabstop3, menuLine, "Narrow");
+
+	if ((mainMenu_font==1)&&((menuDisplay!=MENUDISPLAY_FONT)||(bb)))
+		write_text_inv(tabstop3+7, menuLine,"Wide");
+	else
+		write_text(tabstop3+7, menuLine,"Wide");
+
+	if ((mainMenu_font==2)&&((menuDisplay!=MENUDISPLAY_FONT)||(bb)))
+		write_text_inv(tabstop3+5+7, menuLine,"Original");
+	else
+		write_text(tabstop3+5+7, menuLine,"Original");
 
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_display_separator);
@@ -766,6 +785,21 @@ static int key_displayMenu(int *c)
 			case MENUDISPLAY_BACKGROUND:
 				if ((left)||(right))
 					mainMenu_background=!mainMenu_background;
+				break;
+			case MENUDISPLAY_FONT:
+				if (left) {
+					if ((mainMenu_font > 0) && (mainMenu_font <= 2)) {
+						mainMenu_font--;
+					} else {
+						mainMenu_font = 2;
+					}
+				} else if (right) {
+					if ((mainMenu_font < 2) && (mainMenu_font >= 0)) {
+						mainMenu_font++;
+					} else {
+						mainMenu_font = 0;
+					}
+				}
 				break;
 			case MENUDISPLAY_SOUND:
 					if (left)

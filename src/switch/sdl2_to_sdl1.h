@@ -36,6 +36,8 @@ void SDL_SetVideoModeScaling(int x, int y, float sw, float sh);
 void SDL_SetVideoModeBilinear(int value);
 void SDL_Flip(SDL_Surface *surface);
 void SDL_SetVideoModeSync(int value);
+void updateResolution();
+int isDocked();
 #endif
 
 #endif

@@ -4,7 +4,12 @@ Changes in this Version
 
 - implement config load with dialog, config save as, and config delete
 - increase number of savestates per game to 12
-- increase number of custom control sets to 5
+- increase number of custom control sets to 6
+- on Switch, fix some issues with vsync
+- implement importing and exporting of savestates
+- better menu font (thanks @wronghands)
+- option to select menu font
+- on Switch, automatically use 1080p resolution in docked mode
 
 Description
 =====
@@ -17,6 +22,8 @@ Use4All2 Mod is an Amiga emulator for Vita and Switch. This is my mod of this gr
 Thanks to Cpasjuste for the original port and for jumping in and adding shader support and making the assembler optimizations work. 
 
 Thanks to ScHlAuChi for extensive testing, ideas, and for contributing the new larger virtual keyboard images.
+
+Thanks to wronghands for the new, better-looking menu font, and many ideas.
 
 Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya and many more.
 
@@ -35,7 +42,7 @@ Installation
   * You should now have the executable `/switch/uae4all2/uae4all2.nro` and a folder `/switch/uae4all2/data/` with the keyboard icons and other data files on your SDCard. 
   * Obtain and copy BIOS files `kick13.rom` (Amiga 500), and `kick31.rom` (Amiga 1200) to your SDCard into `/switch/uae4all2/kickstarts/`.
   * Optional: copy over additional BIOS files `kick12.rom`, `kick20.rom`, `kickcustom.rom` (for e.g. version 3.1.4 or any other user-supplied BIOS) to the same folder.
-  * Use your favorite Homebrew Launcher or Homebrew Loader to start Uaeall2
+  * Use nsp injection to start uae4all2, otherwise the `config save as` and `savestate export` options will not work. On SX OS, you can do this by holding down R while launching any installed game to make hbmenu appear.
 
 * MD5 of verified working kickstart rom files, you can test yours at [onlinemd5](http://onlinemd5.com/):   
 ```
@@ -52,7 +59,7 @@ Vita/Switch-exclusive Features
 ======
 - Full speed emulation of most Amiga games with zero frameskip
 - Large, complete virtual keyboard with adjustable position and adjustable transparency
-- Five fully mappable custom control sets: map Vita/Switch buttons to any Amiga joystick or key input
+- Six fully mappable custom control sets: map Vita/Switch buttons to any Amiga joystick or key input
 - Multiple hard-file support: up to 4 hdf files (size <2GB each on Vita, size <4GB each on Switch) can be mounted simultaneously
 - Multiple controller support on Vita TV/Switch: up to four (eight on Switch) paired controllers can be fully mapped
 - Analog mouse control: control the mouse using the analog stick with adjustable sensitivity
@@ -290,7 +297,12 @@ CHANGELOG
 
 - implement config load with dialog, config save as, and config delete
 - increase number of savestates per game to 12
-- increase number of custom control sets to 5
+- increase number of custom control sets to 6
+- on Switch, fix some issues with vsync
+- implement importing and exporting of savestates
+- better menu font (thanks @wronghands)
+- option to select menu font
+- on Switch, automatically use 1080p resolution in docked mode
 
 1.83
 

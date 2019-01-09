@@ -479,7 +479,11 @@ static void draw_controlsMenu(int c)
 		write_text_inv(leftMargin+19,menuLine,"5");
 	else
 		write_text(leftMargin+19,menuLine,"5");
-		
+	if ((mainMenu_custom_controlSet==5)&&((menuControls!=MENUCONTROLS_CUSTOMSET)||(bb)))
+		write_text_inv(leftMargin+21,menuLine,"6");
+	else
+		write_text(leftMargin+21,menuLine,"6");
+
 #else
 	menuLine++;
 	write_text(leftMargin,menuLine,text_str_controls_separator);

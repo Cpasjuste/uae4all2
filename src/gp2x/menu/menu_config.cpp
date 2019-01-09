@@ -83,6 +83,7 @@ int mainMenu_autofireRate = 8;
 int mainMenu_customAutofireButton = 0;
 int mainMenu_showStatus = DEFAULT_STATUSLN;
 int mainMenu_background = 0;
+int mainMenu_font = 0;
 int mainMenu_mouseMultiplier = DEFAULT_MOUSEMULTIPLIER;
 int mainMenu_mouseEmulation = 1;
 int mainMenu_stylusOffset = 0;
@@ -261,6 +262,7 @@ void SetDefaultMenuSettings(int general)
     mainMenu_customAutofireButton = 0;
     mainMenu_showStatus = DEFAULT_STATUSLN;
     mainMenu_background = 0;
+    mainMenu_font = 0;
     mainMenu_mouseMultiplier = DEFAULT_MOUSEMULTIPLIER;
     mainMenu_mouseEmulation = 1;
     mainMenu_stylusOffset = 0;
@@ -1179,6 +1181,8 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "background=%d\n",mainMenu_background);
     fputs(buffer,f);
+    snprintf((char*)buffer, 255, "font=%d\n",mainMenu_font);
+    fputs(buffer,f);
     snprintf((char*)buffer, 255, "mousemultiplier=%d\n",mainMenu_mouseMultiplier);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "mouseemulation=%d\n",mainMenu_mouseEmulation);
@@ -1591,6 +1595,7 @@ void loadconfig(int general)
 #endif
         fscanf(f,"showstatus=%d\n",&mainMenu_showStatus);
         fscanf(f,"background=%d\n",&mainMenu_background);
+        fscanf(f,"font=%d\n",&mainMenu_font);
         fscanf(f,"mousemultiplier=%d\n",&mainMenu_mouseMultiplier);
         //remain compatible with old configuration versions
         if (mainMenu_mouseMultiplier < 10) {
@@ -1670,36 +1675,34 @@ void loadconfig(int general)
 #else
 		fscanf(f,"custom_controlSet=%d\n",&mainMenu_custom_controlSet);
 		int config_1_73 = -1;
-		int config_1_82 = 1;
-		int config_1_83 = 1;
+		int config_1_82 = -1;
+		int config_1_83 = -1;
 		int l=0;
 		int m=0;
 		for (int i=0; i<MAX_NUM_CONTROLLERS; i++)
 		{
-			if (config_1_82==-1)
+			if (config_1_82==1)
 				break;
 			for (int j=0; j<MAX_NUM_CUSTOM_PRESETS; j++) {
-				if (j==0 && i==4) {
-					if (!fscanf(f,"custom%d_up_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_up[j][i])) {
-						config_1_82 = -1;
-						break;
-					}
-				} else {
 #ifdef __SWITCH__
-					if (!(i==0 && j==1)) {
+				if (!(i==0 && j==1)) {
 #endif
+				if (config_1_83 == -1) {
 					if (!fscanf(f,"custom%d\n",&l)) {
-						config_1_82 = -1;
+						config_1_82 = 1;
 						break;
 					}
 					if (j==3 && l!=4) {
+						config_1_83 = 1;
 						break;
 					}
-					fscanf(f,"_up_Ply%d=%d\n",&m,&mainMenu_customPreset_up[j][i]);
-#ifdef __SWITCH__
-					}
-#endif
 				}
+				else 
+					config_1_83 = -1;
+				fscanf(f,"_up_Ply%d=%d\n",&m,&mainMenu_customPreset_up[j][i]);
+#ifdef __SWITCH__
+				}
+#endif
 				fscanf(f,"custom%d_down_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_down[j][i]);
 				fscanf(f,"custom%d_left_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_left[j][i]);
 				fscanf(f,"custom%d_right_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_right[j][i]);
@@ -1722,28 +1725,18 @@ void loadconfig(int general)
 				fscanf(f,"custom%d_R_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R[j][i]);
 #ifdef __SWITCH__
 				if (j == 0 && i == 0) {
-					if (config_1_73 > 0) {
-						fscanf(f,"custom%d_L2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L2[j][i]);
+					if (fscanf(f,"custom%d_L2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L2[j][i]) > 1) {
 						fscanf(f,"custom%d_R2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R2[j][i]);
 						fscanf(f,"custom%d_L3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L3[j][i]);
 						fscanf(f,"custom%d_R3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R3[j][i]);
 						fscanf(f,"custom%d_up_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_up[j+1][i]);
-					} else if (config_1_73 == 0) {
-						fscanf(f,"custom%d_up_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_up[j+1][i]);
-					} else if (config_1_73 < 0) {
-						if (fscanf(f,"custom%d_L2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L2[j][i]) > 1) {
-							fscanf(f,"custom%d_R2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R2[j][i]);
-							fscanf(f,"custom%d_L3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L3[j][i]);
-							fscanf(f,"custom%d_R3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R3[j][i]);
-							fscanf(f,"custom%d_up_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_up[j+1][i]);
-							config_1_73 = 1;
-						} else {
-							fscanf(f,"up_Ply%d=%d\n",&m,&mainMenu_customPreset_up[j+1][i]);
-							config_1_73 = 0;
-						}
+						config_1_73 = 0;
+					} else {
+						fscanf(f,"up_Ply%d=%d\n",&m,&mainMenu_customPreset_up[j+1][i]);
+						config_1_73 = 1;
 					}
 				} else {
-					if (config_1_73 != 0) {
+					if (config_1_73 == 0) {
 						fscanf(f,"custom%d_L2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L2[j][i]);
 						fscanf(f,"custom%d_R2_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_R2[j][i]);
 						fscanf(f,"custom%d_L3_Ply%d=%d\n",&l,&m,&mainMenu_customPreset_L3[j][i]);
@@ -1754,7 +1747,7 @@ void loadconfig(int general)
 			}
 		}
 		remap_custom_controls(); // update the custom variables with the appropriate set.
-		if (config_1_82 == -1) {
+		if (config_1_82 == 1) {
 			fscanf(f,"pu=%d\n",&mainMenu_CPU_model);
 		} else
 #endif //__PSP2__

@@ -14,6 +14,15 @@
 #include "gp2x.h"
 #include <SDL_ttf.h>
 #include "savestate.h"
+#include <fstream>
+
+#ifdef __SWITCH__
+#include "switch_kbd.h"
+#endif
+
+#ifdef __PSP2__
+#include "psp2_kbdvita.h"
+#endif
 
 #if defined(__PSP2__) || defined(__SWITCH__)
 #define SDL_PollEvent PSP2_PollEvent
@@ -33,12 +42,15 @@ static const char *text_str_8="8";
 static const char *text_str_9="9";
 static const char *text_str_10="10";
 static const char *text_str_auto="auto";
+static const char *text_str_importmem="Import to Slot";
+static const char *text_str_exportmem="Export from Slot";
 static const char *text_str_loadmem="Load State";
 static const char *text_str_savemem="Save State";
-static const char *text_str_deletemem="Delete State";
+static const char *text_str_deletemem="Delete State (File Dialog)";
+static const char *text_str_deleteslot="Delete State (Selected Slot)";
 static const char *text_str_savestateslocation="Location";
 static const char *text_str_separator="-------------------------------------";
-static const char *text_str_exit="Back to Main Menu";
+static const char *text_str_exit="Return to Main Menu";
 
 extern int emulating;
 extern int saveMenu_n_savestate;
@@ -53,10 +65,21 @@ int saveMenu_case=-1;
 int leftMargin = 4;
 int tabstop1 = 14;
 
-enum { SAVE_MENU_CASE_EXIT, SAVE_MENU_CASE_LOAD_MEM, SAVE_MENU_CASE_SAVE_MEM, SAVE_MENU_CASE_DELETE_MEM, SAVE_MENU_CASE_LOAD_VMU, SAVE_MENU_CASE_SAVE_VMU, SAVE_MENU_CASE_CANCEL };
+char save_import_filename[300];
+
+enum { SAVE_MENU_CASE_EXIT, SAVE_MENU_CASE_LOAD_MEM, SAVE_MENU_CASE_SAVE_MEM, SAVE_MENU_CASE_DELETE_SLOT, SAVE_MENU_CASE_LOAD_VMU, SAVE_MENU_CASE_SAVE_VMU, SAVE_MENU_CASE_CANCEL, SAVE_MENU_CASE_IMPORT_MEM, SAVE_MENU_CASE_EXPORT_MEM, SAVE_MENU_CASE_DELETE_MEM};
+
+static inline void cp(char* source_name, char* dest_name)
+{
+    std::ifstream  src(source_name, std::ios::binary);
+    std::ofstream  dst(dest_name,   std::ios::binary);
+
+    dst << src.rdbuf();
+}
 
 static inline void draw_savestatesMenu(int c)
 {
+	int menuLine = 6;
 	static int b=0;
 	int bb=(b%6)/3;
 	SDL_Rect r;
@@ -66,118 +89,142 @@ static inline void draw_savestatesMenu(int c)
 	text_draw_background();
 	text_draw_window(3,4,39,20,text_str_title);
 
-	write_text(leftMargin,6,text_str_separator);
+	if ((c==0)&&(bb))
+		write_text_inv(leftMargin,menuLine,text_str_exit);
+	else
+		write_text(leftMargin,menuLine,text_str_exit);
 	
-	write_text(leftMargin,7,text_str_savestate);
-
-	if ((saveMenu_n_savestate==0)&&((c!=0)||(bb)))
-		write_text_inv(tabstop1,7,text_str_0);
-	else
-		write_text(tabstop1,7,text_str_0);
-
-	if ((saveMenu_n_savestate==1)&&((c!=0)||(bb)))
-		write_text_inv(tabstop1+2,7,text_str_1);
-	else
-		write_text(tabstop1+2,7,text_str_1);
-
-	if ((saveMenu_n_savestate==2)&&((c!=0)||(bb)))
-		write_text_inv(tabstop1+4,7,text_str_2);
-	else
-		write_text(tabstop1+4,7,text_str_2);
-
-	if ((saveMenu_n_savestate==3)&&((c!=0)||(bb)))
-		write_text_inv(tabstop1+6,7,text_str_3);
-	else
-		write_text(tabstop1+6,7,text_str_3);
-
-	if ((saveMenu_n_savestate==4)&&((c!=0)||(bb)))
-		write_text_inv(tabstop1+8,7,text_str_4);
-	else
-		write_text(tabstop1+8,7,text_str_4);
-
-	if ((saveMenu_n_savestate==5)&&((c!=0)||(bb)))
-		write_text_inv(tabstop1+10,7,text_str_5);
-	else
-		write_text(tabstop1+10,7,text_str_5);
+	menuLine++;
+	write_text(leftMargin,menuLine,text_str_separator);
+	menuLine++;
 	
-	if ((saveMenu_n_savestate==6)&&((c!=0)||(bb)))
-		write_text_inv(tabstop1+12,7,text_str_6);
-	else
-		write_text(tabstop1+12,7,text_str_6);
+	write_text(leftMargin,menuLine,text_str_savestate);
 
-	if ((saveMenu_n_savestate==7)&&((c!=0)||(bb)))
-		write_text_inv(tabstop1+14,7,text_str_7);
+	if ((saveMenu_n_savestate==0)&&((c!=1)||(bb)))
+		write_text_inv(tabstop1,menuLine,text_str_0);
 	else
-		write_text(tabstop1+14,7,text_str_7);
+		write_text(tabstop1,menuLine,text_str_0);
 
-	if ((saveMenu_n_savestate==8)&&((c!=0)||(bb)))
-		write_text_inv(tabstop1+16,7,text_str_8);
+	if ((saveMenu_n_savestate==1)&&((c!=1)||(bb)))
+		write_text_inv(tabstop1+2,menuLine,text_str_1);
 	else
-		write_text(tabstop1+16,7,text_str_8);
+		write_text(tabstop1+2,menuLine,text_str_1);
 
-	if ((saveMenu_n_savestate==9)&&((c!=0)||(bb)))
-		write_text_inv(tabstop1+18,7,text_str_9);
+	if ((saveMenu_n_savestate==2)&&((c!=1)||(bb)))
+		write_text_inv(tabstop1+4,menuLine,text_str_2);
 	else
-		write_text(tabstop1+18,7,text_str_9);
+		write_text(tabstop1+4,menuLine,text_str_2);
 
-	if ((saveMenu_n_savestate==10)&&((c!=0)||(bb)))
-		write_text_inv(tabstop1+20,7,text_str_10);
+	if ((saveMenu_n_savestate==3)&&((c!=1)||(bb)))
+		write_text_inv(tabstop1+6,menuLine,text_str_3);
 	else
-		write_text(tabstop1+20,7,text_str_10);
+		write_text(tabstop1+6,menuLine,text_str_3);
+
+	if ((saveMenu_n_savestate==4)&&((c!=1)||(bb)))
+		write_text_inv(tabstop1+8,menuLine,text_str_4);
+	else
+		write_text(tabstop1+8,menuLine,text_str_4);
+
+	if ((saveMenu_n_savestate==5)&&((c!=1)||(bb)))
+		write_text_inv(tabstop1+10,menuLine,text_str_5);
+	else
+		write_text(tabstop1+10,menuLine,text_str_5);
 	
-	if ((saveMenu_n_savestate==11)&&((c!=0)||(bb)))
-		write_text_inv(tabstop1+23,7,text_str_auto);
+	if ((saveMenu_n_savestate==6)&&((c!=1)||(bb)))
+		write_text_inv(tabstop1+12,menuLine,text_str_6);
 	else
-		write_text(tabstop1+23,7,text_str_auto);
+		write_text(tabstop1+12,menuLine,text_str_6);
 
-	write_text(leftMargin,8,text_str_separator);
-
-	write_text(leftMargin,10,text_str_separator);
-
-	if ((c==1)&&(bb))
-		write_text_inv(leftMargin,11,text_str_loadmem);
+	if ((saveMenu_n_savestate==7)&&((c!=1)||(bb)))
+		write_text_inv(tabstop1+14,menuLine,text_str_7);
 	else
-		write_text(leftMargin,11,text_str_loadmem);
+		write_text(tabstop1+14,menuLine,text_str_7);
 
-	write_text(leftMargin,12,text_str_separator);
+	if ((saveMenu_n_savestate==8)&&((c!=1)||(bb)))
+		write_text_inv(tabstop1+16,menuLine,text_str_8);
+	else
+		write_text(tabstop1+16,menuLine,text_str_8);
 
+	if ((saveMenu_n_savestate==9)&&((c!=1)||(bb)))
+		write_text_inv(tabstop1+18,menuLine,text_str_9);
+	else
+		write_text(tabstop1+18,menuLine,text_str_9);
+
+	if ((saveMenu_n_savestate==10)&&((c!=1)||(bb)))
+		write_text_inv(tabstop1+20,menuLine,text_str_10);
+	else
+		write_text(tabstop1+20,menuLine,text_str_10);
+	
+	if ((saveMenu_n_savestate==11)&&((c!=1)||(bb)))
+		write_text_inv(tabstop1+23,menuLine,text_str_auto);
+	else
+		write_text(tabstop1+23,menuLine,text_str_auto);
+
+	menuLine++;
+	write_text(leftMargin,menuLine,text_str_separator);
+	menuLine++;
+	
 	if ((c==2)&&(bb))
-		write_text_inv(leftMargin,13,text_str_savemem);
+		write_text_inv(leftMargin,menuLine,text_str_importmem);
 	else
-		write_text(leftMargin,13,text_str_savemem);
+		write_text(leftMargin,menuLine,text_str_importmem);
 
-	write_text(leftMargin,14,text_str_separator);
-
+	menuLine+=2;
 	if ((c==3)&&(bb))
-		write_text_inv(leftMargin,15,text_str_deletemem);
+		write_text_inv(leftMargin,menuLine,text_str_exportmem);
 	else
-		write_text(leftMargin,15,text_str_deletemem);
+		write_text(leftMargin,menuLine,text_str_exportmem);
 
-	write_text(leftMargin,20,text_str_separator);
 
-	write_text(leftMargin,21,text_str_savestateslocation);
+	menuLine++;
+	write_text(leftMargin,menuLine,text_str_separator);
+	menuLine++;
+
+	if ((c==4)&&(bb))
+		write_text_inv(leftMargin,menuLine,text_str_loadmem);
+	else
+		write_text(leftMargin,menuLine,text_str_loadmem);
+	
+	menuLine+=2;
+	if ((c==5)&&(bb))
+		write_text_inv(leftMargin,menuLine,text_str_savemem);
+	else
+		write_text(leftMargin,menuLine,text_str_savemem);
+
+	menuLine++;
+	write_text(leftMargin,menuLine,text_str_separator);
+	menuLine++;
+	
+	if ((c==6)&&(bb))
+		write_text_inv(leftMargin,menuLine,text_str_deletemem);
+	else
+		write_text(leftMargin,menuLine,text_str_deletemem);
+
+	menuLine+=2;
+	if ((c==7)&&(bb))
+		write_text_inv(leftMargin,menuLine,text_str_deleteslot);
+	else
+		write_text(leftMargin,menuLine,text_str_deleteslot);
+
+	menuLine++;
+	write_text(leftMargin,menuLine,text_str_separator);
+	menuLine++;
+
+	write_text(leftMargin,menuLine,text_str_savestateslocation);
 	if (mainMenu_useSavesFolder==0)
 	{
-		if ((c!=4)||(bb))
-			write_text_inv(tabstop1,21,"Same as ROM ");
+		if ((c!=8)||(bb))
+			write_text_inv(tabstop1,menuLine,"Same as ROM ");
 		else
-			write_text(tabstop1,21,"Same as ROM ");
+			write_text(tabstop1,menuLine,"Same as ROM ");
 	}
 	else if (mainMenu_useSavesFolder==1)
 	{
-		if ((c!=4)||(bb))
-			write_text_inv(tabstop1,21,"Saves Folder");
+		if ((c!=8)||(bb))
+			write_text_inv(tabstop1,menuLine,"Saves Folder");
 		else
-			write_text(tabstop1,21,"Saves Folder");
+			write_text(tabstop1,menuLine,"Saves Folder");
 	}
-
-	write_text(leftMargin,22,text_str_separator);
-
-	if ((c==5)&&(bb))
-		write_text_inv(leftMargin,23,text_str_exit);
-	else
-		write_text(leftMargin,23,text_str_exit);
-	write_text(leftMargin,24,text_str_separator);
 
 	text_flip();
 	b++;
@@ -307,22 +354,22 @@ static inline int key_saveMenu(int *cp)
 		}
 		else if (up)
 		{
-			if (c>0) c=(c-1)%6;
-			else c=5;
+			if (c>0) c=(c-1)%9;
+			else c=8;
 		}
 		else if (down)
 		{
-			c=(c+1)%6;
+			c=(c+1)%9;
 		}
 		else
-		if (left && c!=4)
+		if (left && c!=8)
 		{
 			if (saveMenu_n_savestate>0)
 				saveMenu_n_savestate--;
 			else
 				saveMenu_n_savestate=11;
 		}
-		else if (right && c!=4)
+		else if (right && c!=8)
 		{
 			if (saveMenu_n_savestate<11)
 				saveMenu_n_savestate++;
@@ -332,29 +379,57 @@ static inline int key_saveMenu(int *cp)
 		switch(c)
 		{
 			case 0:
+			if (hit0)
+			{
+				saveMenu_case=SAVE_MENU_CASE_EXIT;
+				end=1;
+			}
 			break;
 			case 1:
+			break;
+			case 2:
+			if (hit0)
+			{
+			saveMenu_case=SAVE_MENU_CASE_IMPORT_MEM;
+			end=1;
+			}
+			break;			
+			case 3:
+			if (hit0)
+			{
+			saveMenu_case=SAVE_MENU_CASE_EXPORT_MEM;
+			end=1;
+			}
+			break;
+			case 4:
 			if (hit0)
 			{
 			saveMenu_case=SAVE_MENU_CASE_LOAD_MEM;
 			end=1;
 			}
 			break;
-			case 2:
+			case 5:
 			if (hit0)
 			{
-				saveMenu_case=SAVE_MENU_CASE_SAVE_MEM;
-				end=1;
+			saveMenu_case=SAVE_MENU_CASE_SAVE_MEM;
+			end=1;
 			}
 			break;
-			case 3:
+			case 6:
 			if (hit0)
 			{
-				saveMenu_case=SAVE_MENU_CASE_DELETE_MEM;
-				end=1;
+			saveMenu_case=SAVE_MENU_CASE_DELETE_MEM;
+			end=1;
 			}
 			break;
-			case 4:
+			case 7:
+			if (hit0)
+			{
+			saveMenu_case=SAVE_MENU_CASE_DELETE_SLOT;
+			end=1;
+			}
+			break;
+			case 8:
 			if (left || right)
 			{
 				if (mainMenu_useSavesFolder==0)
@@ -362,13 +437,6 @@ static inline int key_saveMenu(int *cp)
 				else
 					mainMenu_useSavesFolder=0;
 				make_savestate_filenames(savestate_filename, NULL);
-			}
-			break;
-			case 5:
-			if (hit0)
-			{
-				saveMenu_case=SAVE_MENU_CASE_EXIT;
-				end=1;
 			}
 			break;
 		}
@@ -586,21 +654,68 @@ int run_menuSavestates()
 		unraise_saveMenu();
 		switch(saveMenu_case)
 		{
-			case SAVE_MENU_CASE_LOAD_MEM:
+			case SAVE_MENU_CASE_IMPORT_MEM:
 				{
-				make_savestate_filenames(savestate_filename,NULL);
-				FILE *f=fopen(savestate_filename,"rb");
-				if (f)
-				{
-					fclose(f);
-					savestate_state = STATE_DORESTORE;
-					saveMenu_case=1;
-				}
-				else
-				{
-					show_error("File doesn't exist.");
+					make_savestate_filenames(savestate_filename,NULL);
+					char path[255];
+					snprintf(path, 255, "%s", SAVE_PREFIX);
+
+					if(run_menuLoad(path, MENU_LOAD_IMPORT_SAVE)) {
+						FILE *source=fopen(save_import_filename,"rb");
+						if (source) {
+							fclose(source);
+							remove(savestate_filename);
+							cp(save_import_filename,savestate_filename);
+							show_error("File Imported");
+						}
+					}
 					saveMenu_case=-1;
 				}
+				break;
+			case SAVE_MENU_CASE_EXPORT_MEM:
+				{
+				make_savestate_filenames(savestate_filename,NULL);
+				FILE *source=fopen(savestate_filename,"rb");
+				if (source)
+				{
+					fclose(source);
+#if defined(__SWITCH__) || defined(__PSP2__)
+			        char buf[100] = "";
+#ifdef __SWITCH__
+			        kbdswitch_get("Enter savestate name:", "mysavestate", 100, 0, buf);
+#else
+			        strcpy(buf, kbdvita_get("Enter savestate name:", "mysavestate", 100, 0));
+#endif
+					char save_export_filename[255] = "";
+			        snprintf(save_export_filename, 255, "%s%s%s", SAVE_PREFIX, buf, ".asf");
+					cp(savestate_filename, save_export_filename);
+#else
+					saveMenu_case=-1;
+					break;
+#endif
+					}
+					else
+					{
+						show_error("Nothing to export.");
+					}
+				}
+				saveMenu_case=-1;
+				break;
+			case SAVE_MENU_CASE_LOAD_MEM:
+				{
+					make_savestate_filenames(savestate_filename,NULL);
+					FILE *f=fopen(savestate_filename,"rb");
+					if (f)
+					{
+						fclose(f);
+						savestate_state = STATE_DORESTORE;
+						saveMenu_case=1;
+					}
+					else
+					{
+						show_error("File doesn't exist.");
+						saveMenu_case=-1;
+					}
 				}
 				break;
 			case SAVE_MENU_CASE_SAVE_MEM:
@@ -609,6 +724,24 @@ int run_menuSavestates()
 				saveMenu_case=1;
 				break;
 			case SAVE_MENU_CASE_DELETE_MEM:
+				{
+					char path[255];
+					snprintf(path, 255, "%s", SAVE_PREFIX);
+
+					if(run_menuLoad(path, MENU_LOAD_DELETE_SAVE)) {
+						FILE *source=fopen(save_import_filename,"rb");
+						if (source) {
+							fclose(source);
+							remove(save_import_filename);
+							show_error("File Deleted");
+						} else {
+							show_error("Nothing to delete."); 
+						}
+					}
+					saveMenu_case=-1;
+				}
+				break;
+			case SAVE_MENU_CASE_DELETE_SLOT:
 			{
 				make_savestate_filenames(savestate_filename,NULL);
 				FILE *f=fopen(savestate_filename,"rb");

@@ -1,16 +1,24 @@
 #ifdef USE_SDL2
 #include <SDL.h>
+#include <switch.h>
+#include <sdl2_to_sdl1.h>
 
 static SDL_Window* window = NULL;
 static SDL_Texture* texture = NULL;
 static SDL_Texture* prescaled = NULL;
 static SDL_Renderer* renderer = NULL;
-int prescale_factor_x = 1;
-int prescale_factor_y = 1;
-int prescaled_width = 320;
-int prescaled_height = 240;
-int surface_width = 320;
-int surface_height = 240;
+static int prescale_factor_x = 1;
+static int prescale_factor_y = 1;
+static int prescaled_width = 320;
+static int prescaled_height = 240;
+static int surface_width = 320;
+static int surface_height = 240;
+
+static float current_sw = 1.0;
+static float current_sh = 1.0;
+static int current_x = 0;
+static int current_y = 0;
+static int currently_docked = -1;
 
 static int x_offset;
 static int y_offset;
@@ -18,6 +26,7 @@ static int scaled_height;
 static int scaled_width;
 static int display_width;
 static int display_height;
+
 extern int mainMenu_shader;
 extern int mainMenu_displayedLines;
 extern int mainMenu_displayHires;
@@ -29,15 +38,61 @@ extern void update_joycon_mode(void);
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
-SDL_Surface *SDL_SetVideoMode(int w, int h, int bpp, int flags) {
-	if (!renderer) {
-		window = SDL_CreateWindow("uae4all2", 0, 0, 0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP);
-		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+int isDocked() {
+	switch (appletGetOperationMode()) {
+		case AppletOperationMode_Handheld:
+			return 0;
+			break;
+		case AppletOperationMode_Docked:
+			return 1;
+			break;
+		default:
+			return 0;
+	}
+}
+
+void updateResolution() {
+	int docked = isDocked();
+	if ((docked && !currently_docked) || (!docked && currently_docked)) {
+		// docked mode has changed, update window size etc.
+		if (docked) {
+			display_width = 1920;
+			display_height = 1080;
+			currently_docked = 1;
+		} else {
+			display_width = 1280;
+			display_height = 720;
+			currently_docked = 0;
+		}
+		// remove leftover-garbage on screen
 		SDL_RenderClear(renderer);
-		SDL_DisplayMode DM;
-		SDL_GetCurrentDisplayMode(0, &DM);
-		display_width = DM.w;
-		display_height = DM.h;
+		SDL_RenderPresent(renderer);
+		SDL_RenderClear(renderer);
+		SDL_RenderPresent(renderer);
+		SDL_RenderClear(renderer);
+		SDL_RenderPresent(renderer);
+		SDL_SetWindowSize(window, display_width, display_height);
+		SDL_SetVideoModeScaling(current_x, current_y, current_sw, current_sh);
+	}
+}
+
+SDL_Surface *SDL_SetVideoMode(int w, int h, int bpp, int flags) {
+	if (currently_docked == -1) {
+		if (isDocked()) {
+			display_width = 1920;
+			display_height = 1080;
+			currently_docked = 1;
+		} else {
+			display_width = 1280;
+			display_height = 720;
+			currently_docked = 0;
+		}
+	}
+
+	if (!renderer) {
+		window = SDL_CreateWindow("uae4all2", 0, 0, display_width, display_height, 0);
+		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC);
+		SDL_RenderClear(renderer);
 	}
 	SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormat(0, w, h, 16, SDL_PIXELFORMAT_RGB565);
 	surface_width = w;
@@ -46,6 +101,10 @@ SDL_Surface *SDL_SetVideoMode(int w, int h, int bpp, int flags) {
 }
 
 void SDL_SetVideoModeScaling(int x, int y, float sw, float sh) {
+	current_sw = sw;
+	current_sh = sh;
+	current_x = x;
+	current_y = y;
 	if (mainMenu_shader != 0 && !displaying_menu) {
 		x_offset = (x * display_width) / 960;
 		y_offset = (y * display_height) / 544;
@@ -98,6 +157,7 @@ void SDL_SetVideoModeSync(int value) {
 void SDL_Flip(SDL_Surface *surface) {
 	update_joycon_mode();
 	if (surface && renderer && window) {
+		updateResolution();
 		if (texture) {
 			SDL_DestroyTexture(texture);
 			texture = NULL;

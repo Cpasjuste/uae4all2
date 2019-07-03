@@ -18,7 +18,7 @@
 #include "sound.h"
 #include "gp2x.h"
 
-static const char *text_str_fileinfo_title=    "            File info              -";
+static const char *text_str_fileinfo_title=    "File info";
 char* fileInfo_fileName;
 
 static void draw_fileinfoMenu(int c)

@@ -30,6 +30,7 @@ extern SDL_Surface *prSDLScreen;
 #define SDL_keysym SDL_Keysym
 #define SDL_DisplayFormat(x) SDL_ConvertSurface(x,prSDLScreen->format,0)
 #define SDL_SetAlpha(x,y,z) SDL_SetSurfaceAlphaMod(x,z); SDL_SetSurfaceBlendMode(x, SDL_BLENDMODE_BLEND);
+#define SDL_SoftStretch(a,b,c,d) SDL_BlitScaled(a,b,c,d);
 
 SDL_Surface *SDL_SetVideoMode(int w, int h, int bpp, int flags);
 void SDL_SetVideoModeScaling(int x, int y, float sw, float sh);

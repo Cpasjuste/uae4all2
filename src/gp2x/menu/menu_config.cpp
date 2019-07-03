@@ -58,8 +58,6 @@ int mainMenu_fastMemory = 0;	/* off */
 
 int mainMenu_bootHD = DEFAULT_ENABLE_HD;
 int mainMenu_filesysUnits = 0;
-int hd_dir_unit_nr = -1;
-int hd_file_unit_nr = -1;
 
 int mainMenu_drives = DEFAULT_DRIVES;
 int mainMenu_floppyspeed = 100;
@@ -74,11 +72,7 @@ int mainMenu_CPU_speed = 0;
 int mainMenu_cpuSpeed = 600;
 
 int mainMenu_joyConf = 0;
-#if defined(__PSP2__) || defined(__SWITCH__)
 int mainMenu_joyPort = 2; // Default to port 1 on Vita because mouse is always on.
-#else
-int mainMenu_joyPort = 0; // Both ports
-#endif
 int mainMenu_autofireRate = 8;
 int mainMenu_customAutofireButton = 0;
 int mainMenu_showStatus = DEFAULT_STATUSLN;
@@ -145,6 +139,7 @@ int mainMenu_cutRight = 0;
 int mainMenu_ntsc = DEFAULT_NTSC;
 int mainMenu_frameskip = 0;
 int mainMenu_vkbdLanguage = 0; //Default is US Keyboard
+int mainMenu_vkbdStyle = 0; //Default is original style
 int visibleAreaWidth = 320;
 
 
@@ -253,11 +248,7 @@ void SetDefaultMenuSettings(int general)
 
     mainMenu_cpuSpeed = 600;
     mainMenu_joyConf = 0;
-#if defined(__PSP2__) || defined(__SWITCH__)
     mainMenu_joyPort = 2; // Default to port 1 on Vita because mouse is always on.
-#else
-    mainMenu_joyPort = 0;
-#endif
     mainMenu_autofireRate = 8;
     mainMenu_customAutofireButton = 0;
     mainMenu_showStatus = DEFAULT_STATUSLN;
@@ -504,12 +495,13 @@ void SetDefaultMenuSettings(int general)
 #endif //__PSP2__
     SetPresetMode(2);
     moveX = 0;
-    moveY = 0;
+    moveY = 16;
     mainMenu_cutLeft = 0;
     mainMenu_cutRight = 0;
     mainMenu_ntsc = DEFAULT_NTSC;
     mainMenu_frameskip = 0;
     mainMenu_vkbdLanguage = 0; //Default is US Keyboard
+    mainMenu_vkbdStyle = 0; //Default is original style
     mainMenu_autofire = DEFAULT_AUTOFIRE;
 
 #if defined(__PSP2__) || defined(__SWITCH__)
@@ -987,17 +979,9 @@ void set_joyConf()
 void kill_hd_configs()
 {
 	 //properly close all open hdf and hd dirs
-    if (hd_dir_unit_nr >= 0) 
-    {
+	for (int i = 0; i < mainMenu_filesysUnits; i++) {
         kill_filesys_unit(currprefs.mountinfo, 0);
-        hd_dir_unit_nr = -1;
     }
-    if (hd_file_unit_nr >= 0) 
-    {
-    	for (int i=hd_file_unit_nr; i>=0; i--)
-        kill_filesys_unit(currprefs.mountinfo, i); 
-    }
-    hd_file_unit_nr = -1;
     mainMenu_filesysUnits = 0;
 }
 
@@ -1011,65 +995,47 @@ void reset_hdConf()
         // nothing to do, already killed above
         break;
     case 1:
-        if (hd_dir_unit_nr < 0) {
-            if (uae4all_hard_dir[0] != '\0') {
-                parse_filesys_spec(0, uae4all_hard_dir);
-                hd_dir_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
+        if (uae4all_hard_dir[0] != '\0') {
+            parse_filesys_spec(0, uae4all_hard_dir);
+            mainMenu_filesysUnits++;
         }
-        if (hd_file_unit_nr < 0) {
-            if (uae4all_hard_file0[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file0);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
-            if (uae4all_hard_file1[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file1);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
-            if (uae4all_hard_file2[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file2);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
-            if (uae4all_hard_file3[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file3);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
+        if (uae4all_hard_file0[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file0);
+            mainMenu_filesysUnits++;
+        }
+        if (uae4all_hard_file1[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file1);
+            mainMenu_filesysUnits++;
+        }
+        if (uae4all_hard_file2[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file2);
+            mainMenu_filesysUnits++;
+        }
+        if (uae4all_hard_file3[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file3);
+            mainMenu_filesysUnits++;
         }
         break;
     case 2:
-        if (hd_file_unit_nr < 0) {
-            if (uae4all_hard_file0[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file0);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
-            if (uae4all_hard_file1[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file1);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
-            if (uae4all_hard_file2[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file2);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
-            if (uae4all_hard_file3[0] != '\0') {
-                parse_hardfile_spec(uae4all_hard_file3);
-                hd_file_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
+        if (uae4all_hard_file0[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file0);
+            mainMenu_filesysUnits++;
         }
-        if (hd_dir_unit_nr < 0) {
-            if (uae4all_hard_dir[0] != '\0') {
-                parse_filesys_spec(0, uae4all_hard_dir);
-                hd_dir_unit_nr++;
-                mainMenu_filesysUnits++;
-            }
+        if (uae4all_hard_file1[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file1);
+            mainMenu_filesysUnits++;
+        }
+        if (uae4all_hard_file2[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file2);
+            mainMenu_filesysUnits++;
+        }
+        if (uae4all_hard_file3[0] != '\0') {
+            parse_hardfile_spec(uae4all_hard_file3);
+            mainMenu_filesysUnits++;
+        }
+        if (uae4all_hard_dir[0] != '\0') {
+            parse_filesys_spec(0, uae4all_hard_dir);
+            mainMenu_filesysUnits++;
         }
         break;
     }
@@ -1143,10 +1109,12 @@ int saveconfig(int general)
 #if defined(__SWITCH__) || defined(__PSP2__)
         char buf[100] = "";
 #ifdef __SWITCH__
-        kbdswitch_get("Enter config name:", "myconfig", 100, 0, buf);
+        kbdswitch_get("Enter config name:", "", 100, 0, buf);
 #else
-        strcpy(buf, kbdvita_get("Enter config name:", "myconfig", 100, 0));
+        strcpy(buf, kbdvita_get("Enter config name:", "", 100, 0));
 #endif
+        if (buf[0] == 0)
+            return 0;
         snprintf(path, 300, "%s/conf/%s%s", launchDir, buf, ".conf");
 #else
         return 0;
@@ -1203,6 +1171,8 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "vkbdlanguage=%d\n",mainMenu_vkbdLanguage);
     fputs(buffer,f);
+    snprintf((char*)buffer, 255, "vkbdstyle=%d\n",mainMenu_vkbdStyle);
+    fputs(buffer,f);
     snprintf((char*)buffer, 255, "sound=%d\n",mainMenu_sound + mainMenu_soundStereo * 10);
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "soundstereosep=%d\n",mainMenu_soundStereoSep);
@@ -1247,7 +1217,7 @@ int saveconfig(int general)
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "moveX=%d\n",moveX);
     fputs(buffer,f);
-    snprintf((char*)buffer, 255, "moveY=%d\n",moveY);
+    snprintf((char*)buffer, 255, "moveY=%d\n",moveY-16); // compatibility with versions <1.96
     fputs(buffer,f);
     snprintf((char*)buffer, 255, "displayedLines=%d\n",mainMenu_displayedLines);
     fputs(buffer,f);
@@ -1616,6 +1586,7 @@ void loadconfig(int general)
 #endif
         fscanf(f,"frameskip=%d\n",&mainMenu_frameskip);
         fscanf(f,"vkbdlanguage=%d\n",&mainMenu_vkbdLanguage);
+        fscanf(f,"vkbdstyle=%d\n",&mainMenu_vkbdStyle);
         fscanf(f,"sound=%d\n",&mainMenu_sound );
         if (mainMenu_sound >= 10) {
             mainMenu_soundStereo = 1;
@@ -1634,6 +1605,8 @@ void loadconfig(int general)
         fscanf(f,"joyconf=%d\n",&joybuffer);
         mainMenu_joyConf = (joybuffer & 0x0f);
         mainMenu_joyPort = ((joybuffer >> 4) & 0x0f);
+        if (mainMenu_joyPort == 0)
+            mainMenu_joyPort = 2;
         fscanf(f,"autofireRate=%d\n",&mainMenu_autofireRate);
         fscanf(f,"autofire=%d\n",&mainMenu_autofire);
         fscanf(f,"customAutofireButton=%d\n",&mainMenu_customAutofireButton);
@@ -1655,6 +1628,7 @@ void loadconfig(int general)
         fscanf(f,"presetModeId=%d\n",&presetModeId);
         fscanf(f,"moveX=%d\n",&moveX);
         fscanf(f,"moveY=%d\n",&moveY);
+        moveY+=16; // compatibility with versions <1.96
         fscanf(f,"displayedLines=%d\n",&mainMenu_displayedLines);
         fscanf(f,"screenWidth=%d\n",&screenWidth);
         fscanf(f,"cutLeft=%d\n",&mainMenu_cutLeft);
@@ -1921,7 +1895,9 @@ void loadconfig(int general)
         if (filebuffer[0]) {
             strcpy(custom_kickrom, filebuffer);
         }
+        // ignore this option. All saves are always made into saves folder now
         fscanf(f,"useSavesFolder=%d\n",&mainMenu_useSavesFolder);
+        mainMenu_useSavesFolder = DEFAULT_USESAVESFOLDER;
 #ifdef __SWITCH__ 
         fscanf(f,"swapAB=%d\n",&mainMenu_swapAB);
         fscanf(f,"singleJoycons=%d\n",&mainMenu_singleJoycons);
@@ -1944,5 +1920,4 @@ void loadconfig(int general)
     }
     UpdateMemorySettings();
     set_joyConf();
-    reset_hdConf();
 }

@@ -182,7 +182,9 @@ void reset_all_systems (void)
 {
     init_eventtab ();
     memory_reset ();
+    // the following is a workaround to prevent failed fdopen commands for hdf files
     filesys_reset ();
+    reset_hdConf();
     filesys_start_threads ();
 }
 
@@ -259,6 +261,10 @@ void real_main (int argc, char **argv)
 	psp2InitTouch();
 #endif
 
+#if defined(__SWITCH__)
+    appletLockExit();
+#endif
+
 #ifdef USE_SDL
     SDL_Init (SDL_INIT_VIDEO | SDL_INIT_JOYSTICK 
 #if !defined(NO_SOUND) && !defined(GP2X)
@@ -276,12 +282,16 @@ void real_main (int argc, char **argv)
 	mkdir("ux0:/data/uae4all/saves", 0777);
 	mkdir("ux0:/data/uae4all/conf", 0777);
 	mkdir("ux0:/data/uae4all/kickstarts", 0777);
+    mkdir("ux0:/data/uae4all/thumbs", 0777);
+    mkdir("ux0:/data/uae4all/tmp", 0777);
 	strcpy(launchDir, "ux0:/data/uae4all");
 #elif defined(__SWITCH__)
 	mkdir("./roms", 0777);
 	mkdir("./saves", 0777);
 	mkdir("./conf", 0777);
 	mkdir("./kickstarts", 0777);
+	mkdir("./thumbs", 0777);
+	mkdir("./tmp", 0777);
     strcpy(launchDir, ".");
 #else
 	getcwd(launchDir,250);

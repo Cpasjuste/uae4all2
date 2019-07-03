@@ -33,8 +33,8 @@
 static int justSwitchedSingleJoycons = 0;
 #endif
 
-const char *text_str_misc_separator="-------------------------------------";
-static const char *text_str_misc_title=    "            Miscellanous            -";
+const char *text_str_misc_separator="----------------------------------------";
+static const char *text_str_misc_title=    "Miscellanous";
 static const char *text_str_stylus_offset="StylusOffset";
 static const char *text_str_0px="0px";
 static const char *text_str_1px="1px";
@@ -110,7 +110,7 @@ static void draw_miscMenu(int c)
 	int tabstop8 = 31;
 	int tabstop9 = 33;
 
-	int menuLine = 2;
+	int menuLine = 3;
 	static int b=0;
 	int bb=(b%6)/3;
 	SDL_Rect r;
@@ -121,7 +121,7 @@ static void draw_miscMenu(int c)
 	r.x=80-64; r.y=0; r.w=110+64+64; r.h=240;
 
 	text_draw_background();
-	text_draw_window(2,1,40,30,text_str_misc_title);
+	text_draw_window(2,2,42,30,text_str_misc_title);
 
 	// MENUMISC_RETURNMAIN
 	if (menuMisc == MENUMISC_RETURNMAIN && bb)
@@ -136,103 +136,103 @@ static void draw_miscMenu(int c)
 	// MENUMISC_CPU
 	write_text(leftMargin,menuLine,"CPU");
 	if ((mainMenu_CPU_model==0)&&((menuMisc!=MENUMISC_CPU)||(bb)))
-	  write_text_inv(tabstop1,menuLine,"68000");
+	  write_text_inv(tabstop2,menuLine,"68000");
 	else
-	  write_text(tabstop1,menuLine,"68000");
+	  write_text(tabstop2,menuLine,"68000");
 	
 	if ((mainMenu_CPU_model==1)&&((menuMisc!=MENUMISC_CPU)||(bb)))
-	  write_text_inv(tabstop4,menuLine,"68020");
+	  write_text_inv(tabstop5,menuLine,"68020");
 	else
-	  write_text(tabstop4,menuLine,"68020");
+	  write_text(tabstop5,menuLine,"68020");
 
 	// MENUMISC_CHIPSET
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Chipset");
 	
 	if (((mainMenu_chipset & 0xff)==0)&&((menuMisc!=MENUMISC_CHIPSET)||(bb)))
-		write_text_inv(tabstop1,menuLine,"OCS");
+		write_text_inv(tabstop2,menuLine,"OCS");
 	else
-		write_text(tabstop1,menuLine,"OCS");
+		write_text(tabstop2,menuLine,"OCS");
 	
 	if (((mainMenu_chipset & 0xff)==1)&&((menuMisc!=MENUMISC_CHIPSET)||(bb)))
-		write_text_inv(tabstop3,menuLine,"ECS");
+		write_text_inv(tabstop4,menuLine,"ECS");
 	else
-		write_text(tabstop3,menuLine,"ECS");
+		write_text(tabstop4,menuLine,"ECS");
 	
 	if (((mainMenu_chipset & 0xff)==2)&&((menuMisc!=MENUMISC_CHIPSET)||(bb)))
-		write_text_inv(tabstop5,menuLine,"AGA");
+		write_text_inv(tabstop6,menuLine,"AGA");
 	else
-		write_text(tabstop5,menuLine,"AGA");
+		write_text(tabstop6,menuLine,"AGA");
 				
 	// MENUMISC_KICKSTART
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Kickstart");
 	if ((kickstart==0)&&((menuMisc!=MENUMISC_KICKSTART)||(bb)))
-		write_text_inv(tabstop1,menuLine,"1.2");
+		write_text_inv(tabstop2,menuLine,"1.2");
 	else
-		write_text(tabstop1,menuLine,"1.2");
+		write_text(tabstop2,menuLine,"1.2");
 
 	if ((kickstart==1)&&((menuMisc!=MENUMISC_KICKSTART)||(bb)))
-		write_text_inv(tabstop3,menuLine,"1.3");
+		write_text_inv(tabstop4,menuLine,"1.3");
 	else
-		write_text(tabstop3,menuLine,"1.3");
+		write_text(tabstop4,menuLine,"1.3");
 
 	if ((kickstart==2)&&((menuMisc!=MENUMISC_KICKSTART)||(bb)))
-		write_text_inv(tabstop5,menuLine,"2.0");
+		write_text_inv(tabstop6,menuLine,"2.0");
 	else
-		write_text(tabstop5,menuLine,"2.0");
+		write_text(tabstop6,menuLine,"2.0");
 
 	if ((kickstart==3)&&((menuMisc!=MENUMISC_KICKSTART)||(bb)))
-		write_text_inv(tabstop7,menuLine,"3.1");
+		write_text_inv(tabstop8,menuLine,"3.1");
 	else
-		write_text(tabstop7,menuLine,"3.1");
+		write_text(tabstop8,menuLine,"3.1");
 
 	if ((kickstart==4)&&((menuMisc!=MENUMISC_KICKSTART)||(bb)))
-		write_text_inv(tabstop9,menuLine,"Custom");
+		write_text_inv(tabstop9+2,menuLine,"Custom");
 	else
-		write_text(tabstop9,menuLine,"Custom");
+		write_text(tabstop9+2,menuLine,"Custom");
 
 	// MENUMISC_CPUSPEED
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"CPU Speed");
 	if ((mainMenu_CPU_speed==0)&&((menuMisc!=MENUMISC_CPUSPEED)||(bb)))
-		write_text_inv(tabstop1,menuLine,"7MHz");
+		write_text_inv(tabstop2,menuLine,"7MHz");
 	else
-		write_text(tabstop1,menuLine,"7MHz");
+		write_text(tabstop2,menuLine,"7MHz");
 
 	if ((mainMenu_CPU_speed==1)&&((menuMisc!=MENUMISC_CPUSPEED)||(bb)))
-		write_text_inv(tabstop4,menuLine,"14MHz");
+		write_text_inv(tabstop5,menuLine,"14MHz");
 	else
-		write_text(tabstop4,menuLine,"14MHz");
+		write_text(tabstop5,menuLine,"14MHz");
 
 	if ((mainMenu_CPU_speed==2)&&((menuMisc!=MENUMISC_CPUSPEED)||(bb)))
-		write_text_inv(tabstop7,menuLine,"28MHz");
+		write_text_inv(tabstop8,menuLine,"28MHz");
 	else
-		write_text(tabstop7,menuLine,"28MHz");
+		write_text(tabstop8,menuLine,"28MHz");
 
 	if ((mainMenu_CPU_speed==3)&&((menuMisc!=MENUMISC_CPUSPEED)||(bb)))
-		write_text_inv(tabstop7+6,menuLine,"56MHz");
+		write_text_inv(tabstop9+4,menuLine,"56MHz");
 	else
-		write_text(tabstop7+6,menuLine,"56MHz");
+		write_text(tabstop9+4,menuLine,"56MHz");
 
 	// MENUMISC_BLITTER
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Blitter");
 	
 	if (((mainMenu_chipset & 0xff00)!=0x100 && (mainMenu_chipset & 0xff00)!=0x200)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
-		write_text_inv(tabstop1,menuLine,"Normal");
+		write_text_inv(tabstop2,menuLine,"Normal");
 	else
-		write_text(tabstop1,menuLine,"Normal");
+		write_text(tabstop2,menuLine,"Normal");
 
 	if (((mainMenu_chipset & 0xff00)==0x100)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
-		write_text_inv(tabstop5-2,menuLine,"Immediate");
+		write_text_inv(tabstop5,menuLine,"Immediate");
 	else
-		write_text(tabstop5-2,menuLine,"Immediate");
+		write_text(tabstop5,menuLine,"Immediate");
 
 	if (((mainMenu_chipset & 0xff00)==0x200)&&((menuMisc!=MENUMISC_BLITTER)||(bb)))
-		write_text_inv(tabstop9,menuLine,"Improved");
+		write_text_inv(tabstop9+2,menuLine,"Improved");
 	else
-		write_text(tabstop9,menuLine,"Improved");
+		write_text(tabstop9+2,menuLine,"Improved");
 
 	// MENUMISC_SPRITECOLLISIONS
 	menuLine+=2;
@@ -322,31 +322,26 @@ static void draw_miscMenu(int c)
 
   // MENUMISC_JOYSTICK
 	menuLine+=2;
-	write_text(leftMargin,menuLine,"Joystick");
+	write_text(leftMargin,menuLine,"Controller 1");
   
 	if ((mainMenu_joyPort==1)&&((menuMisc!=MENUMISC_JOYSTICK)||(bb)))
-		write_text_inv(tabstop3-2,menuLine,"Port0");
+		write_text_inv(tabstop2,menuLine,"Amiga Port0");
 	else
-		write_text(tabstop3-2,menuLine,"Port0");
+		write_text(tabstop2,menuLine,"Amiga Port0");
 
 	if ((mainMenu_joyPort==2)&&((menuMisc!=MENUMISC_JOYSTICK)||(bb)))
-		write_text_inv(tabstop6-2,menuLine,"Port1");
+		write_text_inv(tabstop9-1,menuLine,"Amiga Port1");
 	else
-		write_text(tabstop6-2,menuLine,"Port1");
-
-	if ((mainMenu_joyPort==0)&&((menuMisc!=MENUMISC_JOYSTICK)||(bb)))
-		write_text_inv(tabstop9-1,menuLine,"Both");
-	else
-		write_text(tabstop9-1,menuLine,"Both");
+		write_text(tabstop9-1,menuLine,"Amiga Port1");
   
 	// MENUMISC_AUTOFIRERATE
 	menuLine+=2;
 	write_text(leftMargin,menuLine,"Autofire Rate");
 
 	if ((mainMenu_autofireRate==8)&&((menuMisc!=MENUMISC_AUTOFIRERATE)||(bb)))
-		write_text_inv(tabstop3-2,menuLine,"Light");
+		write_text_inv(tabstop2,menuLine,"Light");
 	else
-		write_text(tabstop3-2,menuLine,"Light");
+		write_text(tabstop2,menuLine,"Light");
 
 	if ((mainMenu_autofireRate==4)&&((menuMisc!=MENUMISC_AUTOFIRERATE)||(bb)))
 		write_text_inv(tabstop6-2,menuLine,"Medium");
@@ -957,7 +952,7 @@ static int key_miscMenu(int *c)
 			case MENUMISC_JOYSTICK:
 				if (left)
 				{
-					if (mainMenu_joyPort>0)
+					if (mainMenu_joyPort>1)
 						mainMenu_joyPort--;
 					else
 						mainMenu_joyPort=2;
@@ -967,7 +962,7 @@ static int key_miscMenu(int *c)
 					if (mainMenu_joyPort<2)
 						mainMenu_joyPort++;
 					else
-						mainMenu_joyPort=0;
+						mainMenu_joyPort=1;
 				}
 				break;  
 			case MENUMISC_AUTOFIRERATE:

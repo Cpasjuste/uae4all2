@@ -31,7 +31,7 @@
 #define MIN_CUSTOM_ID -28
 
 const char *text_str_controls_separator="---------------------------------------";
-const char *text_str_controls_title=    "         Custom Controls              -";
+const char *text_str_controls_title=    "Custom Controls";
 char tmpchar[256];
 char mapping[32]="";
 int menuControls = 0;
@@ -356,7 +356,7 @@ static void draw_controlsMenu(int c)
 #endif
 	int ctrlNr = mainMenu_custom_currentlyEditingControllerNr;
 	
-	int leftMargin=3;
+	int leftMargin = 3;
 	int tabstop1 = 17;
 	int tabstop2 = 19;
 	int tabstop3 = 21;
@@ -375,7 +375,7 @@ static void draw_controlsMenu(int c)
 	r.x=80-64; r.y=0; r.w=110+64+64; r.h=240;
 
 	text_draw_background();
-	text_draw_window(2,2,41,30,text_str_controls_title);
+	text_draw_window(2,2,41,29,text_str_controls_title);
 
 	// MENUCONTROLS_RETURNMAIN
 	if (menuControls == MENUCONTROLS_RETURNMAIN && bb)
@@ -786,7 +786,7 @@ static int key_controlsMenu(int *c)
 					break;
 			}
 		}
-		
+
 		if (left && !holdingLeft)
 		{
 			holdingLeft=1;

@@ -24,6 +24,11 @@
 #include <android/log.h>
 #endif
 
+#if defined(__vita__) || defined(__SWITCH__)
+#include <unzip.h>
+#endif
+
+
 #ifdef WIN32
 #include <stdio.h>
 #include <fcntl.h>
@@ -159,12 +164,38 @@ size_t zfile_fwrite (void *b, size_t l1, size_t l2, struct zfile *z)
  */
 static int gunzip (const char *decompress, const char *src, const char *dst)
 {
+#if defined(__PSP2__) || defined(__SWITCH__)
+    if (!dst)
+        return 1;
+    int success = 0;
+    typedef struct gzFile_s *gzFile;
+    gzFile input = gzopen(src,"rb");
+    if (input) {
+        FILE *output = fopen(dst,"wb");
+        if (output) {
+            char *buf = (char *) malloc(1024*1024);
+            gzrewind(input);
+            while(!gzeof(input))
+            {
+                //buf contains len bytes of decompressed data
+                int len = gzread(input, buf, 1024*1024 - 2);
+                fwrite(buf, sizeof(char), len, output);
+            }
+            fclose(output);
+            success = 1;
+            free(buf);
+        }
+        gzclose(input);
+    }
+    return success;
+#else
     char cmd[1024];
     const char *ext = strrchr (src, '.');
     if (!dst)
 	return 1;
     sprintf (cmd, "%s -c -d \"%s\" > \"%s\"", decompress, src, dst);
     return !system (cmd);
+#endif
 }
 
 
@@ -197,11 +228,47 @@ static int lha (const char *src, const char *dst)
  */
 static int unzip (const char *src, const char *dst)
 {
+#if defined(__PSP2__) || defined(__SWITCH__)
+    if (!dst)
+        return 1;
+    int success = 0;
+    unz_file_info file_info;
+    uint32_t size = 0;
+
+    unzFile input = unzOpen(src);
+    if (input) {
+        unzGoToFirstFile(input);
+        unzGetCurrentFileInfo(input, &file_info, NULL, 0, NULL, 0, NULL, 0);
+        size = file_info.uncompressed_size;
+        if (size < 2048 * 1024 && size > 0) {
+            if (unzOpenCurrentFile(input) == UNZ_OK) {
+                FILE *output = fopen(dst,"wb");
+                if (output) {
+                    char *buf = (char *) malloc(size);
+                    //buf contains len bytes of decompressed data
+                    int len = unzReadCurrentFile(input, buf, size);
+                    if (len == size) {
+                        int written = fwrite(buf, sizeof(char), len, output);
+                        if (written == size) {
+                            success = 1;
+                        }
+                    }
+                    fclose(output);
+                    free(buf);
+                }
+                unzCloseCurrentFile(input);
+            }
+        }
+        unzClose(input);
+    }
+    return success;
+#else
     char cmd[1024];
     if (!dst)
 	return 1;
     sprintf (cmd, "unzip -p '%s' *.adf *.ADF *.Adf >%s", src, dst);
     return !system (cmd);
+#endif
 }
 
 /*
@@ -283,7 +350,18 @@ struct zfile *zfile_open (const char *name, const char *mode)
     else {
 //	tmpnam (l->name);
 //	fd = creat (l->name, S_IRUSR | S_IWUSR);
-#ifdef ANDROIDSDL
+#if defined(__SWITCH__) || defined(__PSP2__)
+    static int tempnr = 0;
+    tempnr++;
+    snprintf(l->name, L_tmpnam, "%suaetmp-%06d", TMP_PREFIX, tempnr);
+    if (! uncompress (name, l->name)) {
+        unlink (l->name);
+        free (l);
+        return NULL;
+    }
+    l->f = fopen (l->name, mode);
+#else
+#if ANDROIDSDL
   strncpy(l->name, "./uaetmp-XXXXXX", L_tmpnam);
 #else
   strncpy(l->name, "/tmp/uaetmp-XXXXXX", L_tmpnam);
@@ -299,9 +377,10 @@ struct zfile *zfile_open (const char *name, const char *mode)
 	    free (l);
 	    return NULL;
 	}
-	l->f = fopen (l->name, mode);
-	close (fd);
 
+    l->f = fopen (l->name, mode);
+    close (fd);
+#endif // __SWITCH__ || __PSP2__
     }
     if (l->f == NULL) {
 	if (strlen (l->name) > 0)

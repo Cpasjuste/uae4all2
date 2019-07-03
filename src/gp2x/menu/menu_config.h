@@ -16,8 +16,6 @@ extern int mainMenu_slowMemory;
 extern int mainMenu_fastMemory;
 extern int mainMenu_bootHD;
 extern int mainMenu_filesysUnits;
-extern int hd_dir_unit_nr;
-extern int hd_file_unit_nr;
 extern int mainMenu_drives;
 extern int mainMenu_floppyspeed;
 extern int mainMenu_CPU_model;
@@ -71,6 +69,7 @@ extern int mainMenu_cutRight;
 extern int mainMenu_ntsc;
 extern int mainMenu_frameskip;
 extern int mainMenu_vkbdLanguage;
+extern int mainMenu_vkbdStyle;
 extern int mainMenu_autofire;
 extern int visibleAreaWidth;
 

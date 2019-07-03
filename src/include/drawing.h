@@ -13,7 +13,7 @@
 #define RES_HIRES 1
 #define RES_SUPERHIRES 2
 
-#define gfxHeight 270
+#define gfxHeight 286
 
 #ifndef UAE4ALL_ALIGN
 #error UAE4ALL_ALIGN NO DEFINIDO

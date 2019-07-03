@@ -94,4 +94,5 @@ extern void custom_save_state (void);
 
 extern int savestate_state;
 extern char *savestate_filename;
+extern char *screenshot_filename;
 extern FILE *savestate_file;

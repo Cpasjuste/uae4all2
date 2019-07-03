@@ -62,9 +62,9 @@
 //#if defined(__PSP2__) || defined(__SWITCH__)
 //#define GFXVIDINFO_HEIGHT 240
 //#else
-#define GFXVIDINFO_HEIGHT 270
+#define GFXVIDINFO_HEIGHT 286
 //#endif
-#define MAXBLOCKLINES 270
+#define MAXBLOCKLINES 286
 //#define VISIBLE_LEFT_BORDER 72
 //#define VISIBLE_RIGHT_BORDER 392
 //#define LINETOSCR_X_ADJUST_BYTES 144
@@ -74,13 +74,8 @@ static int var_VISIBLE_LEFT_BORDER = 73;
 static int var_VISIBLE_RIGHT_BORDER = 393;
 static int var_LINETOSCR_X_ADJUST_BYTES = 144;
 
-#ifdef USE_GUICHAN
-static char screenshot_filename_default[255]={
-	'/', 't', 'm', 'p', '/', 'n', 'u', 'l', 'l', '.', 'p', 'n', 'g', '\0'
-};
-char *screenshot_filename=(char *)&screenshot_filename_default[0];
-FILE *screenshot_file=NULL;
-#endif
+static char screenshot_filename_default[255] = { "" };
+char *screenshot_filename = (char *) &screenshot_filename_default[0];
 
 // newWidth is always in LORES
 void InitDisplayArea(int newWidth)
@@ -173,7 +168,7 @@ static int min_diwstart, max_diwstop;
 static int thisframe_y_adjust;
 static int thisframe_y_adjust_real, max_ypos_thisframe, min_ypos_for_screen;
 static int extra_y_adjust;
-int moveX = 0, moveY = 0;
+int moveX = 0, moveY = 16;
 
 /* A frame counter that forces a redraw after at least one skipped frame in
    interlace mode.  */
@@ -2320,9 +2315,7 @@ void vsync_handle_redraw (int long_frame, int lof_changed)
 			custom_prepare_savestate ();
 			savestate_state = STATE_SAVE;
 			pause_sound();
-#if !defined(__PSP2__) && !defined(__SWITCH__)
 			save_thumb(SCREENSHOT, screenshot_filename);
-#endif
 			save_state (savestate_filename, "Description!");
 			resume_sound();
 			gui_set_message("Saved", 50);
@@ -2391,8 +2384,8 @@ void drawing_init ()
 void moveVertical(int value)
 {
 	moveY += value;
-	if(moveY<-42)
-		moveY=-42;
-	else if(moveY>50)
-		moveY=50;
+	if(moveY<-26)
+		moveY=-26;
+	else if(moveY>66)
+		moveY=66;
 }

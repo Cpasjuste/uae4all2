@@ -48,9 +48,9 @@ extern char currentDir[300];
 extern char config_load_filename[300];
 extern char save_import_filename[300];
 
-const char *text_str_load_separator="----------------------------------------";
+const char *text_str_load_separator="------------------------------------------------------";
 const char *text_str_load_dir="#DIR#";
-static const char *text_str_load_title="            Filemanager            -";
+static const char *text_str_load_title="Filemanager";
 int text_dir_num_files=0, text_dir_num_files_index=0;
 
 #define SHOW_MAX_FILES 13
@@ -121,101 +121,113 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	int bb=(b%6)/3;
 	SDL_Rect r;
 	extern SDL_Surface *text_screen;
-	r.x=80-64; r.y=0; r.w=150-24+64+64; r.h=240;
 	text_draw_background();
+	// widescreen file list allows for longer filename display
+	r.x=80-64; r.y=0; r.w=150-24+64+64+(text_screen->w-320)/2+32; r.h=240;
+	int x_win = 2 - (text_screen->w - 320) / 2 / 7;
+	int y_win = 2;
+#ifdef __PSP2__
+	int w_win = 42 + (text_screen->w - 320) / 7;
+#else
+	int w_win = 41 + (text_screen->w - 320) / 7;
+#endif
+	int h_win = 25; 
+	int x_sep = 3 - (text_screen->w - 320) / 2 / 7;
+	int x_file = 3 - (text_screen->w - 320) / 2 / 7;
+	int x_dir = 38 + (text_screen->w - 320) / 2 / 7;
 
 	if (menu_load_type == MENU_LOAD_HD_DIR)
 #ifdef __PSP2__
-		text_draw_window(2,2,41,25,"  Press SELECT to load HD-dir (Tri.=Info)  ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Press SELECT to load HD-dir (Triangle = Info)");
 #else
 #ifdef __SWITCH__
-		text_draw_window(2,2,41,25,"  Press MINUS to load HD-dir (X = Info)  ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Press MINUS to load HD-dir (X = Info)");
 #else
-		text_draw_window(2,2,41,25,"  Press L-key to load HD-dir  ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Press L-key to load HD-dir");
 #endif
 #endif
 	else if (menu_load_type == MENU_LOAD_HDF)
 #ifdef __PSP2__
-		text_draw_window(2,2,41,25,"       Select .HDF-file (Triangle = Info)      ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Select .HDF-file (Triangle = Info)");
 #else
 #ifdef __SWITCH__
-		text_draw_window(2,2,41,25,"       Select .HDF-file (X = Info)      ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Select .HDF-file (X = Info)");
 #else
-		text_draw_window(2,2,41,25,"       Select .HDF-file       ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Select .HDF-file");
 #endif
 #endif
 	else if (menu_load_type == MENU_LOAD_CONFIG)
 #ifdef __PSP2__
-		text_draw_window(2,2,41,25,"       Select .CONF-file (Triangle = Info)      ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Select .CONF-file (Triangle = Info)");
 #else
 #ifdef __SWITCH__
-		text_draw_window(2,2,41,25,"       Select .CONF-file (X = Info)      ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Select .CONF-file (X = Info)");
 #else
-		text_draw_window(2,2,41,25,"       Select .CONF-file       ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Select .CONF-file");
 #endif
 #endif
 	else if (menu_load_type == MENU_LOAD_DELETE_CONFIG)
 #ifdef __PSP2__
-		text_draw_window(2,2,41,25,"       Delete .CONF-file (Triangle = Info)      ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Delete .CONF-file (Triangle = Info)");
 #else
 #ifdef __SWITCH__
-		text_draw_window(2,2,41,25,"       Delete .CONF-file (X = Info)      ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Delete .CONF-file (X = Info)");
 #else
-		text_draw_window(2,2,41,25,"       Delete .CONF-file       ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Delete .CONF-file");
 #endif
 #endif
 	else if (menu_load_type == MENU_LOAD_IMPORT_SAVE)
 #ifdef __PSP2__
-		text_draw_window(2,2,41,25,"       Select .ASF-file (Triangle = Info)      ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Select .ASF-file (Triangle = Info)");
 #else
 #ifdef __SWITCH__
-		text_draw_window(2,2,41,25,"       Select .ASF-file (X = Info)      ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Select .ASF-file (X = Info)");
 #else
-		text_draw_window(2,2,41,25,"       Select .ASF-file       ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Select .ASF-file");
 #endif
 #endif
 	else if (menu_load_type == MENU_LOAD_DELETE_SAVE)
 #ifdef __PSP2__
-		text_draw_window(2,2,41,25,"       Delete .ASF-file (Triangle = Info)      ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Delete .ASF-file (Triangle = Info)");
 #else
 #ifdef __SWITCH__
-		text_draw_window(2,2,41,25,"       Delete .ASF-file (X = Info)      ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Delete .ASF-file (X = Info)");
 #else
-		text_draw_window(2,2,41,25,"       Delete .ASF-file       ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Delete .ASF-file");
 #endif
 #endif
 #ifdef __PSP2__
 	else if (current_drive==0)
-		text_draw_window(2,2,41,25," Insert .ADF into DF0 (Triangle = Info) ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF0 (Triangle = Info)");
 	else if (current_drive==1)
-		text_draw_window(2,2,41,25," Insert .ADF into DF1 (Triangle = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF1 (Triangle = Info)");
 	else if (current_drive==2)
-		text_draw_window(2,2,41,25," Insert .ADF into DF2 (Triangle = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF2 (Triangle = Info)");
 	else if (current_drive==3)
-		text_draw_window(2,2,41,25," Insert .ADF into DF3 (Triangle = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF3 (Triangle = Info)");
 #else
 #ifdef __SWITCH__
 	else if (current_drive==0)
-		text_draw_window(2,2,41,25," Insert .ADF into DF0 (X = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF0 (X = Info)");
 	else if (current_drive==1)
-		text_draw_window(2,2,41,25," Insert .ADF into DF1 (X = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF1 (X = Info)");
 	else if (current_drive==2)
-		text_draw_window(2,2,41,25," Insert .ADF into DF2 (X = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF2 (X = Info)");
 	else if (current_drive==3)
-		text_draw_window(2,2,41,25," Insert .ADF into DF3 (X = Info)");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF3 (X = Info)");
 #else
 	else if (current_drive==0)
-		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF0 ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF0");
 	else if (current_drive==1)
-		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF1 ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF1");
 	else if (current_drive==2)
-		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF2 ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF2");
 	else if (current_drive==3)
-		text_draw_window(2,2,41,25," Insert .ADF or .ADZ into DF3 ");
+		text_draw_window(x_win,y_win,w_win,h_win,"Insert .ADF or .ADZ or .ZIP into DF3");
 #endif
 #endif
 	else
-		text_draw_window(2,2,41,25,text_str_load_title);
+		text_draw_window(x_win,y_win,w_win,h_win,text_str_load_title);
 
 	if (sel<min_in_dir)
 	{
@@ -234,21 +246,21 @@ static void draw_dirlist(char *curdir, struct dirent **namelist, int n, int sel)
 	for (i=min_in_dir,j=3;i<max_in_dir;i++,j+=2)
 	{
 		
-		write_text(3,j,text_str_load_separator);
+		write_text(x_sep,j,text_str_load_separator);
 		SDL_SetClipRect(text_screen,&r);
 		
 	if ((sel+1==i+1)&&(bb))
-			write_text_inv(4,j+1,namelist[i+1]->d_name);
+			write_text_inv(x_file,j+1,namelist[i+1]->d_name);
 		else
-			write_text(4,j+1,namelist[i+1]->d_name);
+			write_text(x_file,j+1,namelist[i+1]->d_name);
 
 
 		SDL_SetClipRect(text_screen,NULL);
 
 		if (namelist[i+1]->d_type==DT_DIR)
-			write_text(38,j+1,text_str_load_dir);
+			write_text(x_dir,j+1,text_str_load_dir);
 	}
-	write_text(3,j,text_str_load_separator);
+	write_text(x_sep,j,text_str_load_separator);
 
 	text_flip();
 
@@ -553,7 +565,7 @@ static int menuLoadLoop(char *curr_path)
 							break;
 						case MENU_LOAD_HDF:
 							if (strstr(filename, ".hdf") == NULL)
-								showWarning("HDF file must be selected");
+								showWarning("HDF file must be selected.");
 							else
 								if (current_hdf==0)
 									strcpy(uae4all_hard_file0, filename);
@@ -567,14 +579,14 @@ static int menuLoadLoop(char *curr_path)
 						case MENU_LOAD_CONFIG:
 						case MENU_LOAD_DELETE_CONFIG:
 							if (strstr(filename, ".conf") == NULL)
-								showWarning("CONF file must be selected");
+								showWarning("CONF file must be selected.");
 							else
 								strcpy(config_load_filename,filename);
 							break;
 						case MENU_LOAD_IMPORT_SAVE:
 						case MENU_LOAD_DELETE_SAVE:
 							if (strstr(filename, ".asf") == NULL)
-								showWarning("ASF file must be selected");
+								showWarning("ASF file must be selected.");
 							else
 								strcpy(save_import_filename,filename);
 							break;

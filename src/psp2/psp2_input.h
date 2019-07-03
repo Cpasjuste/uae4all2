@@ -5,6 +5,9 @@ extern "C" {
 #endif
 
 int PSP2_PollEvent(SDL_Event *event);
+#ifdef __SWITCH__
+void exit_safely(int quit_via_home);
+#endif
 
 #ifdef __PSP2__ // NOT __SWITCH__
 #define PAD_UP 8

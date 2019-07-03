@@ -33,7 +33,7 @@
 #endif
 
 const char *text_str_memdisk_separator="--------------------------------------";
-static const char *text_str_memdisk_title=    "     Memory and Disk Options     -";
+static const char *text_str_memdisk_title=    "Memory and Disk Options";
 const char *text_str_off="off";
 const char *text_str_on="on";
 const char *text_str_512K="512K";
@@ -62,7 +62,6 @@ enum {
 };
 
 extern char currentDir[300];
-extern void reset_hdConf();
 
 static void draw_memDiskMenu(int c)
 {
@@ -544,25 +543,21 @@ static int key_memDiskMenu(int *c)
 						mainMenu_bootHD--;
 					else
 						mainMenu_bootHD = 2;
-					reset_hdConf();
 				} else if (right) {
 					if (mainMenu_bootHD < 2)
 						mainMenu_bootHD++;
 					else
 						mainMenu_bootHD = 0;
-					reset_hdConf();
 				}
 				break;
 			case MENUDISK_HDDIR:
 				if (hit0) {
 					if (run_menuLoad(currentDir, MENU_LOAD_HD_DIR)) {
 						make_hard_dir_cfg_line(uae4all_hard_dir);
-						reset_hdConf();
 						loadconfig(4);
 					}
 				} else if (del) {
 					uae4all_hard_dir[0] = '\0';
-					reset_hdConf();
 				}
 				break;
 			case MENUDISK_HDFILE:
@@ -576,7 +571,6 @@ static int key_memDiskMenu(int *c)
 							make_hard_file_cfg_line(uae4all_hard_file2);
 						else if (current_hdf==3)
 							make_hard_file_cfg_line(uae4all_hard_file3);
-						reset_hdConf();
 						if (current_hdf==0) {
 							loadconfig(2);
 						}
@@ -590,14 +584,13 @@ static int key_memDiskMenu(int *c)
 						uae4all_hard_file2[0] = '\0';
 					else if (current_hdf==3)
 						uae4all_hard_file3[0] = '\0';
-					reset_hdConf();
 				}
 				break;
 			case MENUDISK_SAVEHDCONF:
 				if (hit0)
 				{
 					if (saveconfig(2))
-						showWarning("Config saved for current HD");
+						showWarning("Config saved for current HD.");
 				}
 				break;
 			case MENUDISK_FLOPPYSPEED:

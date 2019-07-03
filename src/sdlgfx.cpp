@@ -109,11 +109,6 @@ Uint32 uae4all_numframes=0;
 /* SDL variable for output surface */
 SDL_Surface *prSDLScreen = NULL;
 
-#ifdef USE_GUICHAN
-extern char *screenshot_filename;
-#endif
-
-
 static int red_bits, green_bits, blue_bits;
 static int red_shift, green_shift, blue_shift;
 static SDL_Color arSDLColors[256];
@@ -153,29 +148,35 @@ void flush_block ()
 	if (drawfinished)
 	{
 		drawfinished=0;
-#ifdef USE_GUICHAN
 		if (savestate_state == STATE_DOSAVE)
-		  CreateScreenshot(SCREENSHOT);
-#endif
-    unsigned long start = read_processor_time();
-    if(start < next_synctime && next_synctime - start > time_per_frame - 1000)
+		{
 #if defined(__PSP2__)
-		SDL_Delay(((next_synctime - start) - 1000) / 1000);
+			SDL_UnlockSurface(prSDLScreen);
+			CreateScreenshot(SCREENSHOT);
+			SDL_LockSurface(prSDLScreen);
 #else
-      usleep((next_synctime - start) - 1000);
-#endif    
-    SDL_Flip(prSDLScreen);
-	  last_synctime = read_processor_time();
-    
-    if(last_synctime - next_synctime > time_per_frame - 1000)
-      adjust_idletime(0);
-    else
-      adjust_idletime(next_synctime - start);
-    
-    if(last_synctime - next_synctime > time_per_frame - 5000)
-      next_synctime = last_synctime + time_per_frame * (1 + prefs_gfx_framerate);
-    else
-      next_synctime = next_synctime + time_per_frame * (1 + prefs_gfx_framerate);
+			CreateScreenshot(SCREENSHOT);
+#endif
+		}
+		unsigned long start = read_processor_time();
+		if(start < next_synctime && next_synctime - start > time_per_frame - 1000)
+#if defined(__PSP2__)
+			SDL_Delay(((next_synctime - start) - 1000) / 1000);
+#else
+			usleep((next_synctime - start) - 1000);
+#endif
+		SDL_Flip(prSDLScreen);
+		last_synctime = read_processor_time();
+
+		if(last_synctime - next_synctime > time_per_frame - 1000)
+			adjust_idletime(0);
+		else
+			adjust_idletime(next_synctime - start);
+
+		if(last_synctime - next_synctime > time_per_frame - 5000)
+			next_synctime = last_synctime + time_per_frame * (1 + prefs_gfx_framerate);
+		else
+			next_synctime = next_synctime + time_per_frame * (1 + prefs_gfx_framerate);
 	}
 #if defined(__SWITCH__)
 	SDL_LockSurface (prSDLScreen);

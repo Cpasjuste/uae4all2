@@ -36,6 +36,15 @@ typedef struct private_hwdata {
 #endif //PRIVATE_HW_DATA
 #endif
 
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
+
+#if defined(__PSP2__) // NOT __SWITCH__
+//Allow locking PS Button
+#include <psp2/shellutil.h>
+#endif
+
 extern int screenWidth;
 extern int mainMenu_case;
 
@@ -46,6 +55,13 @@ extern char launchDir[300];
 extern char currentDir[300];
 
 extern int displaying_menu;
+
+extern void gp2x_stop_sound(void);
+
+#ifdef __SWITCH__
+extern void update_joycon_mode();
+#endif
+
 
 int saveAdfDir() {
     char path[300];
@@ -65,6 +81,42 @@ void extractFileName(char *str, char *buffer) {
         p--;
     p++;
     strcpy(buffer, p);
+}
+
+void stateFilenameToThumbFilename(char *src, char *dst) {
+    char buffer[255] = "";
+    extractFileName(src, buffer);
+    char *p = buffer + strlen(buffer) - 4;
+    *p = 0;
+    p--;
+    strcat(p, ".png");
+    strcpy(dst, THUMB_PREFIX);
+    strcat(dst, buffer);
+}
+
+void exit_safely(int quit_via_home) {
+#ifndef USE_SDLSOUND
+	gp2x_stop_sound();
+#endif
+    saveAdfDir();	
+    
+#if defined(__PSP2__) // NOT __SWITCH__
+    //unlock PS Button
+    sceShellUtilUnlock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
+#endif
+    
+    leave_program();
+
+#if !defined(__PSP2__) && !defined(__SWITCH__)
+    sync();
+#endif
+#ifdef __SWITCH__
+    mainMenu_singleJoycons = 0;
+    update_joycon_mode();
+    if (quit_via_home)
+        appletUnlockExit();
+#endif
+    exit(0);
 }
 
 #ifdef ANDROIDSDL
@@ -157,9 +209,10 @@ void update_display() {
 
 #if defined(__PSP2__) || defined(__SWITCH__)
     if (prSDLScreen != NULL) {
-		for (int i=0; i<10; i++)
+        // clear old screen
+        for (int i=0; i<4; i++)
 		{
-			SDL_FillRect(prSDLScreen,NULL,0);
+			SDL_FillRect(prSDLScreen,NULL,SDL_MapRGB(prSDLScreen->format, 0, 0, 0));
 			SDL_Flip(prSDLScreen);
 		}
 #ifdef __PSP2__ // NOT __SWITCH__
@@ -229,6 +282,14 @@ void update_display() {
     }
     shader = new PSP2Shader((PSP2Shader::Shader)mainMenu_shader);
 #endif
+
+    // clear new screen
+    for (int i=0; i<4; i++)
+	{
+		SDL_FillRect(prSDLScreen,NULL,SDL_MapRGB(prSDLScreen->format, 0, 0, 0));
+		SDL_Flip(prSDLScreen);
+	}
+
 #else
 #if defined(PANDORA) && !(defined(WIN32) || defined(AROS))
     prSDLScreen = SDL_SetVideoMode(visibleAreaWidth, mainMenu_displayedLines, 16, SDL_SWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF);

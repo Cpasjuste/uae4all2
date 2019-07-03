@@ -125,9 +125,9 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 
 	// are we trying to figure out the regular GP2X controls for the primary (or first two) joysticks?
 #ifdef USE_UAE4ALL_VKBD
-	int usingRegularControls = ((!mainMenu_customControls) && ((mainMenu_joyPort == 0 && (nr == 0 || nr == 1)) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1)) && !(buttonStart[0] && triggerR[0]) && !vkbd_mode);
+	int usingRegularControls = ((!mainMenu_customControls) && ((nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1)) && !(buttonStart[0] && triggerR[0]) && !vkbd_mode);
 #else
-	int usingRegularControls = ((!mainMenu_customControls) && ((mainMenu_joyPort == 0 && (nr == 0 || nr == 1)) || (nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1)) && !(buttonStart[0] && triggerR[0]));
+	int usingRegularControls = ((!mainMenu_customControls) && ((nr == 1 && mainMenu_joyPort == 2) || (nr == 0 && mainMenu_joyPort == 1)) && !(buttonStart[0] && triggerR[0]));
 #endif
 	//PSP2 updates joysticks in handle_events function which is always called 
 	//just before read_joystick is called. No need to update them again here
@@ -835,14 +835,11 @@ void read_joystick(int nr, unsigned int *dir, int *button)
 //If not on Vita, zero the "other" joystick
 	if (!mainMenu_customControls)
 	{
-		if(mainMenu_joyPort != 0)
+	 // Only one joystick active
+		if((nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1))
 		{
-		 // Only one joystick active
-			if((nr == 0 && mainMenu_joyPort == 2) || (nr == 1 && mainMenu_joyPort == 1))
-			{
-				*dir = 0;
-				*button = 0;
-			}
+			*dir = 0;
+			*button = 0;
 		}
 	}
 

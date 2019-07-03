@@ -59,7 +59,6 @@ extern int gp2xMouseEmuOn;
 extern int gp2xButtonRemappingOn;
 
 extern int init_sound(void);
-extern void gp2x_stop_sound(void);
 extern void leave_program(void);
 extern void extractFileName(char * str,char *buffer);
 extern void update_display(void);
@@ -68,7 +67,6 @@ extern void setCpuSpeed(void);
 extern void show_error(const char *);
 extern void close_joystick();
 extern void init_joystick();
-
 
 extern char launchDir[300];
 extern char currentDir[300];
@@ -457,12 +455,12 @@ static void draw_mainMenu(int c)
 
 void showWarning(const char *msg)
 {
-	text_draw_window(54/7,91/8,255/7,64/8,"--- Config ---");
-	write_text(12,14,msg);
-	write_text(11,16,"Press any button to continue");
+	text_draw_window(4,9,37,4,"Message");
+	write_text(5,11,msg);
+	//write_text(11,16,"Press any button to continue");
 	text_flip();
 	SDL_Event ev;
-	SDL_Delay(333);
+	SDL_Delay(1000);
 	while(SDL_PollEvent(&ev))
 	{
 		if (ev.type==SDL_QUIT)
@@ -880,7 +878,7 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				{
 					mainMenu_case=MAIN_MENU_CASE_SAVE;
 					if (saveconfig(4))
-						showWarning("Config saved");
+						showWarning("Config saved.");
 				}
 				break;
 			case 15:
@@ -895,7 +893,7 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				{
 					mainMenu_case=MAIN_MENU_CASE_SAVE;
 					saveconfig(1);
-					showWarning("General config file saved");
+					showWarning("General config file saved.");
 				}
 				break;
 			case 17:
@@ -903,7 +901,7 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 				{
 					mainMenu_case=MAIN_MENU_CASE_SAVE;
 					if (saveconfig())
-						showWarning("Config saved for this game");
+						showWarning("Config saved for this game.");
 				}
 				break;
 			case 18:
@@ -932,10 +930,10 @@ SDL_ANDROID_SetScreenKeyboardShown(1);
 
 static void raise_mainMenu()
 {	
-	int i;
 	text_draw_background();
 	text_flip();
 #if !defined(__PSP2__) && !defined(__SWITCH__)
+	int i;
 	for(i=0;i<10;i++)
 	{
 		text_draw_background();
@@ -947,8 +945,8 @@ static void raise_mainMenu()
 
 static void unraise_mainMenu()
 {
-	int i;
 #if !defined(__PSP2__) && !defined(__SWITCH__)
+	int i;
 	for(i=9;i>=0;i--)
 	{
 		text_draw_background();
@@ -967,6 +965,7 @@ int run_mainMenu()
 	int old_sound_rate = sound_rate;
 	int old_stereo = mainMenu_soundStereo;
 	int old_vkbdLanguage = mainMenu_vkbdLanguage;
+    int old_vkbdStyle = mainMenu_vkbdStyle;
 	mainMenu_case=-1;
 	init_text(0);
 	
@@ -1009,7 +1008,7 @@ int run_mainMenu()
 				{
 					int old_saveMenu_n_savestate = saveMenu_n_savestate;
 					saveMenu_n_savestate=11;
-					make_savestate_filenames(savestate_filename,NULL);
+					make_savestate_filenames(savestate_filename,screenshot_filename);
 					f=fopen(savestate_filename,"rb");
 					if (f)
 					{
@@ -1019,7 +1018,7 @@ int run_mainMenu()
 					} else 
 					{
 						saveMenu_n_savestate=old_saveMenu_n_savestate;
-						make_savestate_filenames(savestate_filename,NULL);
+						make_savestate_filenames(savestate_filename,screenshot_filename);
 					}
 				}
 			}
@@ -1185,9 +1184,9 @@ int run_mainMenu()
 				if (f) {
 					fclose(f);
 					if (remove(config_load_filename) == 0) {
-						show_error("Config File deleted");
+						showWarning("Config File deleted");
 					} else {
-						show_error("Config File doesn't exist.");
+						showWarning("Config File does not exist.");
 					}
 				}
 			}
@@ -1197,28 +1196,10 @@ int run_mainMenu()
 		case MAIN_MENU_CASE_QUIT:
 			if (gui_data.hdled == HDLED_WRITE && force_quit == 0) 
 			{
-				show_error("Amiga is writing to HDF. Press PAD_right+L to force quit.");
+				showWarning("Amiga is writing to HDF. Press PAD_right+L to force quit.");
 				break;
 		   }
-#ifndef USE_SDLSOUND
-			gp2x_stop_sound();
-#endif
-			saveAdfDir();	
-
-#if defined(__PSP2__) // NOT __SWITCH__
-			//unlock PS Button
-			sceShellUtilUnlock(SCE_SHELL_UTIL_LOCK_TYPE_PS_BTN);
-#endif
-
-      	leave_program();
-#if !defined(__PSP2__) && !defined(__SWITCH__)
-			sync();
-#endif
-#ifdef __SWITCH__
-            mainMenu_singleJoycons = 0;
-            update_joycon_mode();
-#endif
-			exit(0);
+			exit_safely(0);
 			break;
 		default:
 			mainMenu_case=-1;
@@ -1229,7 +1210,7 @@ int run_mainMenu()
 		init_sound();
 	
 #if defined(USE_UAE4ALL_VKBD)
-	if (mainMenu_vkbdLanguage != old_vkbdLanguage)
+	if ((mainMenu_vkbdLanguage != old_vkbdLanguage) || (mainMenu_vkbdStyle != old_vkbdStyle))
 	{
 		vkbd_quit();
 		vkbd_init();
@@ -1243,6 +1224,7 @@ int run_mainMenu()
 	init_joystick();
 	
 	update_display();
+
 #if defined(__PSP2__) || defined(__SWITCH__)
 	inside_menu = 0;
 #endif

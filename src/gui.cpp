@@ -122,20 +122,21 @@ struct myRes
 		int top_pos;
 };
 static myRes quickSwitchModes[] = {
-	{192, 2},
-	{200, 2},
-	{216, 2},
-	{224, 2},
-	{240, 2},
-	{256, 2},
-	{270, 2},
-	{192, 14},
-	{200, 14},
-	{216, 14},
-	{224, 14},
-	{240, 14},
-	{256, 14},
-	{270, 14},
+	{192, 18},
+	{200, 18},
+	{216, 18},
+	{224, 18},
+	{240, 18},
+	{256, 18},
+	{270, 18},
+	{286, 0},
+	{192, 30},
+	{200, 30},
+	{216, 30},
+	{224, 30},
+	{240, 30},
+	{256, 30},
+	{270, 30},
 };
 extern int moveY;
 
@@ -348,11 +349,7 @@ int gui_init (void)
 int gui_update (void)
 {
 	extern char *savestate_filename;
-#ifdef USE_GUICHAN
 	extern char *screenshot_filename;
-#else
-	 char *screenshot_filename=NULL;
-#endif
 	strcpy(changed_df[0],uae4all_image_file0);
 	strcpy(changed_df[1],uae4all_image_file1);
 	strcpy(changed_df[2],uae4all_image_file2);
@@ -409,11 +406,7 @@ static void goMenu(void)
 	if (exitmode==1 || exitmode==2)
 	{
 		extern char *savestate_filename;
-#ifdef USE_GUICHAN
 		extern char *screenshot_filename;
-#else
-		char *screenshot_filename = NULL;
-#endif
 		extern int saveMenu_n_savestate;
 		for(int i=0;i<mainMenu_drives;i++)
 		{
@@ -439,11 +432,7 @@ static void goMenu(void)
 	if (exitmode==3)
 	{
 		extern char *savestate_filename;
-#ifdef USE_GUICHAN
 		extern char *screenshot_filename;
-#else
-		char *screenshot_filename = NULL;
-#endif
 		for(int i=0;i<mainMenu_drives;i++)
 		{
 			changed_df[i][0]=0;
@@ -482,9 +471,6 @@ static void goMenu(void)
 			disk_eject(i);
 		}
 		make_savestate_filenames(savestate_filename, screenshot_filename);
-#ifdef USE_GUICHAN
-		strcpy(screenshot_filename,uae4all_image_file0);
-#endif
 	}
 	if (exitmode==2)
 	{
@@ -503,6 +489,11 @@ static void goMenu(void)
 	gui_purge_events();
 	fpscounter_reset();
 	notice_screen_contents_lost();
+	
+	//remove gfx garbage in pixel array
+	lockscr();
+	memset((char *) prSDLScreen->pixels, 0, prSDLScreen->h*prSDLScreen->pitch);
+	unlockscr();
 }
 
 int customKey;
@@ -933,6 +924,7 @@ void gui_handle_events (void)
 		}
 		goMenu();
 	}
+
 #else
 	dpadUp[0] = keystate[SDLK_UP];
 	dpadDown[0] = keystate[SDLK_DOWN];
@@ -1223,7 +1215,7 @@ if(!vkbd_mode)
 		//0
 		else if(keystate[SDLK_0])
 		{
-			if(mainMenu_displayedLines < 270)
+			if(mainMenu_displayedLines < 286)
 				mainMenu_displayedLines++;
 			update_display();
 		}
@@ -1529,12 +1521,12 @@ if(!vkbd_mode)
 		}//end of nr_joysticks loop
 		if (quickSave)
 		{
-			make_savestate_filenames(savestate_filename,NULL);
+			make_savestate_filenames(savestate_filename,screenshot_filename);
 			savestate_state = STATE_DOSAVE;
 		} 
 		else if (quickLoad) 
 		{
-			make_savestate_filenames(savestate_filename,NULL);
+			make_savestate_filenames(savestate_filename,screenshot_filename);
 			FILE *f=fopen(savestate_filename, "rb");
 			keystate[SDLK_l]=0;
 			if(f)

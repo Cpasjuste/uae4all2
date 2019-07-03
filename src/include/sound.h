@@ -21,7 +21,7 @@ extern void finish_sound_buffer (void);
 #define DEFAULT_SOUND_CHANNELS 1
 #endif
 
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__PSP2__)
 #define DEFAULT_SOUND_FREQ 48000
 #else
 #define DEFAULT_SOUND_FREQ 44100

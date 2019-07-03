@@ -1,29 +1,33 @@
-Changes in this Version
+Important note to Switch users
 ======
-1.84
+On the Switch, since v1.84, please use nsp injection to start uae4all2, otherwise the `config save as` and `savestate export` options will not work. On SX OS, you can do this by holding down R while launching any installed game to make hbmenu appear.
 
-- implement config load with dialog, config save as, and config delete
-- increase number of savestates per game to 12
-- increase number of custom control sets to 6
-- on Switch, fix some issues with vsync
-- implement importing and exporting of savestates
-- better menu font (thanks @wronghands)
-- option to select menu font
-- on Switch, automatically use 1080p resolution in docked mode
+Recent Changes
+======
+1.95
+
+- add support for .zip floppy files (read-only)
+- on Switch, also compile with optimization level 3
 
 Description
 =====
 Use4All2 Mod is an Amiga emulator for Vita and Switch. This is my mod of this great Amiga emulator that was originally ported to the Vita by Cpasjuste. Depending on when you read this, this mod might be ahead or behind his version.
 
-![Screenshot of UAE4All2 running on Vita](https://s14.postimg.cc/lzgf1988h/uae4all_b.jpg)
+![Screenshot of UAE4All2 running on Switch](https://i.postimg.cc/Tw0MsKkG/1.jpg)
 
 ![Photo of UAE4All2 running on Switch in tabletop mode](https://i.postimg.cc/3RD6Lr7j/Split-Joycon-b.jpg)
 
-Thanks to Cpasjuste for the original port and for jumping in and adding shader support and making the assembler optimizations work. 
+More Screenshots:
+
+ <a href="https://postimg.cc/SJFvR4ZD" target="_blank"><img src="https://i.postimg.cc/SJFvR4ZD/3.jpg" alt="3"/></a> <a href="https://postimg.cc/jLHkJ1mK" target="_blank"><img src="https://i.postimg.cc/jLHkJ1mK/4.jpg" alt="4"/></a> <a href="https://postimg.cc/cvdk7mG3" target="_blank"><img src="https://i.postimg.cc/cvdk7mG3/5.jpg" alt="5"/></a> <a href="https://postimg.cc/9zqkc0BD" target="_blank"><img src="https://i.postimg.cc/9zqkc0BD/6.jpg" alt="6"/></a> <a href="https://postimg.cc/2Lv9G95Q" target="_blank"><img src="https://i.postimg.cc/2Lv9G95Q/7.jpg" alt="7"/></a> <a href="https://postimg.cc/G9YXZNcY" target="_blank"><img src="https://i.postimg.cc/G9YXZNcY/8.jpg" alt="8"/></a> <a href="https://postimg.cc/PPQ2qwv5" target="_blank"><img src="https://i.postimg.cc/PPQ2qwv5/9.png" alt="9"/></a> <a href="https://postimg.cc/w1Ffwm9G" target="_blank"><img src="https://i.postimg.cc/w1Ffwm9G/10.jpg" alt="10"/></a> <a href="https://postimg.cc/1gjWQ1n0" target="_blank"><img src="https://i.postimg.cc/1gjWQ1n0/11.jpg" alt="11"/></a> <a href="https://postimg.cc/MMf9Z3VC" target="_blank"><img src="https://i.postimg.cc/MMf9Z3VC/12.jpg" alt="12"/></a> <a href="https://postimg.cc/qtRmSvRM" target="_blank"><img src="https://i.postimg.cc/qtRmSvRM/13.jpg" alt="13"/></a> <a href="https://postimg.cc/vxR347vc" target="_blank"><img src="https://i.postimg.cc/vxR347vc/14.jpg" alt="14"/></a> <a href="https://postimg.cc/WqMSgD9S" target="_blank"><img src="https://i.postimg.cc/WqMSgD9S/15.jpg" alt="15"/></a> <a href="https://postimg.cc/7fkKDV6R" target="_blank"><img src="https://i.postimg.cc/7fkKDV6R/16.jpg" alt="16"/></a>
+
+Thanks to Cpasjuste for the original port, for jumping in and adding shader support, for making the assembler optimizations work, and for fixing audio playback on suspend/resume in SDL2 for Switch.
 
 Thanks to ScHlAuChi for extensive testing, ideas, and for contributing the new larger virtual keyboard images.
 
-Thanks to wronghands for the new, better-looking menu font, and many ideas.
+Thanks to wronghands for the new, better-looking menu font, all the new keyboard styles, and many ideas.
+
+Thanks to CrashMidnick for the French virtual keyboard.
 
 Thanks to the original authors Chui, john4p, TomB, notaz, Bernd Schneider, Toni Wilen, Pickle, smoku, AnotherGuest, Anonymous engineer, finkel, Lubomyr, pelya and many more.
 
@@ -73,11 +77,16 @@ Vita/Switch-exclusive Features
 - Touchpad style pointer controls using the touchscreen
 - Parallel port joystick adapter support for multiplayer games with up to 4 joysticks.
 - Additional savestate slot called auto, for automatic savestate loading
-- Bluetooth keyboard and mouse support (Vita only)
+- Physical keyboard and mouse support (Bluetooth on Vita, USB on Switch)
 - Supports loading files from ux0: or uma0: partition (Vita only)
 - Rear touch panel can be enabled for mouse pointer control (Vita only)
 - Split Joy-Con support (Switch only)
 - A "fast mouse" custom button can be mapped to speed up the mouse
+- Automatic full 1080p support in docked mode (Switch only)
+- Savestate import/export to backup savestates
+- Config file management (load, save as, etc.)
+- Thumbnail previews for savestates
+- Four different on-screen keyboard styles: original, warm, cool, and dark
 
 Controls
 =====
@@ -153,9 +162,11 @@ SL = on-screen keyboard (player 1 only)
 Pressing stick while moving it = change keyboard transparency/position, control mouse pointer (player 1 only)  
 SR + SL + Stick directions = hotkey to quick-zoom image and center image vertically (player 1 only)  
 
-Bluetooth Keyboard / Mouse controls (Vita only)
+Physical Keyboard / Mouse controls
 -----
-Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard With Mouse Touchpad, ASIN:B06Y56BBYP," and with the "Jelly Comb Bluetooth Wireless Mouse ASIN:B075HBDWCF." The Amiga keys are mapped to Windows (GUI) keys as well as Page Up/Down. The Vita doesn't pair with all Bluetooth keyboards and mice. As a rule, if the keyboard works to highlight bubbles with cursor keys, it should also work in UAE4All.
+On Vita (Bluetooth): Mouse + keyboard tested working with the "Jelly Comb Mini Bluetooth Keyboard With Mouse Touchpad, ASIN:B06Y56BBYP," and with the "Jelly Comb Bluetooth Wireless Mouse ASIN:B075HBDWCF." The Amiga keys are mapped to Windows (GUI) keys as well as Page Up/Down. The Vita doesn't pair with all Bluetooth keyboards and mice. As a rule, if the keyboard works to highlight bubbles with cursor keys, it should also work in UAE4All.
+
+On Switch (USB): All keyboards seem to work. Not all mice seem to work. [Mouse compatibility sheet](https://docs.google.com/spreadsheets/d/1Drbo5-QuSX901MwtOytSMuqRGxeIkq2HELM806I9dj0/edit#gid=0) 
 
 Notes
 ======
@@ -170,7 +181,7 @@ Notes
 - *Sprite Collisions:* Some games require sprite-to-sprite collisions. Sprite collisions can be turned on in the "more options" menu. The only game I know of that requires this is SpaceTaxi 3.
 - *Savestates:* Four regular savestates can be saved per game. There's also a slot for an automatic savestate, labeled "auto". If it exists, this will be loaded immediately when the .adf is inserted. To prevent this, delete the auto savestate by selecting it and choosing "delete savestate".
 - *Multiplayer:* Up to four controllers on Vita TV and Switch are supported and can be fully mapped. The mouse can be switched off because it interferes with the other joystick that controls player 2 in most games. If you pair new controllers on Vita TV and they do not seem to work, scan for them in the "custom controls" menu by pressing L. At the bottom it will say how many controllers have been found. This scanning is not neccessary on Switch. By default, parallel port Amiga joysticks 3 and 4 are controlled by VitaTV/Switch gamepads 3 and 4. They can also be mapped to other inputs using the custom controls screen.
-- *Sound:* For use with headphones, a stereo separation setting of 50 sounds better than the default setting of 100. The original Amiga had completely disjoint left/right channels. This can sound quite jarring on headphones. Concerning sound frequency, on the Vita, the default of 44.1 kHz gives by far the best results. On the Switch, the best sound is obtained with 48 kHz, which is the only frequency supported on Switch.
+- *Sound:* For use with headphones, a stereo separation setting of 50 sounds better than the default setting of 100. The original Amiga had completely disjoint left/right channels. This can sound quite jarring on headphones. Concerning sound frequency, I think 48 kHz gives the best results. On the Switch, 48 kHz is the only supported frequency.
 
 FAQ
 =====
@@ -193,6 +204,10 @@ Games with known fixes
   Issue: flickering scrolling  
   Fix: set “Blitter: Normal” and reboot  
 
+- Lionheart with A1200 config
+  Issue: some flickering graphics glitches in water and in cave, runs slow on Vita
+  Fix: run the floppy version using A500 config
+ 
 - Lure of the Temptress (adf only)  
   Issue: hangs at title  
   Fix: use hdf version  
@@ -208,6 +223,10 @@ Games with known fixes
 - Rainbow Islands (adf only)  
   Issue: hangs after title  
   Fix: use hdf version  
+
+- Reshoot R
+  Issue: hangs on title screen (CIA overlay issue)  
+  Fix: there's a test version of the emulator that fixes this game on Switch by force-disabling CIA overlay whenever AGA is selected, see [here](https://www.patreon.com/posts/uae4all2-switch-27451333), but it has not been tested much. The fix might break other games. Some problems with this game remain (blue background detail is missing, etc.), but it seems very playable. It requires A1200 config and setting "more options->sprite collisions: on". The Vita is too slow for this game.
 
 - Rock’n’Roll  
   Issue: gfx glitches / flickering  
@@ -293,6 +312,61 @@ Compiling
 
 CHANGELOG
 =====
+1.95
+
+- add support for .zip floppy files (read-only)
+- on Switch, also compile with optimization level 3
+
+1.94
+
+- fix hdf settings with non-zero hd dir causing wrong mounted drives
+- implement .adz floppy disk format support (read only)
+- widescreen file dialog to show longer filenames
+
+1.93 (Switch only)
+
+- fix mouse pointer getting stuck sometimes when using USB mouse (fixed in SDL)
+
+1.92
+
+- add frameskip option back in
+- on Vita, also use 48 kHz as default sound frequency (seems to work a bit better)
+
+1.91
+
+- widescreen menu
+- physical keyboard and mouse support also on Switch. All keyboards I tried seem to work. Not many mice work. The Logitech M187 mouse seems to work fine.
+- on Switch, no more slow-down when returning from sleep (thanks @Cpasjuste)
+
+1.90
+
+- Add keyboard style option with many choices: original, warm, cool, dark (thanks @wronghands)
+- On Switch, quit gracefully when using home button to exit
+- Speed up rendering of savestate menu when thumbnails are displayed
+
+1.89 (Switch only)
+
+- On Switch, fix scaling artifacts when sharp_bilinear_simple was selected. Pixels are even sharper now! 
+
+1.88
+
+- add French on-screen keyboard (thanks @CrashMidnick)
+
+1.87
+
+- improve savestate thumbnail quality
+- rename joystick port option to clarify what it means
+
+1.86
+
+- implement thumbnail previews for savestates
+- savestates are now always stored in the saves folder, never in the rom folder
+
+1.85
+
+- make some notifications in menu more readable
+- fix some visual inconsistencies in the menu
+
 1.84
 
 - implement config load with dialog, config save as, and config delete
